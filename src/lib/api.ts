@@ -1,10 +1,9 @@
 import axios from 'axios'
 
-// 개발 환경에서는 Vite 프록시를 통해 상대 경로 사용
-// 프로덕션에서는 환경 변수 또는 기본값 사용
-const API_BASE_URL = import.meta.env.PROD
-  ? (import.meta.env.VITE_API_URL || 'https://disk-cms.simg.kr')
-  : '' // 개발 환경에서는 상대 경로 사용 (Vite 프록시가 처리)
+// 프로덕션과 개발 환경 모두 상대 경로 사용
+// 프로덕션: 같은 도메인의 /api 경로 사용 (https://react.disk-cms.simg.kr/api)
+// 개발: Vite 프록시가 /api 요청을 백엔드로 전달
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
   baseURL: API_BASE_URL,
