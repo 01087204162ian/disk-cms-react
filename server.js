@@ -1,0 +1,310 @@
+// ==============================
+// server.js - 메인 서버 파일
+// ==============================
+// dotenv를 가장 먼저 로드 (환경 변수 설정 전)
+require('dotenv').config();
+
+// 타임존 설정 (dotenv 로드 후, 기본값 설정)
+process.env.TZ = process.env.TZ || 'Asia/Seoul';
+const express = require('express');
+const path = require('path');
+const cors = require('cors');
+
+// 설정 파일들
+const { pool } = require('./config/database');
+const sessionConfig = require('./config/session');
+
+// 기존 라우트들
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const dashboardRoutes = require('./routes/dashboard');
+const attendanceRoutes = require('./routes/attendance');
+const employeesRoutes = require('./routes/staff/employees'); // 직원리스트
+const departmentRoutes = require('./routes/staff/departments'); // 부서
+const workSchedulesRouter = require('./routes/staff/work-schedules'); // 주4일 근무제
+const holidaysRouter = require('./routes/staff/holidays'); // 공휴일 관리
+
+// 보험 관련 라우트들
+const pharmacyRoutes = require('./routes/pharmacy'); // 약국배상책임보험
+const pharmacy2Routes = require('./routes/pharmacy/pharmacy2'); // 약국관련 프록시
+const pharmacyAdminRoutes = require('./routes/pharmacy/admin'); // 약국 관리자
+const pharmacyDepositsRoutes = require('./routes/pharmacy/deposits');
+const pharmacyReportsRoutes = require('./routes/pharmacy/reports'); // 🆕 추가
+// 근재보험 라우트들 (새로 추가)
+const workersCompApplicationsRoutes = require('./routes/workers-comp/applications'); // 근재보험 신청서 관리
+const workersCompConsultationsRoutes = require('./routes/workers-comp/consultations'); // 근재보험 상담신청서 관리
+
+// 보험상품 (KJ 대리운전 등)
+const kjDriverSearchRoutes = require('./routes/insurance/kj-driver-search');
+const kjDriverCompanyRoutes = require('./routes/insurance/kj-driver-company');
+
+// 지식 공유 (실수 사례 공유 시스템)
+const mistakeCasesRoutes = require('./routes/manual/mistake-cases');
+
+// 업무 티켓 시스템 (보험 운영 플랫폼 Phase 1)
+const ticketsRoutes = require('./routes/tickets');
+const approvalsRoutes = require('./routes/approvals');
+
+const fieldPracticeRoutes = require('./routes/field-practice/applications'); // 현장실습보험 신청
+const fieldPracticeClaimsRoutes = require('./routes/field-practice/claims'); // 현장실습보험 클레임리스트
+const fieldPracticeAccountsRoutes = require('./routes/field-practice/accounts'); // 현장실습보험 id리스트
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 프록시 설정 (Nginx 등 리버스 프록시 사용 시)
+app.set('trust proxy', 1);
+
+// 기본 미들웨어 설정
+app.use(express.json({ limit: '50mb' })); // 파일 업로드를 위해 제한 증가
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// React 빌드 결과물 서빙 (프로덕션)
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'dist')));
+} else {
+    // 개발 환경에서는 기존 public 폴더 사용 (선택사항)
+    app.use(express.static(path.join(__dirname, 'public')));
+}
+
+// CORS 설정
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://disk-cms.simg.kr', 'https://geunjae.kr', 'https://imet.kr'] 
+        : true,
+    credentials: true
+}));
+
+// 세션 설정
+app.use(sessionConfig);
+
+// 로깅 시스템
+const logger = require('./utils/logger');
+
+// 요청 로깅 미들웨어 (라우터 등록 전에 배치)
+app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.path}`, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        userId: req.session?.user?.id
+    });
+    next();
+});
+
+// ========== API 라우트 설정 ==========
+
+// 인증 및 사용자 관리
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/attendance', attendanceRoutes);
+
+// 직원 관리
+app.use('/api/staff/departments', departmentRoutes);
+app.use('/api/staff/work-schedules', workSchedulesRouter);
+app.use('/api/staff/holidays', holidaysRouter);
+app.use('/api/staff', employeesRoutes);
+
+// 약국배상책임보험 관련
+app.use('/api/pharmacy', pharmacyRoutes);
+app.use('/api/pharmacy2', pharmacy2Routes);
+app.use('/api/pharmacy-admin', pharmacyAdminRoutes);
+app.use('/api/pharmacy-deposits', pharmacyDepositsRoutes); // 🆕 예치
+app.use('/api/pharmacy-reports', pharmacyReportsRoutes); // 🆕 실적
+
+// 보험상품 (KJ 대리운전 등)
+app.use('/api/insurance', kjDriverSearchRoutes);
+app.use('/api/insurance', kjDriverCompanyRoutes);
+
+// 근재보험 관련 (새로 추가)
+app.use('/api/workers-comp', workersCompApplicationsRoutes);
+app.use('/api/workers-comp/consultations', workersCompConsultationsRoutes); // 신규 추가
+
+
+//현장실습 보험
+app.use('/api/field-practice', fieldPracticeRoutes);
+app.use('/api/field-practice/claims', fieldPracticeClaimsRoutes); // ⭐ 추가
+app.use('/api/field-practice/accounts', fieldPracticeAccountsRoutes);
+
+// 지식 공유 (실수 사례 공유 시스템)
+app.use('/api/manual/mistake-cases', mistakeCasesRoutes);
+
+// 업무 티켓 시스템 (보험 운영 플랫폼 Phase 1)
+app.use('/api/tickets', ticketsRoutes);
+app.use('/api/approvals', approvalsRoutes);
+
+// ========== 정적 파일 라우팅 ==========
+/*app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
+
+// 근재보험 관리 페이지 라우팅 (새로 추가)
+app.get('/workers-comp-contracts', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'workers-comp-contracts.html'));
+});
+
+app.get('/workers-comp-contracts.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'workers-comp-contracts.html'));
+});*/
+
+// ========== 에러 핸들링 ==========
+
+// React SPA 라우팅 지원 (프로덕션)
+if (process.env.NODE_ENV === 'production') {
+    // API가 아닌 모든 요청을 React 앱으로 리다이렉트
+    app.get('*', (req, res, next) => {
+        // API 요청은 제외
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        // React 앱의 index.html 서빙
+        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    });
+}
+
+// 404 처리 (API 요청만)
+app.use((req, res) => {
+    // API 요청인 경우에만 JSON 응답
+    if (req.path.startsWith('/api')) {
+        logger.warn(`404 Not Found: ${req.method} ${req.path}`, {
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        });
+        
+        return res.status(404).json({ 
+            success: false, 
+            error: '요청한 페이지를 찾을 수 없습니다.',
+            path: req.path
+        });
+    }
+    
+    // 그 외의 경우는 이미 React 앱으로 리다이렉트됨
+    res.status(404).send('Not Found');
+});
+
+// 전역 에러 핸들링
+app.use((err, req, res, next) => {
+    logger.error('서버 오류:', {
+        error: err.message,
+        stack: err.stack,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+    });
+    
+    // 개발 환경에서는 상세 에러 정보 제공
+    if (process.env.NODE_ENV === 'development') {
+        res.status(500).json({ 
+            success: false, 
+            error: '서버 내부 오류가 발생했습니다.',
+            details: err.message,
+            stack: err.stack
+        });
+    } else {
+        res.status(500).json({ 
+            success: false, 
+            error: '서버 내부 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// ========== 서버 시작 ==========
+let server;
+server = app.listen(PORT, () => {
+    console.log(`🚀 보험 CMS 서버가 포트 ${PORT}에서 실행 중입니다.`);
+    console.log(`🔗 접속 URL: http://localhost:${PORT}`);
+}).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ 오류: 포트 ${PORT}가 이미 사용 중입니다.`);
+        console.error(`\n해결 방법:`);
+        console.error(`1. 실행 중인 프로세스 종료: kill -9 $(lsof -ti:${PORT})`);
+        console.error(`2. PM2 사용 중인 경우: pm2 stop all`);
+        console.error(`3. 다른 포트 사용: PORT=3001 npm run dev`);
+        console.error(`\n자세한 내용: docs/서버-포트-충돌-해결.md\n`);
+        process.exit(1);
+    } else {
+        throw err;
+    }
+    console.log(`📋 약국보험: http://localhost:${PORT}/pharmacy-applications.html`);
+    console.log(`🏗️ 근재보험: http://localhost:${PORT}/workers-comp-contracts.html`);
+    
+    if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 개발 모드로 실행 중입니다.');
+    }
+});
+
+// ========== 우아한 종료 처리 ==========
+const gracefulShutdown = (signal) => {
+    console.log(`\n${signal} 신호를 받았습니다. 서버를 종료합니다...`);
+    
+    // 새로운 연결 거부
+    if (server && server.close) {
+        server.close(() => {
+            console.log('HTTP 서버가 종료되었습니다.');
+            
+            // 데이터베이스 연결 종료
+            if (pool) {
+                pool.end(() => {
+                    console.log('데이터베이스 연결이 종료되었습니다.');
+                    process.exit(0);
+                });
+            } else {
+                process.exit(0);
+            }
+        });
+    } else {
+        console.error('서버 close 핸들러가 없습니다. 강제 종료합니다.');
+        process.exit(1);
+    }
+    
+    // 강제 종료 (30초 후)
+    setTimeout(() => {
+        console.error('강제 종료됩니다.');
+        process.exit(1);
+    }, 30000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// ========== 데이터베이스 연결 테스트 ==========
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error('❌ 데이터베이스 연결 실패:', err.message);
+        logger.error('Database connection failed', { error: err.message });
+    } else {
+        console.log('✅ 데이터베이스 연결 성공');
+        logger.info('Database connected successfully');
+        connection.release();
+    }
+});
+
+// ========== 개발용 디버그 정보 ==========
+if (process.env.NODE_ENV === 'development') {
+    console.log('\n=== 개발 환경 정보 ===');
+    console.log(`Node.js 버전: ${process.version}`);
+    console.log(`메모리 사용량: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`);
+    console.log(`환경 변수:`);
+    console.log(`  - PORT: ${process.env.PORT || 3000}`);
+    console.log(`  - NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`  - TZ: ${process.env.TZ}`);
+    console.log('====================\n');
+}
+
+// ========== 헬스체크 엔드포인트 ==========
+app.get('/health', (req, res) => {
+    const healthCheck = {
+        uptime: process.uptime(),
+        message: 'OK',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        memory: {
+            used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+            total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+        }
+    };
+    
+    res.status(200).json(healthCheck);
+});
+
+module.exports = app;
