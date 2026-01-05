@@ -1,7 +1,6 @@
 import { Menu, Bell, User, LogOut } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
-import { cn } from '../lib/utils'
 
 interface HeaderProps {
   onMenuClick: () => void
