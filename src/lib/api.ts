@@ -1,8 +1,10 @@
 import axios from 'axios'
 
-// 프로덕션과 개발 환경 모두 상대 경로 사용
-// 프로덕션: 같은 도메인의 /api 경로 사용 (https://react.disk-cms.simg.kr/api)
-// 개발: Vite 프록시가 /api 요청을 백엔드로 전달
+// API 베이스 URL 설정
+// - 프로덕션: 빈 문자열('')이면 상대 경로 사용 → 같은 서버의 /api 경로 사용
+//   예: https://react.disk-cms.simg.kr/api/auth/login
+// - 개발: Vite 프록시가 /api 요청을 localhost:3000으로 전달
+// - 커스텀: VITE_API_URL 환경변수로 다른 서버 지정 가능
 const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const api = axios.create({
