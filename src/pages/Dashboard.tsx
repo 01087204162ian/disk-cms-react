@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Users,
   CheckCircle,
-  Calendar,
   Bell,
   FileText,
   BarChart3,
@@ -179,8 +178,8 @@ export default function Dashboard() {
   const attendance = data.todayAttendance
   const personalStats = data.personalStats
   const adminStats = data.adminStats
-  const hasCheckedIn = attendance?.formatted_check_in
-  const hasCheckedOut = attendance?.formatted_check_out
+  const hasCheckedIn = !!attendance?.formatted_check_in
+  const hasCheckedOut = !!attendance?.formatted_check_out
 
   return (
     <div className="space-y-6">
