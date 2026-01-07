@@ -1392,9 +1392,7 @@ export default function Employees() {
                         </tr>
                       </thead>
                       <tbody>
-                        {departmentList.map((dept) => {
-                          const manager = departmentEmployees.find((emp) => emp.email === dept.manager_id)
-                          return (
+                        {departmentList.map((dept) => (
                             <tr key={dept.id} className={dept.is_active ? '' : 'bg-yellow-50'}>
                               <td className="px-3 py-2 border border-gray-300">
                                 <input
