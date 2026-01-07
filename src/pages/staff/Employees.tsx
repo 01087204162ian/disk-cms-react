@@ -52,6 +52,7 @@ export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
   const [stats, setStats] = useState<Stats>({
     total: 0,
     pending: 0,
@@ -74,6 +75,7 @@ export default function Employees() {
 
   // 관리자 권한 체크
   const isAdmin = user?.role && ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'DEPT_MANAGER'].includes(user.role)
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
 
   useEffect(() => {
     if (!isAdmin) {
@@ -144,6 +146,85 @@ export default function Employees() {
 
   const handleRefresh = () => {
     loadEmployees()
+  }
+
+  // === 수정/삭제/활성화 상태 ===
+  const [editOpen, setEditOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<Employee | null>(null)
+  const [editForm, setEditForm] = useState({
+    name: '',
+    phone: '',
+    department_id: '',
+    position: '',
+    role: '',
+    is_active: '1',
+  })
+
+  const openEdit = (emp: Employee) => {
+    setActionError(null)
+    setEditTarget(emp)
+    setEditForm({
+      name: emp.name || '',
+      phone: emp.phone || '',
+      department_id: emp.department?.id ? String(emp.department.id) : '',
+      position: emp.position || '',
+      role: emp.role || '',
+      is_active: emp.is_active !== undefined ? String(emp.is_active) : '1',
+    })
+    setEditOpen(true)
+  }
+
+  const submitEdit = async () => {
+    if (!editTarget) return
+    try {
+      setActionError(null)
+      await api.put(`/api/staff/employees/${editTarget.email}`, {
+        name: editForm.name,
+        phone: editForm.phone,
+        department_id: editForm.department_id || null,
+        position: editForm.position,
+        role: editForm.role,
+        is_active: Number(editForm.is_active),
+      })
+      setEditOpen(false)
+      await loadEmployees()
+    } catch (error: any) {
+      setActionError(error?.response?.data?.message || error?.message || '직원 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const confirmDeactivate = async (emp: Employee) => {
+    if (!confirm(`'${emp.name || emp.email}' 계정을 비활성화할까요?`)) return
+    try {
+      setActionError(null)
+      await api.patch(`/api/staff/employees/${emp.email}/deactivate`)
+      await loadEmployees()
+    } catch (error: any) {
+      setActionError(error?.response?.data?.message || error?.message || '비활성화 중 오류가 발생했습니다.')
+    }
+  }
+
+  const confirmActivate = async (emp: Employee) => {
+    if (!confirm(`'${emp.name || emp.email}' 계정을 활성화할까요?`)) return
+    try {
+      setActionError(null)
+      await api.patch(`/api/staff/employees/${emp.email}/activate`)
+      await loadEmployees()
+    } catch (error: any) {
+      setActionError(error?.response?.data?.message || error?.message || '활성화 중 오류가 발생했습니다.')
+    }
+  }
+
+  const confirmDelete = async (emp: Employee) => {
+    if (!isSuperAdmin) return
+    if (!confirm(`'${emp.name || emp.email}' 계정을 삭제할까요? (복구 불가)`)) return
+    try {
+      setActionError(null)
+      await api.delete(`/api/staff/employees/${emp.email}`)
+      await loadEmployees()
+    } catch (error: any) {
+      setActionError(error?.response?.data?.message || error?.message || '삭제 중 오류가 발생했습니다.')
+    }
   }
 
   const getRoleBadge = (role: string) => {
@@ -264,6 +345,11 @@ export default function Employees() {
         {loadError ? (
           <div className="mt-3 text-sm text-destructive">
             {loadError}
+          </div>
+        ) : null}
+        {actionError ? (
+          <div className="mt-3 text-sm text-destructive">
+            {actionError}
           </div>
         ) : null}
 
@@ -404,21 +490,43 @@ export default function Employees() {
                           <button
                             className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
                             title="상세보기"
+                            onClick={() => openEdit(employee)}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-colors"
                             title="수정"
+                            onClick={() => openEdit(employee)}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button
-                            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                            title="삭제"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {employee.is_active === 1 ? (
+                            <button
+                              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                              title="비활성화"
+                              onClick={() => confirmDeactivate(employee)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              className="p-2 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+                              title="활성화"
+                              onClick={() => confirmActivate(employee)}
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
+                          )}
+                          {isSuperAdmin && (
+                            <button
+                              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                              title="삭제"
+                              onClick={() => confirmDelete(employee)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -463,14 +571,46 @@ export default function Employees() {
                     </div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <button className="flex-1 px-3 py-2 bg-info/10 text-info rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                    <button
+                      className="flex-1 px-3 py-2 bg-info/10 text-info rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                      onClick={() => openEdit(employee)}
+                    >
                       <Eye className="w-4 h-4" />
                       상세보기
                     </button>
-                    <button className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                    <button
+                      className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                      onClick={() => openEdit(employee)}
+                    >
                       <Edit className="w-4 h-4" />
                       수정
                     </button>
+                    {employee.is_active === 1 ? (
+                      <button
+                        className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                        onClick={() => confirmDeactivate(employee)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        비활성
+                      </button>
+                    ) : (
+                      <button
+                        className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                        onClick={() => confirmActivate(employee)}
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                        활성
+                      </button>
+                    )}
+                    {isSuperAdmin && (
+                      <button
+                        className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                        onClick={() => confirmDelete(employee)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        삭제
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -530,6 +670,100 @@ export default function Employees() {
           </div>
         </div>
       )}
+
+      {/* 수정/상세 모달 */}
+      {editOpen && editTarget ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-xl rounded-xl bg-background border border-border p-6">
+            <div className="text-lg font-semibold mb-1">직원 정보</div>
+            <div className="text-sm text-muted-foreground mb-4">{editTarget.email}</div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <div className="text-sm font-medium mb-1">이름</div>
+                <input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                />
+              </div>
+              <div>
+                <div className="text-sm font-medium mb-1">전화번호</div>
+                <input
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                />
+              </div>
+              <div>
+                <div className="text-sm font-medium mb-1">부서</div>
+                <select
+                  value={editForm.department_id}
+                  onChange={(e) => setEditForm((p) => ({ ...p, department_id: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                >
+                  <option value="">미지정</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <div className="text-sm font-medium mb-1">직급/직책</div>
+                <input
+                  value={editForm.position}
+                  onChange={(e) => setEditForm((p) => ({ ...p, position: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                />
+              </div>
+              <div>
+                <div className="text-sm font-medium mb-1">권한</div>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                >
+                  <option value="SUPER_ADMIN">최고관리자</option>
+                  <option value="SYSTEM_ADMIN">시스템관리자</option>
+                  <option value="DEPT_MANAGER">부서관리자</option>
+                  <option value="EMPLOYEE">직원</option>
+                </select>
+              </div>
+              <div>
+                <div className="text-sm font-medium mb-1">상태</div>
+                <select
+                  value={editForm.is_active}
+                  onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                >
+                  <option value="0">승인대기</option>
+                  <option value="1">활성</option>
+                  <option value="2">비활성</option>
+                </select>
+              </div>
+            </div>
+
+            {actionError ? <div className="mt-3 text-sm text-destructive">{actionError}</div> : null}
+
+            <div className="mt-6 flex gap-2 justify-end">
+              <button
+                onClick={() => setEditOpen(false)}
+                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
+              >
+                닫기
+              </button>
+              <button
+                onClick={submitEdit}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
