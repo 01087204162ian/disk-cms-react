@@ -25,7 +25,7 @@ export default function Layout({ children }: LayoutProps) {
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         </div>
         
-        <main className="pt-16 p-6">
+        <main className="pt-20 p-6">
           {children}
         </main>
       </div>
