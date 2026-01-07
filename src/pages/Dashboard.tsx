@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import api from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import {
-  LayoutDashboard,
   Clock,
   TrendingUp,
   Users,
@@ -183,16 +182,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <LayoutDashboard className="w-8 h-8" />
-          대시보드
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          보험 CMS 시스템에 오신 것을 환영합니다
-        </p>
-      </div>
 
       {/* 출퇴근 카드 */}
       <div className="bg-card rounded-xl border border-border p-6">
