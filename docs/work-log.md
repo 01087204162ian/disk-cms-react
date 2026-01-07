@@ -12,6 +12,63 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-07 (Phase 2 진행)
+
+#### 1) 직원 근무일정 페이지 (EmployeeSchedule.tsx)
+- 기능: 상태확인 → 월별 스케줄 로드 → 캘린더 렌더링(서버 daily_schedule 기반), 반차 신청/목록, 휴무일 변경 신청/목록
+- API: 
+  - `/api/staff/work-schedules/my-status`
+  - `/api/staff/work-schedules/my-schedule/:year/:month`
+  - `/api/staff/work-schedules/apply-half-day`
+  - `/api/staff/work-schedules/temporary-change`
+  - `/api/staff/work-schedules/my-half-days`
+  - `/api/staff/work-schedules/my-change-requests`
+
+#### 2) 공휴일 관리 페이지 (Holidays.tsx)
+- 기능: 3개년 목록, 추가/수정/비활성화, 대체 공휴일 자동 생성, 데이터 검증
+- API:
+  - `GET/POST/PUT/DELETE /api/staff/holidays`
+  - `POST /api/staff/holidays/generate-substitute`
+  - `GET /api/staff/holidays/validate?year=YYYY`
+
+#### 3) 반차 승인 페이지 (HalfDayApproval.tsx)
+- 기능: 승인 대기 반차/휴무일 변경 목록 조회, 승인/거부 처리(거부 사유 입력)
+- API:
+  - `GET /api/staff/work-schedules/pending-half-days`
+  - `POST /api/staff/work-schedules/approve-half-day/:leaveId`
+  - `GET /api/staff/work-schedules/pending-changes`
+  - `POST /api/staff/work-schedules/approve-change/:changeId`
+
+#### 4) 조직도 페이지 (OrganizationChart.tsx)
+- 기능: 부서/검색 필터, 경영진 섹션, 부서별 직원 카드, 부서 미지정 섹션
+- API:
+  - `GET /api/staff/departments`
+  - `GET /api/staff/employees/org-chart`
+
+#### 5) 직원 리스트 개선 (Employees.tsx)
+- 통계 표기 오류 수정: 서버 `data.statistics`/`data.pagination.total_count` 스키마에 맞게 매핑
+- 작업 버튼 구현:
+  - 상세/수정 모달(이름/전화/부서/직급/권한/상태), `PUT /api/staff/employees/:email`
+  - 비활성화/재활성, `PATCH /api/staff/employees/:email/deactivate|activate`
+  - 휴지통 아이콘 중복 제거
+
+#### 6) 부서 관리 페이지 (Departments.tsx)
+- 기능: 관리 목록(`manage`), 추가/수정/삭제(권한별 제한), 검색/필터
+- API:
+  - `GET /api/staff/departments/manage`
+  - `POST /api/staff/departments`
+  - `PUT /api/staff/departments/:id`
+  - `DELETE /api/staff/departments/:id`
+
+#### 7) 라우팅/메뉴 업데이트
+- `App.tsx`: `staff/employee-schedule`, `staff/holidays`, `staff/half-day-approval`, `staff/organization-chart`, `staff/departments` 라우트 추가
+- `menu-config.json`: "부서 관리", "조직도" 등 메뉴 추가/정렬
+
+#### 8) 엑셀 다운로드(진행)
+- 백엔드: `GET /api/staff/employees/export` 구현(필터 반영, exceljs 사용)
+- 프론트: “엑셀 다운로드” 버튼에서 xlsx 다운로드 처리(에러 응답 blob 처리 보완)
+- 현황: 일부 환경에서 401/404/종료 로그 관찰 → 서버 의존성/재시작/세션 상태 점검 필요 (다음 단계에서 안정화)
+
 ### Phase 1: 핵심 기능 구현 (2026-01-05)
 
 #### 1. 프로젝트 분석 및 마이그레이션 계획 수립
@@ -131,6 +188,11 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - `src/pages/Register.tsx`
 - `src/pages/ResetPassword.tsx`
 - `src/pages/staff/Employees.tsx` (약 500줄)
+- `src/pages/staff/EmployeeSchedule.tsx`
+- `src/pages/staff/Holidays.tsx`
+- `src/pages/staff/HalfDayApproval.tsx`
+- `src/pages/staff/OrganizationChart.tsx`
+- `src/pages/staff/Departments.tsx`
 - `src/components/Sidebar.tsx` (242줄)
 - `src/components/Layout.tsx`
 - `src/components/Header.tsx`
@@ -177,15 +239,26 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
    - 문제: `Golf` 아이콘이 lucide-react에 없음
    - 해결: `CircleDot` 아이콘으로 교체
 
+4. **직원 현황 통계 0 표시**
+   - 문제: 서버 응답 스키마(`statistics`, `pagination.total_count`)와 프론트 매핑(`stats`, `total`) 불일치
+   - 해결: 프론트 매핑 수정 및 로드 실패 시 에러 메시지 표시
+
+5. **작업 아이콘 중복**
+   - 문제: 휴지통 아이콘이 작업 열에 중복 표시
+   - 해결: 삭제 아이콘(물리 삭제) 제거, 비활성/활성 전환만 유지
+
 ---
 
 ## 📝 다음 작업 계획
 
-### Phase 2: 직원 관리 모듈 계속
-- [ ] 근무일정 페이지 (staff/employee-schedule)
-- [ ] 공휴일 관리 페이지 (staff/holidays)
-- [ ] 반차 승인 페이지 (staff/half-day-approval)
-- [ ] 조직도 페이지 (staff/organization-chart)
+### Phase 2: 직원 관리 모듈 상태 (업데이트: 2026-01-07)
+- [x] 근무일정 페이지 (staff/employee-schedule)
+- [x] 공휴일 관리 페이지 (staff/holidays)
+- [x] 반차 승인 페이지 (staff/half-day-approval)
+- [x] 조직도 페이지 (staff/organization-chart)
+- [x] 부서 관리 페이지 (staff/departments)
+- [x] 직원리스트 작업 버튼(수정/활성/비활성)
+- [ ] 직원리스트 엑셀 다운로드 안정화 (서버/세션/응답 처리 점검)
 
 ### 공통 컴포넌트 개발
 - [ ] DataTable 컴포넌트 (정렬, 필터, 페이지네이션)
@@ -288,5 +361,5 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 5일  
+**최종 업데이트**: 2026년 1월 7일  
 **프로젝트**: Disk-CMS React 마이그레이션
