@@ -12,6 +12,15 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-07 (Phase 2 진행) - 엑셀 다운로드 버그 수정
+
+#### 8) 직원 엑셀 다운로드 완료
+- **문제**: `/api/staff/employees/export?status=1` 요청 시 "직원을 찾을 수 없습니다." 오류 발생
+- **원인**: Express 라우터 순서 문제 - `/employees/export`가 `/employees/:email` 라우터보다 뒤에 있어서 `export`가 `email` 파라미터로 해석됨
+- **해결**: `/employees/export` 라우터를 `/employees/:email` 라우터보다 앞에 배치하여 라우팅 충돌 해결
+- **파일**: `routes/staff/employees.js`
+- **결과**: 엑셀 다운로드 기능 정상 작동 확인
+
 ### 2026-01-07 (Phase 2 진행)
 
 #### 1) 직원 근무일정 페이지 (EmployeeSchedule.tsx)
@@ -64,10 +73,11 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - `App.tsx`: `staff/employee-schedule`, `staff/holidays`, `staff/half-day-approval`, `staff/organization-chart`, `staff/departments` 라우트 추가
 - `menu-config.json`: "부서 관리", "조직도" 등 메뉴 추가/정렬
 
-#### 8) 엑셀 다운로드(진행)
+#### 8) 엑셀 다운로드 ✅
 - 백엔드: `GET /api/staff/employees/export` 구현(필터 반영, exceljs 사용)
-- 프론트: “엑셀 다운로드” 버튼에서 xlsx 다운로드 처리(에러 응답 blob 처리 보완)
-- 현황: 일부 환경에서 401/404/종료 로그 관찰 → 서버 의존성/재시작/세션 상태 점검 필요 (다음 단계에서 안정화)
+- 프론트: "엑셀 다운로드" 버튼에서 xlsx 다운로드 처리(에러 응답 blob 처리 보완)
+- 라우팅 순서 수정: `/employees/export`를 `/employees/:email`보다 앞에 배치하여 충돌 해결
+- 상태: 완료 및 정상 작동 확인
 
 ### Phase 1: 핵심 기능 구현 (2026-01-05)
 
@@ -258,7 +268,7 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - [x] 조직도 페이지 (staff/organization-chart)
 - [x] 부서 관리 페이지 (staff/departments)
 - [x] 직원리스트 작업 버튼(수정/활성/비활성)
-- [ ] 직원리스트 엑셀 다운로드 안정화 (서버/세션/응답 처리 점검)
+- [x] 직원리스트 엑셀 다운로드 (라우팅 순서 문제 해결 완료)
 
 ### 공통 컴포넌트 개발
 - [ ] DataTable 컴포넌트 (정렬, 필터, 페이지네이션)
