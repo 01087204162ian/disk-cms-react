@@ -31,7 +31,10 @@ interface Employee {
   status: string
   is_active: number
   created_at: string
+  updated_at?: string
   last_login_at?: string
+  hire_date?: string
+  resign_date?: string
 }
 
 interface Department {
@@ -191,21 +194,76 @@ export default function Employees() {
   const [editForm, setEditForm] = useState({
     name: '',
     phone: '',
+    employee_id: '',
     department_id: '',
     position: '',
     role: '',
+    work_type: '',
+    work_schedule: '',
+    hire_date: '',
     is_active: '1',
   })
+
+  // 전화번호 포맷팅 함수 (원본과 동일)
+  const formatPhoneNumber = (value: string): string => {
+    const numbers = value.replace(/[^0-9]/g, '')
+    if (numbers.length >= 3 && numbers.length <= 7) {
+      return numbers.substring(0, 3) + '-' + numbers.substring(3)
+    } else if (numbers.length > 7) {
+      return numbers.substring(0, 3) + '-' + numbers.substring(3, 7) + '-' + numbers.substring(7, 11)
+    }
+    return numbers
+  }
+
+  // 날짜 포맷팅 (YYYY-MM-DD)
+  const formatDateForInput = (dateValue?: string): string => {
+    if (!dateValue) return ''
+    try {
+      const date = new Date(dateValue)
+      if (isNaN(date.getTime())) return ''
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    } catch (error) {
+      return ''
+    }
+  }
+
+  // 날짜시간 포맷팅 (한국어 형식)
+  const formatDateTime = (dateString?: string): string => {
+    if (!dateString) return '-'
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return '-'
+    }
+  }
 
   const openEdit = (emp: Employee) => {
     setActionError(null)
     setEditTarget(emp)
+    // 전화번호 포맷팅
+    const phoneValue = emp.phone || ''
+    const formattedPhone = phoneValue.includes('-') ? phoneValue : formatPhoneNumber(phoneValue)
+    
     setEditForm({
       name: emp.name || '',
-      phone: emp.phone || '',
+      phone: formattedPhone,
+      employee_id: emp.employee_id || '',
       department_id: emp.department?.id ? String(emp.department.id) : '',
       position: emp.position || '',
       role: emp.role || '',
+      work_type: emp.work_type || '',
+      work_schedule: emp.work_schedule || '',
+      hire_date: formatDateForInput(emp.hire_date),
       is_active: emp.is_active !== undefined ? String(emp.is_active) : '1',
     })
     setEditOpen(true)
@@ -218,9 +276,13 @@ export default function Employees() {
       await api.put(`/api/staff/employees/${editTarget.email}`, {
         name: editForm.name,
         phone: editForm.phone,
+        employee_id: editForm.employee_id || null,
         department_id: editForm.department_id || null,
         position: editForm.position,
         role: editForm.role,
+        work_type: editForm.work_type || null,
+        work_schedule: editForm.work_schedule || null,
+        hire_date: editForm.hire_date || null,
         is_active: Number(editForm.is_active),
       })
       setEditOpen(false)
@@ -687,92 +749,222 @@ export default function Employees() {
       {/* 수정/상세 모달 */}
       {editOpen && editTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-xl rounded-xl bg-background border border-border p-6">
-            <div className="text-lg font-semibold mb-1">직원 정보</div>
-            <div className="text-sm text-muted-foreground mb-4">{editTarget.email}</div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="w-full max-w-4xl rounded-xl bg-background border border-border overflow-hidden">
+            {/* 헤더 - 보라색 그라데이션 */}
+            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
               <div>
-                <div className="text-sm font-medium mb-1">이름</div>
+                <h5 className="text-lg font-semibold text-white m-0">
+                  <small className="block mt-1 text-sm font-normal text-white/85">
+                    {editTarget.name} ({editTarget.email})
+                  </small>
+                </h5>
+              </div>
+              <button
+                onClick={() => setEditOpen(false)}
+                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* 본문 */}
+            <div className="p-6 bg-white">
+              <div className="grid grid-cols-[100px_1fr_100px_1fr] gap-y-1 gap-x-4 items-center">
+                {/* 이름 */}
+                <label className="text-xs font-medium text-gray-700 py-1">이름:</label>
                 <input
+                  type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
                 />
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">전화번호</div>
+                
+                {/* 이메일 */}
+                <label className="text-xs font-medium text-gray-700 py-1">이메일:</label>
                 <input
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  type="email"
+                  value={editTarget.email}
+                  readOnly
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
                 />
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">부서</div>
+                
+                {/* 연락처 */}
+                <label className="text-xs font-medium text-gray-700 py-1">연락처:</label>
+                <input
+                  type="tel"
+                  value={editForm.phone}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value)
+                    if (formatted.length <= 13) {
+                      setEditForm((p) => ({ ...p, phone: formatted }))
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                />
+                
+                {/* 사번 */}
+                <label className="text-xs font-medium text-gray-700 py-1">사번:</label>
+                <input
+                  type="text"
+                  value={editForm.employee_id}
+                  onChange={(e) => setEditForm((p) => ({ ...p, employee_id: e.target.value }))}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                />
+                
+                {/* 부서 */}
+                <label className="text-xs font-medium text-gray-700 py-1">부서:</label>
                 <select
                   value={editForm.department_id}
                   onChange={(e) => setEditForm((p) => ({ ...p, department_id: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
                 >
-                  <option value="">미지정</option>
+                  <option value="">부서 선택</option>
                   {departments.map((dept) => (
                     <option key={dept.id} value={dept.id}>
                       {dept.name}
                     </option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">직급/직책</div>
+                
+                {/* 직급 */}
+                <label className="text-xs font-medium text-gray-700 py-1">직급:</label>
                 <input
+                  type="text"
                   value={editForm.position}
                   onChange={(e) => setEditForm((p) => ({ ...p, position: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
                 />
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">권한</div>
+                
+                {/* 입사일 */}
+                <label className="text-xs font-medium text-gray-700 py-1">입사일:</label>
+                <input
+                  type="date"
+                  value={editForm.hire_date}
+                  onChange={(e) => setEditForm((p) => ({ ...p, hire_date: e.target.value }))}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                />
+                
+                {/* 권한 */}
+                <label className="text-xs font-medium text-gray-700 py-1">권한:</label>
                 <select
                   value={editForm.role}
                   onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
                 >
                   <option value="SUPER_ADMIN">최고관리자</option>
+                  <option value="DEPT_MANAGER">부서장</option>
                   <option value="SYSTEM_ADMIN">시스템관리자</option>
-                  <option value="DEPT_MANAGER">부서관리자</option>
                   <option value="EMPLOYEE">직원</option>
                 </select>
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">상태</div>
+                
+                {/* 근무형태 */}
+                <label className="text-xs font-medium text-gray-700 py-1">근무형태:</label>
+                <select
+                  value={editForm.work_type}
+                  onChange={(e) => setEditForm((p) => ({ ...p, work_type: e.target.value }))}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">선택</option>
+                  <option value="FULL_TIME">정규직</option>
+                  <option value="PART_TIME">파트타임</option>
+                  <option value="CONTRACT">계약직</option>
+                </select>
+                
+                {/* 근무일정 */}
+                <label className="text-xs font-medium text-gray-700 py-1">근무일정:</label>
+                <select
+                  value={editForm.work_schedule}
+                  onChange={(e) => setEditForm((p) => ({ ...p, work_schedule: e.target.value }))}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">선택</option>
+                  <option value="STANDARD">표준근무</option>
+                  <option value="4_DAY">4일제</option>
+                  <option value="FLEXIBLE">탄력근무</option>
+                </select>
+                
+                {/* 계정상태 */}
+                <label className="text-xs font-medium text-gray-700 py-1">계정상태:</label>
                 <select
                   value={editForm.is_active}
                   onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
                 >
-                  <option value="0">승인대기</option>
                   <option value="1">활성</option>
+                  <option value="0">대기중</option>
                   <option value="2">비활성</option>
                 </select>
+                
+                {/* 가입일 */}
+                <label className="text-xs font-medium text-gray-700 py-1">가입일:</label>
+                <input
+                  type="text"
+                  value={formatDateTime(editTarget.created_at)}
+                  readOnly
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
+                />
+                
+                {/* 퇴사일 */}
+                <label className="text-xs font-medium text-gray-700 py-1">퇴사일:</label>
+                <input
+                  type="text"
+                  value={editTarget.resign_date ? formatDateForInput(editTarget.resign_date) : '퇴사하지 않음'}
+                  readOnly
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
+                />
+                
+                {/* 마지막 로그인 - 전체 폭 */}
+                <label className="text-xs font-medium text-gray-700 py-1 col-span-1">마지막 로그인:</label>
+                <input
+                  type="text"
+                  value={editTarget.last_login_at ? formatDateTime(editTarget.last_login_at) : '로그인 기록 없음'}
+                  readOnly
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3"
+                />
+                
+                {/* 최종 수정일 - 전체 폭 */}
+                <label className="text-xs font-medium text-gray-700 py-1 col-span-1">최종 수정일:</label>
+                <input
+                  type="text"
+                  value={formatDateTime(editTarget.updated_at || editTarget.created_at)}
+                  readOnly
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3"
+                />
               </div>
-            </div>
 
-            {actionError ? <div className="mt-3 text-sm text-destructive">{actionError}</div> : null}
+              {actionError ? <div className="mt-4 text-sm text-red-600">{actionError}</div> : null}
 
-            <div className="mt-6 flex gap-2 justify-end">
-              <button
-                onClick={() => setEditOpen(false)}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                닫기
-              </button>
-              <button
-                onClick={submitEdit}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
-              >
-                저장
-              </button>
+              {/* 푸터 */}
+              <div className="mt-6 flex gap-2 justify-end border-t pt-4">
+                <button
+                  onClick={() => setEditOpen(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                >
+                  닫기
+                </button>
+                <button
+                  onClick={submitEdit}
+                  className="px-4 py-2 rounded-lg bg-[#667eea] text-white hover:bg-[#5568d3] text-sm font-medium"
+                >
+                  수정
+                </button>
+                {editTarget.is_active === 1 ? (
+                  <button
+                    onClick={() => confirmDeactivate(editTarget)}
+                    className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
+                  >
+                    비활성화
+                  </button>
+                ) : editTarget.is_active === 2 ? (
+                  <button
+                    onClick={() => confirmActivate(editTarget)}
+                    className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 text-sm font-medium"
+                  >
+                    재활성화
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
