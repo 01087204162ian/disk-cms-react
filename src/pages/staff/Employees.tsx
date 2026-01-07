@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import {
-  Users,
   Search,
   Download,
   RefreshCw,
@@ -179,128 +178,105 @@ export default function Employees() {
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <Users className="w-8 h-8" />
-          직원 관리
-        </h1>
-        <p className="text-muted-foreground mt-2">직원 목록을 조회하고 관리할 수 있습니다</p>
-      </div>
-
-      {/* 통계 정보 */}
-      <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <span className="font-medium">직원 현황:</span>
-            <span className="text-foreground">
-              전체 <strong>{stats.total}</strong>명
-            </span>
-            <span className="text-yellow-600">
-              승인대기 <strong>{stats.pending}</strong>명
-            </span>
-            <span className="text-green-600">
-              활성 <strong>{stats.active}</strong>명
-            </span>
-            <span className="text-muted-foreground">
-              비활성 <strong>{stats.inactive}</strong>명
-            </span>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            마지막 갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
-          </div>
-        </div>
-      </div>
-
       {/* 필터 영역 */}
       <div className="bg-card rounded-xl border border-border p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="flex flex-wrap items-center gap-3">
           {/* 부서 필터 */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">부서</label>
-            <select
-              value={filters.department}
-              onChange={(e) => handleFilterChange('department', e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">전체 부서</option>
-              {departments.map((dept) => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filters.department}
+            onChange={(e) => handleFilterChange('department', e.target.value)}
+            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+          >
+            <option value="">전체 부서</option>
+            {departments.map((dept) => (
+              <option key={dept.id} value={dept.id}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
 
           {/* 상태 필터 */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">상태</label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">전체</option>
-              <option value="0">승인대기</option>
-              <option value="1">활성</option>
-              <option value="2">비활성</option>
-            </select>
-          </div>
+          <select
+            value={filters.status}
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+          >
+            <option value="">전체</option>
+            <option value="0">승인대기</option>
+            <option value="1">활성</option>
+            <option value="2">비활성</option>
+          </select>
 
           {/* 권한 필터 */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">권한</label>
-            <select
-              value={filters.role}
-              onChange={(e) => handleFilterChange('role', e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">전체 권한</option>
-              <option value="SUPER_ADMIN">최고관리자</option>
-              <option value="DEPT_MANAGER">부서장</option>
-              <option value="SYSTEM_ADMIN">시스템관리자</option>
-              <option value="EMPLOYEE">직원</option>
-            </select>
-          </div>
+          <select
+            value={filters.role}
+            onChange={(e) => handleFilterChange('role', e.target.value)}
+            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+          >
+            <option value="">전체 권한</option>
+            <option value="SUPER_ADMIN">최고관리자</option>
+            <option value="DEPT_MANAGER">부서장</option>
+            <option value="SYSTEM_ADMIN">시스템관리자</option>
+            <option value="EMPLOYEE">직원</option>
+          </select>
 
           {/* 페이지 크기 */}
-          <div>
-            <label className="text-sm font-medium text-foreground mb-2 block">개수</label>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value))
-                setCurrentPage(1)
-              }}
-              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="20">20개</option>
-              <option value="50">50개</option>
-              <option value="100">100개</option>
-            </select>
-          </div>
-        </div>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value))
+              setCurrentPage(1)
+            }}
+            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+          >
+            <option value="20">20개</option>
+            <option value="50">50개</option>
+            <option value="100">100개</option>
+          </select>
 
-        {/* 검색 영역 */}
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          {/* 검색 영역 */}
+          <div className="flex-1 relative min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               value={filters.search}
               onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="이름, 이메일, 사번으로 검색"
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
             />
           </div>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm"
           >
             <Search className="w-4 h-4" />
             검색
           </button>
+        </div>
+
+        {/* 통계 정보 */}
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <span className="font-medium">직원 현황:</span>
+              <span className="text-foreground">
+                전체 <strong>{stats.total}</strong>명
+              </span>
+              <span className="text-yellow-600">
+                승인대기 <strong>{stats.pending}</strong>명
+              </span>
+              <span className="text-green-600">
+                활성 <strong>{stats.active}</strong>명
+              </span>
+              <span className="text-muted-foreground">
+                비활성 <strong>{stats.inactive}</strong>명
+              </span>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              마지막 갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
+            </div>
+          </div>
         </div>
       </div>
 
