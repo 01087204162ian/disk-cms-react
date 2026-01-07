@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "lastUpdate": "2024-12-19"
+  },
+  "menus": [
+    {
+      "id": "dashboard",
+      "title": "대시보드",
+      "icon": "fas fa-tachometer-alt",
+      "page": "dashboard",
+      "order": 1
+    },
+    {
+      "id": "staff",
+      "title": "직원전용",
+      "icon": "fas fa-users",
+      "order": 2,
+      "children": [
+        {
+          "id": "employees",
+          "title": "직원리스트",
+          "page": "staff/employees",
+          "order": 1
+        },
+        {
+          "id": "employee-schedule",
+          "title": "근무일정",
+          "page": "staff/employee-schedule",
+          "order": 2
+        },
+        {
+          "id": "holidays",
+          "title": "공휴일 관리",
+          "page": "staff/holidays",
+          "order": 3
+        },
+        {
+          "id": "half-day-approval",
+          "title": "반차 승인",
+          "page": "staff/half-day-approval",
+          "order": 4,
+          "roles": ["SUPER_ADMIN", "SYSTEM_ADMIN", "DEPT_MANAGER"]
+        },
+        {
+          "id": "notices",
+          "title": "공지사항",
+          "page": "staff/notices",
+          "order": 5
+        },
+        {
+          "id": "vacations",
+          "title": "휴가일정",
+          "page": "staff/vacations",
+          "order": 6
+        },
+        {
+          "id": "reports",
+          "title": "고지사항",
+          "page": "staff/reports",
+          "order": 7
+        }
+      ]
+    },
+    {
+      "id": "insurance",
+      "title": "보험상품",
+      "icon": "fas fa-shield-alt",
+      "order": 3,
+      "children": [
+        {
+          "id": "proxy-driving",
+          "title": "대리운전",
+          "icon": "fas fa-car",
+          "order": 1,
+          "children": [
+            {
+              "id": "kj-proxy",
+              "title": "KJ대리운전",
+              "page": "insurance/kj-driver",
+              "order": 1
+            },
+            {
+              "id": "das-proxy",
+              "title": "daS대리운전",
+              "page": "insurance/das-proxy",
+              "order": 2
+            },
+            {
+              "id": "personal-proxy",
+              "title": "개인대리운전",
+              "page": "insurance/personal-proxy",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "internship",
+          "title": "현장실습보험",
+          "icon": "fas fa-graduation-cap",
+          "order": 2,
+          "children": [
+            {
+              "id": "internship-applications",
+              "title": "신청리스트",
+              "page": "field-practice/applications",
+              "order": 1
+            },
+            {
+              "id": "internship-claims",
+              "title": "클레임",
+              "page": "field-practice/claims",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "id": "pharmacy",
+          "title": "약국배상책임보험",
+          "icon": "fas fa-pills",
+          "order": 3,
+          "children": [
+            {
+              "id": "pharmacy-applications",
+              "title": "신청리스트",
+              "page": "pharmacy/applications",
+              "order": 1
+            },
+            {
+              "id": "pharmacy-claims",
+              "title": "클레임",
+              "page": "pharmacy/claims",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "id": "hole-in-one",
+          "title": "홀인원보험",
+          "icon": "fas fa-golf-ball",
+          "order": 4,
+          "children": [
+            {
+              "id": "hole-in-one-applications",
+              "title": "신청리스트",
+              "page": "insurance/hole-in-one-applications",
+              "order": 1
+            },
+            {
+              "id": "hole-in-one-claims",
+              "title": "클레임",
+              "page": "insurance/hole-in-one-claims",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "id": "travel",
+          "title": "여행자보험",
+          "icon": "fas fa-plane",
+          "page": "insurance/travel",
+          "order": 5
+        }
+      ]
+    }
+  ]
+}
