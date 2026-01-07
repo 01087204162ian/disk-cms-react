@@ -304,6 +304,20 @@ export default function Employees() {
   const [resignDateTarget, setResignDateTarget] = useState<Employee | null>(null)
   const [resignDate, setResignDate] = useState('')
 
+  // 부서 관리 모달 상태
+  const [departmentModalOpen, setDepartmentModalOpen] = useState(false)
+  const [departmentList, setDepartmentList] = useState<any[]>([])
+  const [departmentLoading, setDepartmentLoading] = useState(false)
+  const [departmentEmployees, setDepartmentEmployees] = useState<Employee[]>([])
+  
+  // 부서 추가 폼 상태
+  const [newDeptCode, setNewDeptCode] = useState('')
+  const [newDeptName, setNewDeptName] = useState('')
+  const [newDeptManager, setNewDeptManager] = useState('')
+  const [newDeptDescription, setNewDeptDescription] = useState('')
+  const [newDeptStatus, setNewDeptStatus] = useState('1')
+  const [departmentError, setDepartmentError] = useState<string | null>(null)
+
   const openResignDateModal = (emp: Employee) => {
     const today = new Date().toISOString().split('T')[0]
     setResignDate(today)
@@ -331,6 +345,124 @@ export default function Employees() {
       await loadEmployees()
     } catch (error: any) {
       setActionError(error?.response?.data?.message || error?.message || '비활성화 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 부서 관리 모달 열기
+  const openDepartmentModal = async () => {
+    setDepartmentModalOpen(true)
+    setDepartmentError(null)
+    await loadDepartmentData()
+  }
+
+  // 부서 데이터 로드
+  const loadDepartmentData = async () => {
+    setDepartmentLoading(true)
+    try {
+      // 부서 목록 로드 (manage API)
+      const deptRes = await api.get('/api/staff/departments/manage')
+      if (deptRes.data.success) {
+        setDepartmentList(deptRes.data.data || [])
+      }
+
+      // 부서장 후보 직원 목록 로드
+      const empRes = await api.get('/api/staff/employees?status=1&limit=1000')
+      if (empRes.data.success) {
+        const candidates = (empRes.data.data?.employees || []).filter((emp: Employee) =>
+          ['SUPER_ADMIN', 'DEPT_MANAGER', 'SYSTEM_ADMIN'].includes(emp.role)
+        )
+        setDepartmentEmployees(candidates)
+      }
+    } catch (error: any) {
+      console.error('부서 데이터 로드 오류:', error)
+      setDepartmentError(error?.response?.data?.message || '부서 데이터를 불러오는데 실패했습니다.')
+    } finally {
+      setDepartmentLoading(false)
+    }
+  }
+
+  // 부서 추가
+  const addDepartment = async () => {
+    if (!newDeptCode.trim() || !newDeptName.trim()) {
+      setDepartmentError('부서코드와 부서명은 필수입니다.')
+      return
+    }
+    try {
+      setDepartmentError(null)
+      const res = await api.post('/api/staff/departments', {
+        code: newDeptCode.trim().toUpperCase(),
+        name: newDeptName.trim(),
+        manager_id: newDeptManager.trim() || null,
+        description: newDeptDescription.trim() || null,
+        is_active: parseInt(newDeptStatus),
+      })
+      if (res.data.success) {
+        // 폼 초기화
+        setNewDeptCode('')
+        setNewDeptName('')
+        setNewDeptManager('')
+        setNewDeptDescription('')
+        setNewDeptStatus('1')
+        // 데이터 새로고침
+        await loadDepartmentData()
+        await loadInitialData() // 메인 페이지 부서 필터도 새로고침
+      } else {
+        setDepartmentError(res.data.message || '부서 추가에 실패했습니다.')
+      }
+    } catch (error: any) {
+      setDepartmentError(error?.response?.data?.message || error?.message || '부서 추가 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 부서 수정
+  const updateDepartment = async (deptId: number, field: string, value: any) => {
+    const dept = departmentList.find((d) => d.id === deptId)
+    if (!dept) return
+
+    const body: any = {
+      code: dept.code,
+      name: dept.name,
+      manager_id: dept.manager_id,
+      description: dept.description,
+      is_active: dept.is_active,
+      [field]: value,
+    }
+
+    try {
+      const res = await api.put(`/api/staff/departments/${deptId}`, body)
+      if (res.data.success) {
+        await loadDepartmentData()
+        await loadInitialData()
+      } else {
+        setDepartmentError(res.data.message || '부서 수정에 실패했습니다.')
+      }
+    } catch (error: any) {
+      setDepartmentError(error?.response?.data?.message || error?.message || '부서 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 부서 삭제
+  const deleteDepartment = async (deptId: number) => {
+    const dept = departmentList.find((d) => d.id === deptId)
+    if (!dept) return
+
+    if ((dept.employee_count || 0) > 0) {
+      setDepartmentError('소속 직원이 있는 부서는 삭제할 수 없습니다.')
+      return
+    }
+
+    if (!confirm(`'${dept.name}' 부서를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) return
+
+    try {
+      const res = await api.delete(`/api/staff/departments/${deptId}`)
+      if (res.data.success) {
+        await loadDepartmentData()
+        await loadInitialData()
+      } else {
+        setDepartmentError(res.data.message || '부서 삭제에 실패했습니다.')
+      }
+    } catch (error: any) {
+      setDepartmentError(error?.response?.data?.message || error?.message || '부서 삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -502,7 +634,7 @@ export default function Employees() {
       {/* 액션 버튼 */}
       <div className="flex flex-wrap gap-2">
         <button
-          onClick={() => navigate('/staff/departments')}
+          onClick={openDepartmentModal}
           className="px-4 py-2 bg-info text-info-foreground rounded-lg font-medium hover:bg-info/90 transition-colors flex items-center gap-2"
         >
           <Building className="w-4 h-4" />
@@ -995,23 +1127,27 @@ export default function Employees() {
                   className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
                 />
                 
-                {/* 마지막 로그인 - 전체 폭 */}
-                <label className="text-xs font-medium text-gray-700 py-1 col-span-1">마지막 로그인:</label>
-                <input
-                  type="text"
-                  value={editTarget.last_login_at ? formatDateTime(editTarget.last_login_at) : '로그인 기록 없음'}
-                  readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3 text-right"
-                />
+                {/* 마지막 로그인 - 전체 폭 (퇴사일 다음 행) */}
+                <div className="col-span-4 grid grid-cols-[100px_1fr] gap-y-1 gap-x-4 items-center mt-2">
+                  <label className="text-xs font-medium text-gray-700 py-1">마지막 로그인:</label>
+                  <input
+                    type="text"
+                    value={editTarget.last_login_at ? formatDateTime(editTarget.last_login_at) : '로그인 기록 없음'}
+                    readOnly
+                    className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
+                  />
+                </div>
                 
-                {/* 최종 수정일 - 전체 폭 */}
-                <label className="text-xs font-medium text-gray-700 py-1 col-span-1">최종 수정일:</label>
-                <input
-                  type="text"
-                  value={formatDateTime(editTarget.updated_at || editTarget.created_at)}
-                  readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3 text-right"
-                />
+                {/* 최종 수정일 - 전체 폭 (마지막 로그인 다음 행) */}
+                <div className="col-span-4 grid grid-cols-[100px_1fr] gap-y-1 gap-x-4 items-center">
+                  <label className="text-xs font-medium text-gray-700 py-1">최종 수정일:</label>
+                  <input
+                    type="text"
+                    value={formatDateTime(editTarget.updated_at || editTarget.created_at)}
+                    readOnly
+                    className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
+                  />
+                </div>
               </div>
 
               {actionError ? <div className="mt-4 text-sm text-red-600">{actionError}</div> : null}
@@ -1112,6 +1248,253 @@ export default function Employees() {
                   비활성화
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 부서 관리 모달 */}
+      {departmentModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-6xl max-h-[90vh] rounded-xl bg-background border border-border overflow-hidden flex flex-col">
+            {/* 헤더 */}
+            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
+              <div>
+                <h5 className="text-lg font-semibold text-white m-0">
+                  <Building className="inline-block w-5 h-5 mr-2" />
+                  부서 관리
+                </h5>
+                <small className="block mt-1 text-sm font-normal text-white/85">
+                  부서 추가, 수정, 삭제 관리
+                </small>
+              </div>
+              <button
+                onClick={() => {
+                  setDepartmentModalOpen(false)
+                  setDepartmentError(null)
+                }}
+                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* 본문 */}
+            <div className="flex-1 overflow-y-auto p-6 bg-white">
+              {departmentError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {departmentError}
+                </div>
+              )}
+
+              {/* 새 부서 추가 영역 */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h6 className="text-sm font-semibold mb-3 text-gray-700">
+                  새 부서 추가
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">부서코드 *</label>
+                    <input
+                      type="text"
+                      value={newDeptCode}
+                      onChange={(e) => setNewDeptCode(e.target.value.toUpperCase())}
+                      placeholder="예: DEV"
+                      maxLength={20}
+                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">부서명 *</label>
+                    <input
+                      type="text"
+                      value={newDeptName}
+                      onChange={(e) => setNewDeptName(e.target.value)}
+                      placeholder="예: 개발팀"
+                      maxLength={50}
+                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">부서장</label>
+                    <select
+                      value={newDeptManager}
+                      onChange={(e) => setNewDeptManager(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">부서장 선택 (선택사항)</option>
+                      {departmentEmployees.map((emp) => (
+                        <option key={emp.email} value={emp.email}>
+                          {emp.name} ({emp.department?.name || '미지정'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">상태</label>
+                    <select
+                      value={newDeptStatus}
+                      onChange={(e) => setNewDeptStatus(e.target.value)}
+                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="1">활성</option>
+                      <option value="0">비활성</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2 flex items-end">
+                    <button
+                      onClick={addDepartment}
+                      className="w-full px-3 py-1.5 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors"
+                    >
+                      추가
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">부서 설명</label>
+                  <textarea
+                    value={newDeptDescription}
+                    onChange={(e) => setNewDeptDescription(e.target.value)}
+                    placeholder="부서 설명을 입력하세요 (선택사항)"
+                    rows={2}
+                    maxLength={500}
+                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* 기존 부서 목록 */}
+              <div>
+                <h6 className="text-sm font-semibold mb-3 text-gray-700">
+                  기존 부서 목록 ({departmentList.length}개)
+                </h6>
+                {departmentLoading ? (
+                  <div className="text-center py-8 text-sm text-gray-500">
+                    부서 목록을 불러오는 중...
+                  </div>
+                ) : departmentList.length === 0 ? (
+                  <div className="text-center py-8 text-sm text-gray-500">
+                    등록된 부서가 없습니다.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-3 py-2 text-left border border-gray-300 font-medium text-gray-700">코드</th>
+                          <th className="px-3 py-2 text-left border border-gray-300 font-medium text-gray-700">부서명</th>
+                          <th className="px-3 py-2 text-left border border-gray-300 font-medium text-gray-700">부서장</th>
+                          <th className="px-3 py-2 text-left border border-gray-300 font-medium text-gray-700">설명</th>
+                          <th className="px-3 py-2 text-center border border-gray-300 font-medium text-gray-700">인원</th>
+                          <th className="px-3 py-2 text-center border border-gray-300 font-medium text-gray-700">상태</th>
+                          <th className="px-3 py-2 text-center border border-gray-300 font-medium text-gray-700">관리</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {departmentList.map((dept) => {
+                          const manager = departmentEmployees.find((emp) => emp.email === dept.manager_id)
+                          return (
+                            <tr key={dept.id} className={dept.is_active ? '' : 'bg-yellow-50'}>
+                              <td className="px-3 py-2 border border-gray-300">
+                                <input
+                                  type="text"
+                                  defaultValue={dept.code}
+                                  onBlur={(e) => {
+                                    if (e.target.value !== dept.code) {
+                                      updateDepartment(dept.id, 'code', e.target.value.toUpperCase())
+                                    }
+                                  }}
+                                  className="w-full px-2 py-1 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  maxLength={20}
+                                />
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300">
+                                <input
+                                  type="text"
+                                  defaultValue={dept.name}
+                                  onBlur={(e) => {
+                                    if (e.target.value !== dept.name) {
+                                      updateDepartment(dept.id, 'name', e.target.value)
+                                    }
+                                  }}
+                                  className="w-full px-2 py-1 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                  maxLength={50}
+                                />
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300">
+                                <select
+                                  defaultValue={dept.manager_id || ''}
+                                  onChange={(e) => updateDepartment(dept.id, 'manager_id', e.target.value || null)}
+                                  className="w-full px-2 py-1 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                >
+                                  <option value="">선택 안함</option>
+                                  {departmentEmployees.map((emp) => (
+                                    <option key={emp.email} value={emp.email}>
+                                      {emp.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300">
+                                <textarea
+                                  defaultValue={dept.description || ''}
+                                  onBlur={(e) => {
+                                    if (e.target.value !== (dept.description || '')) {
+                                      updateDepartment(dept.id, 'description', e.target.value || null)
+                                    }
+                                  }}
+                                  rows={1}
+                                  maxLength={500}
+                                  className="w-full px-2 py-1 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+                                />
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300 text-center">
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                  {dept.employee_count || 0}명
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300">
+                                <select
+                                  defaultValue={dept.is_active ? '1' : '0'}
+                                  onChange={(e) => updateDepartment(dept.id, 'is_active', parseInt(e.target.value))}
+                                  className="w-full px-2 py-1 text-xs border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                >
+                                  <option value="1">활성</option>
+                                  <option value="0">비활성</option>
+                                </select>
+                              </td>
+                              <td className="px-3 py-2 border border-gray-300 text-center">
+                                <button
+                                  onClick={() => deleteDepartment(dept.id)}
+                                  disabled={(dept.employee_count || 0) > 0}
+                                  className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                                  title={(dept.employee_count || 0) > 0 ? '소속 직원이 있어 삭제할 수 없습니다' : '삭제'}
+                                >
+                                  삭제
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 푸터 */}
+            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => {
+                  setDepartmentModalOpen(false)
+                  setDepartmentError(null)
+                }}
+                className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium"
+              >
+                닫기
+              </button>
             </div>
           </div>
         </div>
