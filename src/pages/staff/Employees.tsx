@@ -147,6 +147,33 @@ export default function Employees() {
     loadEmployees()
   }
 
+  const handleExcelDownload = async () => {
+    try {
+      setActionError(null)
+      const params: any = {}
+      if (filters.department) params.department = filters.department
+      if (filters.status) params.status = filters.status
+      if (filters.role) params.role = filters.role
+      if (filters.search) params.search = filters.search
+      const res = await api.get('/api/staff/employees/export', {
+        params,
+        responseType: 'blob',
+      })
+      const blob = new Blob([res.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'employees.xlsx'
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (error: any) {
+      console.error('엑셀 다운로드 오류:', error)
+      setActionError(error?.response?.data?.message || error?.message || '엑셀 다운로드 중 오류가 발생했습니다.')
+    }
+  }
+
   // === 수정/삭제/활성화 상태 ===
   const [editOpen, setEditOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<Employee | null>(null)
@@ -378,13 +405,16 @@ export default function Employees() {
           <span className="hidden md:inline">부서 관리</span>
         </button>
         <button
-          onClick={() => navigate('/staff/employee-schedule')}
+            onClick={() => navigate('/staff/employee-schedule')}
           className="px-4 py-2 bg-success text-success-foreground rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center gap-2"
         >
           <Calendar className="w-4 h-4" />
           <span className="hidden md:inline">근무 일정 관리</span>
         </button>
-        <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+        <button
+          onClick={handleExcelDownload}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+        >
           <Download className="w-4 h-4" />
           <span className="hidden lg:inline">엑셀 다운로드</span>
         </button>

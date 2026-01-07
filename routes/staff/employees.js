@@ -4,6 +4,7 @@
 
 const express = require('express');
 const { pool } = require('../../config/database');
+const ExcelJS = require('exceljs');
 
 const router = express.Router();
 
@@ -336,6 +337,142 @@ router.get('/employees', requireAuth, requireAdmin, async (req, res) => {
         res.status(500).json({
             success: false,
             message: '직원 목록 조회 중 오류가 발생했습니다.'
+        });
+    }
+});
+
+// 직원 엑셀 다운로드
+router.get('/employees/export', requireAuth, requireAdmin, async (req, res) => {
+    try {
+        const {
+            status = '',
+            department = '',
+            role = '',
+            search = '',
+            sortBy = 'created_at',
+            sortOrder = 'desc'
+        } = req.query;
+
+        let whereConditions = [];
+        let queryParams = [];
+
+        switch (status) {
+            case 'pending':
+            case '0':
+                whereConditions.push('u.is_active = 0');
+                break;
+            case 'active':
+            case '1':
+                whereConditions.push('u.is_active = 1');
+                break;
+            case 'inactive':
+            case '2':
+                whereConditions.push('u.is_active = 2');
+                break;
+        }
+
+        if (department) {
+            whereConditions.push('u.department_id = ?');
+            queryParams.push(department);
+        }
+
+        if (role) {
+            whereConditions.push('u.role = ?');
+            queryParams.push(role);
+        }
+
+        if (search) {
+            whereConditions.push('(u.name LIKE ? OR u.email LIKE ? OR u.employee_id LIKE ? OR u.phone LIKE ?)');
+            const searchTerm = `%${search}%`;
+            queryParams.push(searchTerm, searchTerm, searchTerm, searchTerm);
+        }
+
+        if (req.session.user.role === 'DEPT_MANAGER' && req.session.user.department_id) {
+            whereConditions.push('u.department_id = ?');
+            queryParams.push(req.session.user.department_id);
+        }
+
+        const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+        const validSortFields = ['created_at', 'name', 'email', 'role', 'last_login_at'];
+        const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+        const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+        const [rows] = await pool.execute(`
+            SELECT 
+                u.email,
+                u.name,
+                u.phone,
+                u.employee_id,
+                u.department_id,
+                d.name as department_name,
+                u.position,
+                u.hire_date,
+                u.resign_date,
+                u.role,
+                u.work_type,
+                u.work_schedule,
+                u.is_active,
+                u.created_at,
+                u.updated_at,
+                u.last_login_at
+            FROM users u
+            LEFT JOIN departments d ON u.department_id = d.id
+            ${whereClause}
+            ORDER BY u.${sortField} ${sortDirection}
+        `, queryParams);
+
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Employees');
+
+        sheet.columns = [
+            { header: '이메일', key: 'email', width: 28 },
+            { header: '이름', key: 'name', width: 14 },
+            { header: '전화번호', key: 'phone', width: 16 },
+            { header: '사번', key: 'employee_id', width: 12 },
+            { header: '부서', key: 'department', width: 16 },
+            { header: '직급', key: 'position', width: 12 },
+            { header: '권한', key: 'role', width: 14 },
+            { header: '상태', key: 'status', width: 10 },
+            { header: '입사일', key: 'hire_date', width: 12 },
+            { header: '퇴사일', key: 'resign_date', width: 12 },
+            { header: '마지막 로그인', key: 'last_login_at', width: 18 },
+            { header: '생성일', key: 'created_at', width: 18 },
+        ];
+
+        const fmtDate = (v) => (v ? new Date(v).toISOString().split('T')[0] : '');
+        const fmtDateTime = (v) => (v ? new Date(v).toISOString().replace('T', ' ').split('.')[0] : '');
+        const statusLabel = (n) => (n === 0 ? '승인대기' : n === 1 ? '활성' : n === 2 ? '비활성' : '-');
+
+        rows.forEach((emp) => {
+            sheet.addRow({
+                email: emp.email,
+                name: emp.name,
+                phone: emp.phone,
+                employee_id: emp.employee_id,
+                department: emp.department_name || '',
+                position: emp.position || '',
+                role: emp.role || '',
+                status: statusLabel(emp.is_active),
+                hire_date: fmtDate(emp.hire_date),
+                resign_date: fmtDate(emp.resign_date),
+                last_login_at: fmtDateTime(emp.last_login_at),
+                created_at: fmtDateTime(emp.created_at),
+            });
+        });
+
+        sheet.getRow(1).font = { bold: true };
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="employees.xlsx"');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    } catch (error) {
+        console.error('직원 엑셀 다운로드 오류:', error);
+        res.status(500).json({
+            success: false,
+            message: '엑셀 다운로드 중 오류가 발생했습니다.'
         });
     }
 });
