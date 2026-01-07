@@ -14,7 +14,7 @@ import {
   Calendar,
   FileText,
   Plane,
-  Golf,
+  CircleDot,
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -45,7 +45,7 @@ const iconMap: Record<string, any> = {
   'fas fa-graduation-cap': GraduationCap,
   'fas fa-pills': Pill,
   'fas fa-plane': Plane,
-  'fas fa-golf-ball': Golf,
+  'fas fa-golf-ball': CircleDot,
   'fas fa-calendar': Calendar,
   'fas fa-file-alt': FileText,
 }
