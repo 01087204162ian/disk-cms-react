@@ -3,6 +3,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
+import Employees from './pages/staff/Employees'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -26,6 +27,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/staff/employees" element={<Employees />} />
                   {/* 추가 라우트는 여기에 추가 */}
                 </Routes>
               </Layout>

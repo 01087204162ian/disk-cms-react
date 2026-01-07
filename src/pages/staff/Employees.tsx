@@ -1,0 +1,548 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import api from '../../lib/api'
+import { useAuthStore } from '../../store/authStore'
+import {
+  Users,
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
+  Eye,
+  Edit,
+  Trash2,
+  Building,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
+
+interface Employee {
+  email: string
+  name: string
+  phone?: string
+  employee_id?: string
+  department?: {
+    id?: number
+    name?: string
+  }
+  position?: string
+  role: string
+  work_type?: string
+  work_schedule?: string
+  status: string
+  is_active: number
+  created_at: string
+  last_login_at?: string
+}
+
+interface Department {
+  id: number
+  name: string
+}
+
+interface Stats {
+  total: number
+  pending: number
+  active: number
+  inactive: number
+}
+
+export default function Employees() {
+  const { user } = useAuthStore()
+  const navigate = useNavigate()
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    pending: 0,
+    active: 0,
+    inactive: 0,
+  })
+  const [loading, setLoading] = useState(true)
+
+  // 필터 상태
+  const [filters, setFilters] = useState({
+    department: '',
+    status: '1', // 기본값: 활성
+    role: '',
+    search: '',
+  })
+  const [pageSize, setPageSize] = useState(20)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
+
+  // 관리자 권한 체크
+  const isAdmin = user?.role && ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'DEPT_MANAGER'].includes(user.role)
+
+  useEffect(() => {
+    if (!isAdmin) {
+      navigate('/dashboard')
+      return
+    }
+    loadInitialData()
+  }, [isAdmin])
+
+  useEffect(() => {
+    loadEmployees()
+  }, [currentPage, pageSize, filters])
+
+  const loadInitialData = async () => {
+    try {
+      // 부서 목록 로드
+      const deptResponse = await api.get('/api/staff/departments')
+      if (deptResponse.data.success) {
+        setDepartments(deptResponse.data.data || [])
+      }
+    } catch (error) {
+      console.error('부서 목록 로드 오류:', error)
+    }
+  }
+
+  const loadEmployees = async () => {
+    setLoading(true)
+    try {
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+      }
+
+      if (filters.department) params.department = filters.department
+      if (filters.status) params.status = filters.status
+      if (filters.role) params.role = filters.role
+      if (filters.search) params.search = filters.search
+
+      const response = await api.get('/api/staff/employees', { params })
+
+      if (response.data.success) {
+        setEmployees(response.data.data.employees || [])
+        setTotalCount(response.data.data.total || 0)
+        setStats(response.data.data.stats || stats)
+        setLastRefresh(new Date())
+      }
+    } catch (error) {
+      console.error('직원 목록 로드 오류:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }))
+    setCurrentPage(1) // 필터 변경 시 첫 페이지로
+  }
+
+  const handleSearch = () => {
+    setCurrentPage(1)
+    loadEmployees()
+  }
+
+  const handleRefresh = () => {
+    loadEmployees()
+  }
+
+  const getRoleBadge = (role: string) => {
+    const badges: Record<string, { label: string; className: string }> = {
+      SUPER_ADMIN: { label: '최고관리자', className: 'bg-red-100 text-red-800' },
+      SYSTEM_ADMIN: { label: '시스템관리자', className: 'bg-yellow-100 text-yellow-800' },
+      DEPT_MANAGER: { label: '부서관리자', className: 'bg-blue-100 text-blue-800' },
+      EMPLOYEE: { label: '일반직원', className: 'bg-green-100 text-green-800' },
+    }
+    const badge = badges[role] || { label: role, className: 'bg-gray-100 text-gray-800' }
+    return (
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge.className}`}>
+        {badge.label}
+      </span>
+    )
+  }
+
+  const getStatusBadge = (status: string, isActive: number) => {
+    // API에서 status와 is_active 둘 다 올 수 있으므로 둘 다 체크
+    const statusValue = status || (isActive === 0 ? 'pending' : isActive === 1 ? 'active' : 'inactive')
+    
+    const badges: Record<string, { label: string; className: string }> = {
+      pending: { label: '승인대기', className: 'bg-yellow-100 text-yellow-800' },
+      active: { label: '활성', className: 'bg-green-100 text-green-800' },
+      inactive: { label: '비활성', className: 'bg-gray-100 text-gray-800' },
+    }
+    const badge = badges[statusValue] || { label: statusValue, className: 'bg-gray-100 text-gray-800' }
+    return (
+      <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge.className}`}>
+        {badge.label}
+      </span>
+    )
+  }
+
+  const totalPages = Math.ceil(totalCount / pageSize)
+  const startIndex = (currentPage - 1) * pageSize + 1
+  const endIndex = Math.min(currentPage * pageSize, totalCount)
+
+  return (
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <Users className="w-8 h-8" />
+          직원 관리
+        </h1>
+        <p className="text-muted-foreground mt-2">직원 목록을 조회하고 관리할 수 있습니다</p>
+      </div>
+
+      {/* 통계 정보 */}
+      <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <span className="font-medium">직원 현황:</span>
+            <span className="text-foreground">
+              전체 <strong>{stats.total}</strong>명
+            </span>
+            <span className="text-yellow-600">
+              승인대기 <strong>{stats.pending}</strong>명
+            </span>
+            <span className="text-green-600">
+              활성 <strong>{stats.active}</strong>명
+            </span>
+            <span className="text-muted-foreground">
+              비활성 <strong>{stats.inactive}</strong>명
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            마지막 갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
+          </div>
+        </div>
+      </div>
+
+      {/* 필터 영역 */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          {/* 부서 필터 */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">부서</label>
+            <select
+              value={filters.department}
+              onChange={(e) => handleFilterChange('department', e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">전체 부서</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 상태 필터 */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">상태</label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">전체</option>
+              <option value="0">승인대기</option>
+              <option value="1">활성</option>
+              <option value="2">비활성</option>
+            </select>
+          </div>
+
+          {/* 권한 필터 */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">권한</label>
+            <select
+              value={filters.role}
+              onChange={(e) => handleFilterChange('role', e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">전체 권한</option>
+              <option value="SUPER_ADMIN">최고관리자</option>
+              <option value="DEPT_MANAGER">부서장</option>
+              <option value="SYSTEM_ADMIN">시스템관리자</option>
+              <option value="EMPLOYEE">직원</option>
+            </select>
+          </div>
+
+          {/* 페이지 크기 */}
+          <div>
+            <label className="text-sm font-medium text-foreground mb-2 block">개수</label>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value))
+                setCurrentPage(1)
+              }}
+              className="w-full px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="20">20개</option>
+              <option value="50">50개</option>
+              <option value="100">100개</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 검색 영역 */}
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="이름, 이메일, 사번으로 검색"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+          <button
+            onClick={handleSearch}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            검색
+          </button>
+        </div>
+      </div>
+
+      {/* 액션 버튼 */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => navigate('/staff/departments')}
+          className="px-4 py-2 bg-info text-info-foreground rounded-lg font-medium hover:bg-info/90 transition-colors flex items-center gap-2"
+        >
+          <Building className="w-4 h-4" />
+          <span className="hidden md:inline">부서 관리</span>
+        </button>
+        <button
+          onClick={() => navigate('/staff/work-schedules')}
+          className="px-4 py-2 bg-success text-success-foreground rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center gap-2"
+        >
+          <Calendar className="w-4 h-4" />
+          <span className="hidden md:inline">근무 일정 관리</span>
+        </button>
+        <button className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <Download className="w-4 h-4" />
+          <span className="hidden lg:inline">엑셀 다운로드</span>
+        </button>
+        <button
+          onClick={handleRefresh}
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/90 transition-colors flex items-center gap-2"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span className="hidden md:inline">새로고침</span>
+        </button>
+      </div>
+
+      {/* 테이블 */}
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : employees.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            직원 데이터가 없습니다.
+          </div>
+        ) : (
+          <>
+            {/* 데스크톱 테이블 */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-accent">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">이름</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">이메일</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
+                      연락처
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
+                      사번
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">부서</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden xl:table-cell">
+                      직급
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">권한</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">가입일</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
+                      마지막로그인
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">상태</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">작업</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {employees.map((employee, index) => (
+                    <tr key={employee.email} className="hover:bg-accent/50 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-foreground">{employee.name}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <a
+                          href={`mailto:${employee.email}`}
+                          className="text-primary hover:underline"
+                        >
+                          {employee.email}
+                        </a>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                        {employee.phone || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                        {employee.employee_id || '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm text-foreground">
+                          {employee.department?.name || '미지정'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground hidden xl:table-cell">
+                        {employee.position || '-'}
+                      </td>
+                      <td className="px-4 py-3">{getRoleBadge(employee.role)}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                        {new Date(employee.created_at).toLocaleDateString('ko-KR')}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                        {employee.last_login_at
+                          ? new Date(employee.last_login_at).toLocaleDateString('ko-KR')
+                          : '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {getStatusBadge(employee.status, employee.is_active)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
+                            title="상세보기"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-colors"
+                            title="수정"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                            title="삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 모바일 카드 */}
+            <div className="md:hidden divide-y divide-border">
+              {employees.map((employee) => (
+                <div key={employee.email} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium text-foreground">{employee.name}</h3>
+                      <p className="text-sm text-muted-foreground">{employee.email}</p>
+                    </div>
+                    {getStatusBadge(employee.status, employee.is_active)}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">부서:</span>{' '}
+                      <span className="text-foreground">
+                        {employee.department?.name || '미지정'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">권한:</span>{' '}
+                      {getRoleBadge(employee.role)}
+                    </div>
+                    {employee.phone && (
+                      <div>
+                        <span className="text-muted-foreground">연락처:</span>{' '}
+                        <span className="text-foreground">{employee.phone}</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-muted-foreground">가입일:</span>{' '}
+                      <span className="text-foreground">
+                        {new Date(employee.created_at).toLocaleDateString('ko-KR')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button className="flex-1 px-3 py-2 bg-info/10 text-info rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      상세보기
+                    </button>
+                    <button className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                      <Edit className="w-4 h-4" />
+                      수정
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* 페이징 */}
+      {totalCount > 0 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-muted-foreground">
+            {startIndex} ~ {endIndex} / 전체 {totalCount}개
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum
+                if (totalPages <= 5) {
+                  pageNum = i + 1
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i
+                } else {
+                  pageNum = currentPage - 2 + i
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === pageNum
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                )
+              })}
+            </div>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
