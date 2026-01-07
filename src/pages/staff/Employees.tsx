@@ -75,7 +75,6 @@ export default function Employees() {
 
   // 관리자 권한 체크
   const isAdmin = user?.role && ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'DEPT_MANAGER'].includes(user.role)
-  const isSuperAdmin = user?.role === 'SUPER_ADMIN'
 
   useEffect(() => {
     if (!isAdmin) {
@@ -215,17 +214,8 @@ export default function Employees() {
     }
   }
 
-  const confirmDelete = async (emp: Employee) => {
-    if (!isSuperAdmin) return
-    if (!confirm(`'${emp.name || emp.email}' 계정을 삭제할까요? (복구 불가)`)) return
-    try {
-      setActionError(null)
-      await api.delete(`/api/staff/employees/${emp.email}`)
-      await loadEmployees()
-    } catch (error: any) {
-      setActionError(error?.response?.data?.message || error?.message || '삭제 중 오류가 발생했습니다.')
-    }
-  }
+  // 추후 물리 삭제 버튼이 필요하면 복원; 현재는 비활성/재활성만 사용
+  // const confirmDelete = async (emp: Employee) => { ... }
 
   const getRoleBadge = (role: string) => {
     const badges: Record<string, { label: string; className: string }> = {
@@ -518,15 +508,6 @@ export default function Employees() {
                               <RefreshCw className="w-4 h-4" />
                             </button>
                           )}
-                          {isSuperAdmin && (
-                            <button
-                              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                              title="삭제"
-                              onClick={() => confirmDelete(employee)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -600,15 +581,6 @@ export default function Employees() {
                       >
                         <RefreshCw className="w-4 h-4" />
                         활성
-                      </button>
-                    )}
-                    {isSuperAdmin && (
-                      <button
-                        className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                        onClick={() => confirmDelete(employee)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        삭제
                       </button>
                     )}
                   </div>
