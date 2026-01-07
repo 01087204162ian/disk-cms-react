@@ -463,17 +463,25 @@ router.get('/employees/export', requireAuth, requireAdmin, async (req, res) => {
 
         sheet.getRow(1).font = { bold: true };
 
+        const filename = `employees_${new Date().toISOString().split('T')[0]}.xlsx`;
+        
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename="employees.xlsx"');
+        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(filename)}"`);
 
         await workbook.xlsx.write(res);
-        res.end();
+        // res.end()는 Express가 자동으로 처리하므로 제거
     } catch (error) {
         console.error('직원 엑셀 다운로드 오류:', error);
-        res.status(500).json({
-            success: false,
-            message: '엑셀 다운로드 중 오류가 발생했습니다.'
-        });
+        console.error('에러 상세:', error.stack);
+        
+        // 응답이 이미 시작되지 않았을 때만 에러 응답 전송
+        if (!res.headersSent) {
+            res.status(500).json({
+                success: false,
+                message: '엑셀 다운로드 중 오류가 발생했습니다.',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
     }
 });
 

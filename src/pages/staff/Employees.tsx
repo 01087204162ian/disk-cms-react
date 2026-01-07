@@ -155,17 +155,28 @@ export default function Employees() {
       if (filters.status) params.status = filters.status
       if (filters.role) params.role = filters.role
       if (filters.search) params.search = filters.search
+      
       const res = await api.get('/api/staff/employees/export', {
         params,
         responseType: 'blob',
       })
+      
+      // Content-Type 확인: 에러 응답(JSON)인지 체크
+      const contentType = res.headers['content-type'] || ''
+      if (contentType.includes('application/json')) {
+        // 에러 응답인 경우 JSON으로 파싱
+        const text = await res.data.text()
+        const errorData = JSON.parse(text)
+        throw new Error(errorData.message || '엑셀 다운로드 중 오류가 발생했습니다.')
+      }
+      
       const blob = new Blob([res.data], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'employees.xlsx'
+      a.download = `employees_${new Date().toISOString().split('T')[0]}.xlsx`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch (error: any) {
