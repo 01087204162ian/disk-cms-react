@@ -24,47 +24,54 @@
           "order": 1
         },
         {
+          "id": "departments",
+          "title": "부서 관리",
+          "page": "staff/departments",
+          "order": 2,
+          "roles": ["SUPER_ADMIN", "SYSTEM_ADMIN", "DEPT_MANAGER"]
+        },
+        {
           "id": "employee-schedule",
           "title": "근무일정",
           "page": "staff/employee-schedule",
-          "order": 2
+          "order": 3
         },
         {
           "id": "holidays",
           "title": "공휴일 관리",
           "page": "staff/holidays",
-          "order": 3
+          "order": 4
         },
         {
           "id": "half-day-approval",
           "title": "반차 승인",
           "page": "staff/half-day-approval",
-          "order": 4,
+          "order": 5,
           "roles": ["SUPER_ADMIN", "SYSTEM_ADMIN", "DEPT_MANAGER"]
         },
         {
           "id": "organization-chart",
           "title": "조직도",
           "page": "staff/organization-chart",
-          "order": 5
+          "order": 6
         },
         {
           "id": "notices",
           "title": "공지사항",
           "page": "staff/notices",
-          "order": 6
+          "order": 7
         },
         {
           "id": "vacations",
           "title": "휴가일정",
           "page": "staff/vacations",
-          "order": 7
+          "order": 8
         },
         {
           "id": "reports",
           "title": "고지사항",
           "page": "staff/reports",
-          "order": 8
+          "order": 9
         }
       ]
     },

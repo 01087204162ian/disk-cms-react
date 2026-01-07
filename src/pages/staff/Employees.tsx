@@ -51,6 +51,7 @@ export default function Employees() {
   const navigate = useNavigate()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [stats, setStats] = useState<Stats>({
     total: 0,
     pending: 0,
@@ -101,6 +102,7 @@ export default function Employees() {
   const loadEmployees = async () => {
     setLoading(true)
     try {
+      setLoadError(null)
       const params: any = {
         page: currentPage,
         limit: pageSize,
@@ -114,13 +116,17 @@ export default function Employees() {
       const response = await api.get('/api/staff/employees', { params })
 
       if (response.data.success) {
-        setEmployees(response.data.data.employees || [])
-        setTotalCount(response.data.data.total || 0)
-        setStats(response.data.data.stats || stats)
+        const data = response.data.data || {}
+        setEmployees(data.employees || [])
+        setTotalCount(data.pagination?.total_count ?? data.total ?? 0)
+        setStats((prev) => data.statistics ?? data.stats ?? prev)
         setLastRefresh(new Date())
+      } else {
+        setLoadError(response.data.message || '직원 목록을 불러오는데 실패했습니다.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('직원 목록 로드 오류:', error)
+      setLoadError(error?.response?.data?.message || error?.message || '직원 목록 로드 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
@@ -254,6 +260,12 @@ export default function Employees() {
             검색
           </button>
         </div>
+
+        {loadError ? (
+          <div className="mt-3 text-sm text-destructive">
+            {loadError}
+          </div>
+        ) : null}
 
         {/* 통계 정보 */}
         <div className="mt-4 pt-4 border-t border-border">
