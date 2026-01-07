@@ -629,7 +629,7 @@ export default function Employees() {
                             <button
                               className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                               title="비활성화"
-                              onClick={() => confirmDeactivate(employee)}
+                              onClick={() => openResignDateModal(employee)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -703,7 +703,7 @@ export default function Employees() {
                     {employee.is_active === 1 ? (
                       <button
                         className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                        onClick={() => confirmDeactivate(employee)}
+                        onClick={() => openResignDateModal(employee)}
                       >
                         <Trash2 className="w-4 h-4" />
                         비활성
