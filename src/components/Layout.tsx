@@ -18,7 +18,10 @@ export default function Layout({ children }: LayoutProps) {
         "lg:pl-64 transition-all duration-300",
         sidebarOpen && "pl-64"
       )}>
-        <div className="fixed top-0 left-0 lg:left-64 right-0 z-30">
+        <div 
+          className="fixed left-0 lg:left-64 right-0 z-30 bg-background"
+          style={{ top: 0 }}
+        >
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         </div>
         
