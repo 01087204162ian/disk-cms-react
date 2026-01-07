@@ -43,22 +43,28 @@
           "roles": ["SUPER_ADMIN", "SYSTEM_ADMIN", "DEPT_MANAGER"]
         },
         {
+          "id": "organization-chart",
+          "title": "조직도",
+          "page": "staff/organization-chart",
+          "order": 5
+        },
+        {
           "id": "notices",
           "title": "공지사항",
           "page": "staff/notices",
-          "order": 5
+          "order": 6
         },
         {
           "id": "vacations",
           "title": "휴가일정",
           "page": "staff/vacations",
-          "order": 6
+          "order": 7
         },
         {
           "id": "reports",
           "title": "고지사항",
           "page": "staff/reports",
-          "order": 7
+          "order": 8
         }
       ]
     },

@@ -290,7 +290,7 @@ export default function Employees() {
           <span className="hidden md:inline">부서 관리</span>
         </button>
         <button
-          onClick={() => navigate('/staff/work-schedules')}
+          onClick={() => navigate('/staff/employee-schedule')}
           className="px-4 py-2 bg-success text-success-foreground rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center gap-2"
         >
           <Calendar className="w-4 h-4" />
