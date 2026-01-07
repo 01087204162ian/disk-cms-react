@@ -5,7 +5,6 @@ import { useAuthStore } from '../../store/authStore'
 import {
   Users,
   Search,
-  Filter,
   Download,
   RefreshCw,
   Eye,
@@ -373,7 +372,7 @@ export default function Employees() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {employees.map((employee, index) => (
+                  {employees.map((employee) => (
                     <tr key={employee.email} className="hover:bg-accent/50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-medium text-foreground">{employee.name}</div>
