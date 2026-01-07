@@ -1473,8 +1473,7 @@ export default function Employees() {
                                 </button>
                               </td>
                             </tr>
-                          )
-                        })}
+                        ))}
                       </tbody>
                     </table>
                   </div>
