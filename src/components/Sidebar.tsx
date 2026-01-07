@@ -220,8 +220,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           {/* 헤더 */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-            <h1 className="text-xl font-bold text-foreground">보험 CMS</h1>
+          <div className="flex items-center justify-between h-16 px-6 border-b border-border">
+            <h1 className="text-base font-semibold text-foreground leading-none">보험 CMS</h1>
             <button
               onClick={onClose}
               className="lg:hidden p-2 hover:bg-accent rounded-lg"
