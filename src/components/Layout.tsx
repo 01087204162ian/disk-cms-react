@@ -18,9 +18,11 @@ export default function Layout({ children }: LayoutProps) {
         "lg:pl-64 transition-all duration-300",
         sidebarOpen && "pl-64"
       )}>
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <div className="fixed top-0 left-0 lg:left-64 right-0 z-30">
+          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        </div>
         
-        <main className="p-6">
+        <main className="pt-16 p-6">
           {children}
         </main>
       </div>
