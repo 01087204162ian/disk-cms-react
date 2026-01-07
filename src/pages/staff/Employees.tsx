@@ -230,18 +230,25 @@ export default function Employees() {
     }
   }
 
-  // 날짜시간 포맷팅 (한국어 형식)
+  // 날짜시간 포맷팅 (원본과 동일한 형식: 2026. 01. 03. 오후 04:35)
   const formatDateTime = (dateString?: string): string => {
     if (!dateString) return '-'
     try {
       const date = new Date(dateString)
-      return date.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      if (isNaN(date.getTime())) return '-'
+      
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      const hours = date.getHours()
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      
+      // 오전/오후 구분
+      const period = hours >= 12 ? '오후' : '오전'
+      const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours)
+      const displayHoursStr = String(displayHours).padStart(2, '0')
+      
+      return `${year}. ${month}. ${day}. ${period} ${displayHoursStr}:${minutes}`
     } catch {
       return '-'
     }
@@ -292,11 +299,35 @@ export default function Employees() {
     }
   }
 
-  const confirmDeactivate = async (emp: Employee) => {
-    if (!confirm(`'${emp.name || emp.email}' 계정을 비활성화할까요?`)) return
+  // 퇴사일 입력 모달 상태
+  const [resignDateModalOpen, setResignDateModalOpen] = useState(false)
+  const [resignDateTarget, setResignDateTarget] = useState<Employee | null>(null)
+  const [resignDate, setResignDate] = useState('')
+
+  const openResignDateModal = (emp: Employee) => {
+    const today = new Date().toISOString().split('T')[0]
+    setResignDate(today)
+    setResignDateTarget(emp)
+    setResignDateModalOpen(true)
+  }
+
+  const confirmDeactivate = async () => {
+    if (!resignDateTarget || !resignDate) {
+      setActionError('퇴사일을 선택해주세요.')
+      return
+    }
     try {
       setActionError(null)
-      await api.patch(`/api/staff/employees/${emp.email}/deactivate`)
+      await api.patch(`/api/staff/employees/${resignDateTarget.email}/deactivate`, {
+        notes: '모달에서 관리자에 의한 계정 비활성화',
+        resign_date: resignDate
+      })
+      setResignDateModalOpen(false)
+      setResignDateTarget(null)
+      setResignDate('')
+      if (editOpen) {
+        setEditOpen(false)
+      }
       await loadEmployees()
     } catch (error: any) {
       setActionError(error?.response?.data?.message || error?.message || '비활성화 중 오류가 발생했습니다.')
@@ -777,7 +808,17 @@ export default function Employees() {
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  onFocus={(e) => {
+                    e.target.classList.remove('text-right')
+                    e.target.classList.add('text-left')
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      e.target.classList.remove('text-left')
+                      e.target.classList.add('text-right')
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 />
                 
                 {/* 이메일 */}
@@ -786,7 +827,7 @@ export default function Employees() {
                   type="email"
                   value={editTarget.email}
                   readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
                 />
                 
                 {/* 연락처 */}
@@ -800,7 +841,17 @@ export default function Employees() {
                       setEditForm((p) => ({ ...p, phone: formatted }))
                     }
                   }}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  onFocus={(e) => {
+                    e.target.classList.remove('text-right')
+                    e.target.classList.add('text-left')
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      e.target.classList.remove('text-left')
+                      e.target.classList.add('text-right')
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 />
                 
                 {/* 사번 */}
@@ -809,7 +860,17 @@ export default function Employees() {
                   type="text"
                   value={editForm.employee_id}
                   onChange={(e) => setEditForm((p) => ({ ...p, employee_id: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  onFocus={(e) => {
+                    e.target.classList.remove('text-right')
+                    e.target.classList.add('text-left')
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      e.target.classList.remove('text-left')
+                      e.target.classList.add('text-right')
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 />
                 
                 {/* 부서 */}
@@ -817,7 +878,7 @@ export default function Employees() {
                 <select
                   value={editForm.department_id}
                   onChange={(e) => setEditForm((p) => ({ ...p, department_id: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 >
                   <option value="">부서 선택</option>
                   {departments.map((dept) => (
@@ -833,7 +894,17 @@ export default function Employees() {
                   type="text"
                   value={editForm.position}
                   onChange={(e) => setEditForm((p) => ({ ...p, position: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  onFocus={(e) => {
+                    e.target.classList.remove('text-right')
+                    e.target.classList.add('text-left')
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      e.target.classList.remove('text-left')
+                      e.target.classList.add('text-right')
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 />
                 
                 {/* 입사일 */}
@@ -842,7 +913,17 @@ export default function Employees() {
                   type="date"
                   value={editForm.hire_date}
                   onChange={(e) => setEditForm((p) => ({ ...p, hire_date: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  onFocus={(e) => {
+                    e.target.classList.remove('text-right')
+                    e.target.classList.add('text-left')
+                  }}
+                  onBlur={(e) => {
+                    if (!e.target.value) {
+                      e.target.classList.remove('text-left')
+                      e.target.classList.add('text-right')
+                    }
+                  }}
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 />
                 
                 {/* 권한 */}
@@ -850,7 +931,7 @@ export default function Employees() {
                 <select
                   value={editForm.role}
                   onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 >
                   <option value="SUPER_ADMIN">최고관리자</option>
                   <option value="DEPT_MANAGER">부서장</option>
@@ -863,7 +944,7 @@ export default function Employees() {
                 <select
                   value={editForm.work_type}
                   onChange={(e) => setEditForm((p) => ({ ...p, work_type: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 >
                   <option value="">선택</option>
                   <option value="FULL_TIME">정규직</option>
@@ -876,7 +957,7 @@ export default function Employees() {
                 <select
                   value={editForm.work_schedule}
                   onChange={(e) => setEditForm((p) => ({ ...p, work_schedule: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 >
                   <option value="">선택</option>
                   <option value="STANDARD">표준근무</option>
@@ -889,7 +970,7 @@ export default function Employees() {
                 <select
                   value={editForm.is_active}
                   onChange={(e) => setEditForm((p) => ({ ...p, is_active: e.target.value }))}
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
                 >
                   <option value="1">활성</option>
                   <option value="0">대기중</option>
@@ -902,16 +983,16 @@ export default function Employees() {
                   type="text"
                   value={formatDateTime(editTarget.created_at)}
                   readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
                 />
                 
                 {/* 퇴사일 */}
                 <label className="text-xs font-medium text-gray-700 py-1">퇴사일:</label>
                 <input
                   type="text"
-                  value={editTarget.resign_date ? formatDateForInput(editTarget.resign_date) : '퇴사하지 않음'}
+                  value={editTarget.resign_date ? editTarget.resign_date : '퇴사하지 않음'}
                   readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none text-right"
                 />
                 
                 {/* 마지막 로그인 - 전체 폭 */}
@@ -920,7 +1001,7 @@ export default function Employees() {
                   type="text"
                   value={editTarget.last_login_at ? formatDateTime(editTarget.last_login_at) : '로그인 기록 없음'}
                   readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3 text-right"
                 />
                 
                 {/* 최종 수정일 - 전체 폭 */}
@@ -929,7 +1010,7 @@ export default function Employees() {
                   type="text"
                   value={formatDateTime(editTarget.updated_at || editTarget.created_at)}
                   readOnly
-                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3"
+                  className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-gray-50 focus:outline-none col-span-3 text-right"
                 />
               </div>
 
@@ -951,7 +1032,7 @@ export default function Employees() {
                 </button>
                 {editTarget.is_active === 1 ? (
                   <button
-                    onClick={() => confirmDeactivate(editTarget)}
+                    onClick={() => openResignDateModal(editTarget)}
                     className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
                   >
                     비활성화
@@ -969,6 +1050,72 @@ export default function Employees() {
           </div>
         </div>
       ) : null}
+
+      {/* 퇴사일 입력 모달 */}
+      {resignDateModalOpen && resignDateTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl bg-background border border-border overflow-hidden">
+            {/* 헤더 */}
+            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
+              <h5 className="text-lg font-semibold text-white m-0">퇴사일 지정</h5>
+              <button
+                onClick={() => {
+                  setResignDateModalOpen(false)
+                  setResignDateTarget(null)
+                  setResignDate('')
+                }}
+                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* 본문 */}
+            <div className="p-6 bg-white">
+              <div className="mb-4">
+                <label htmlFor="resignDateInput" className="block text-sm font-medium text-gray-700 mb-2">
+                  퇴사일을 선택하세요:
+                </label>
+                <input
+                  type="date"
+                  id="resignDateInput"
+                  value={resignDate}
+                  onChange={(e) => setResignDate(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <div className="mt-2 text-xs text-gray-500">
+                  해당 직원의 퇴사일을 지정합니다.
+                </div>
+              </div>
+
+              {actionError ? <div className="mb-4 text-sm text-red-600">{actionError}</div> : null}
+
+              {/* 푸터 */}
+              <div className="flex gap-2 justify-end border-t pt-4">
+                <button
+                  onClick={() => {
+                    setResignDateModalOpen(false)
+                    setResignDateTarget(null)
+                    setResignDate('')
+                    setActionError(null)
+                  }}
+                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={confirmDeactivate}
+                  className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
+                >
+                  비활성화
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
