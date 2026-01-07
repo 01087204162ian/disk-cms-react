@@ -20,7 +20,7 @@ export default function Layout({ children }: LayoutProps) {
       )}>
         <div 
           className="fixed left-0 lg:left-64 right-0 z-30 bg-background"
-          style={{ top: 0 }}
+          style={{ top: '-1px' }}
         >
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         </div>
