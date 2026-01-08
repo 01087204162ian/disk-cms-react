@@ -12,6 +12,40 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-08 (Phase 3 진행) - 약국배상책임보험 정산 데이터 정리 기능 구현
+
+#### 31) 정산 데이터 정리 모달 구현 완료
+- **정산 데이터 정리 모달** (`SettlementCleanupModal.tsx`):
+  - 거래처 불일치 데이터 조회 기능
+  - `pharmacy_settlementList`와 `pharmacyApply` 테이블의 `account` 불일치 데이터만 필터링
+  - 테이블: 신청번호, 상태, 승인보험료, 정산 거래처, 약국 거래처 표시
+  - 상태명 변환 (1=정상, 2=보류 또는 메일보냄)
+  - 금액 포맷팅 (콤마 구분)
+  - 통계 정보 표시 (불일치 데이터 건수)
+  - 안내 메시지 표시 (거래처 불일치 설명)
+- **Applications.tsx 수정**:
+  - 새로고침 버튼 우측에 "정리" 버튼 추가
+  - `AlertTriangle` 아이콘 사용
+  - 정리 모달 상태 관리 추가
+  - 정리 모달 컴포넌트 import 및 렌더링
+- **PHP API 구현** (`imet/api/pharmacy/pharmacy-settlement-cleanup.php`):
+  - `pharmacy_settlementList` 전체 데이터 조회
+  - `pharmacyApply` 테이블과 INNER JOIN
+  - `pharmacy_settlementList.account != pharmacyApply.account` 조건으로 필터링
+  - 반환 데이터: `applyNum`, `sangtae`, `approvalPreminum`, `settlementAccount`, `pharmacyAccount`
+  - JSON 응답 형식
+- **Node.js 프록시 라우터** (`routes/pharmacy.js`):
+  - `GET /api/pharmacy/cleanup` 엔드포인트 추가
+  - PHP API 프록시 역할 (`https://imet.kr/api/pharmacy/pharmacy-settlement-cleanup.php`)
+  - 타임아웃 설정 (30초)
+  - 에러 핸들링 및 로깅
+- **파일**:
+  - `src/pages/pharmacy/components/SettlementCleanupModal.tsx`: 정리 모달 컴포넌트 (신규)
+  - `src/pages/pharmacy/components/Applications.tsx`: 정리 버튼 및 모달 통합
+  - `imet/api/pharmacy/pharmacy-settlement-cleanup.php`: PHP API 구현 (신규)
+  - `routes/pharmacy.js`: cleanup 엔드포인트 추가
+- **결과**: Applications 페이지의 "정리" 버튼 클릭 시 거래처 불일치 데이터를 확인할 수 있는 모달 제공, 데이터 정합성 검증 기능 완료
+
 ### 2026-01-08 (Phase 3 진행) - 약국배상책임보험 예치금 관리 시스템 구현
 
 #### 30) 예치금 충전/리스트/사용내역 모달 구현 완료
@@ -905,7 +939,7 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 8일 (예치금 충전/리스트/사용내역 모달 구현 완료)  
+**최종 업데이트**: 2026년 1월 8일 (정산 데이터 정리 모달 구현 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
@@ -916,8 +950,8 @@ work-log.md 파일 학습하자
 - **Phase 1**: 9개 작업 완료
 - **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
 - **Phase 3**: 진행 중 (보험 상품 모듈)
-  - 약국배상책임보험: 8개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달)
-- **총 30개 작업 완료**
+  - 약국배상책임보험: 9개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달, 정산 데이터 정리 모달)
+- **총 31개 작업 완료**
 
 ### 개발된 공통 컴포넌트
 - ✅ Modal (모달)
