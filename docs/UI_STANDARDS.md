@@ -9,6 +9,7 @@
 1. [필터 영역 표준](#1-필터-영역-표준)
 2. [모달 표준](#2-모달-표준)
 3. [작업 열 아이콘 표준](#3-작업-열-아이콘-표준)
+4. [공통 컴포넌트 사용 가이드](#4-공통-컴포넌트-사용-가이드)
 
 ---
 
@@ -299,7 +300,208 @@ className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white fo
 
 ---
 
-## 4. 적용 대상 페이지
+## 4. 공통 컴포넌트 사용 가이드
+
+### 4.1 Modal 컴포넌트
+
+**Import**:
+```tsx
+import { Modal } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+<Modal
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="모달 제목"
+  maxWidth="lg" // sm | md | lg | xl | 2xl | 4xl | 6xl
+>
+  {/* 모달 본문 */}
+  <div className="grid grid-cols-1 gap-3">
+    <input
+      type="text"
+      placeholder="입력 필드명 *"
+      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+  
+  {/* 푸터 (선택적) */}
+  <div slot="footer" className="mt-6 flex gap-2 justify-end">
+    <button onClick={onSave}>저장</button>
+  </div>
+</Modal>
+```
+
+**Props**:
+- `isOpen`: 모달 열림/닫힘 상태 (boolean)
+- `onClose`: 닫기 핸들러 함수
+- `title`: 모달 제목 (string)
+- `maxWidth`: 최대 너비 (기본값: 'lg')
+- `children`: 모달 본문 내용
+- `footer`: 푸터 내용 (선택적, ReactNode)
+
+**주의사항**:
+- 헤더에 X 버튼이 자동으로 포함됨
+- 푸터에는 닫기/취소 버튼을 넣지 않음
+- 본문은 `text-xs` 폰트 사용
+
+### 4.2 FilterBar 컴포넌트
+
+**Import**:
+```tsx
+import { FilterBar } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+<FilterBar
+  actionButtons={
+    <>
+      <button>액션 1</button>
+      <button>액션 2</button>
+    </>
+  }
+>
+  {/* Select 필터 */}
+  <FilterBar.Select
+    value={filters.department}
+    onChange={(value) => handleFilterChange('department', value)}
+    options={[
+      { value: '', label: '전체 부서' },
+      { value: '1', label: '개발팀' },
+    ]}
+  />
+  
+  {/* Input 필터 */}
+  <FilterBar.Input
+    value={filters.search}
+    onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
+    onSearch={handleSearch}
+    placeholder="검색어 입력"
+  />
+  
+  {/* 검색 버튼 */}
+  <FilterBar.SearchButton onClick={handleSearch} />
+  
+  {/* 통계 정보 */}
+  <FilterBar.Stats
+    stats={[
+      { label: '전체', value: stats.total, color: 'foreground' },
+      { label: '승인대기', value: stats.pending, color: 'yellow' },
+      { label: '활성', value: stats.active, color: 'green' },
+      { label: '비활성', value: stats.inactive, color: 'muted' },
+    ]}
+    lastRefresh={lastRefresh}
+  />
+</FilterBar>
+```
+
+**FilterBar.Select Props**:
+- `value`: 선택된 값
+- `onChange`: 변경 핸들러 (value: string)
+- `options`: 옵션 배열 `{ value: string, label: string }[]`
+- `placeholder`: 기본 옵션 라벨 (선택적)
+
+**FilterBar.Input Props**:
+- `value`: 입력값
+- `onChange`: 변경 핸들러 (value: string)
+- `onSearch`: 검색 핸들러 (선택적, Enter 키 또는 검색 버튼)
+- `placeholder`: 플레이스홀더 (선택적)
+
+**FilterBar.Stats Props**:
+- `stats`: 통계 배열 `Array<{ label: string, value: number | string, color?: 'foreground' | 'yellow' | 'green' | 'muted' }>`
+- `lastRefresh`: 마지막 갱신 시간 (Date, 선택적)
+
+### 4.3 DataTable 컴포넌트
+
+**Import**:
+```tsx
+import { DataTable, type Column } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+const columns: Column<Employee>[] = [
+  {
+    key: 'name',
+    header: '이름',
+    cell: (row) => <div className="font-medium text-xs">{row.name}</div>,
+  },
+  {
+    key: 'email',
+    header: '이메일',
+    cell: (row) => (
+      <a href={`mailto:${row.email}`} className="text-primary hover:underline text-xs">
+        {row.email}
+      </a>
+    ),
+  },
+  {
+    key: 'actions',
+    header: '작업',
+    cell: (row) => (
+      <div className="flex items-center gap-2">
+        <button onClick={() => handleEdit(row)}>수정</button>
+      </div>
+    ),
+  },
+]
+
+<DataTable
+  data={employees}
+  columns={columns}
+  loading={loading}
+  emptyMessage="직원 데이터가 없습니다."
+  onRowClick={(row) => handleRowClick(row)}
+  pagination={{
+    currentPage: currentPage,
+    pageSize: pageSize,
+    totalCount: totalCount,
+    onPageChange: setCurrentPage,
+    onPageSizeChange: setPageSize,
+    pageSizeOptions: [20, 50, 100],
+  }}
+  mobileCard={(row) => (
+    <div className="p-4 space-y-3">
+      <div>{row.name}</div>
+      <div>{row.email}</div>
+    </div>
+  )}
+/>
+```
+
+**Props**:
+- `data`: 테이블 데이터 배열
+- `columns`: 컬럼 정의 배열 `Column<T>[]`
+- `loading`: 로딩 상태 (선택적)
+- `emptyMessage`: 빈 데이터 메시지 (선택적, 기본값: "데이터가 없습니다.")
+- `onRowClick`: 행 클릭 핸들러 (선택적)
+- `pagination`: 페이지네이션 설정 (선택적)
+  - `currentPage`: 현재 페이지
+  - `pageSize`: 페이지 크기
+  - `totalCount`: 전체 데이터 수
+  - `onPageChange`: 페이지 변경 핸들러
+  - `onPageSizeChange`: 페이지 크기 변경 핸들러 (선택적)
+  - `pageSizeOptions`: 페이지 크기 옵션 배열 (선택적)
+- `mobileCard`: 모바일 카드 렌더링 함수 (선택적)
+- `className`: 추가 클래스명 (선택적)
+
+**Column 타입**:
+```tsx
+interface Column<T> {
+  key: string // 데이터 키
+  header: string // 헤더 텍스트
+  cell?: (row: T) => ReactNode // 커스텀 셀 렌더링 (선택적)
+  sortable?: boolean // 정렬 가능 여부 (선택적)
+  className?: string // 추가 클래스명 (선택적)
+  hidden?: boolean // 반응형 숨김 (선택적, lg:hidden 등)
+}
+```
+
+---
+
+## 5. 적용 대상 페이지
 
 다음 페이지에 이 표준을 적용해야 합니다:
 
@@ -312,7 +514,7 @@ className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white fo
 
 ---
 
-## 5. 체크리스트
+## 6. 체크리스트
 
 ### 필터 영역
 - [ ] Select 요소 높이 40px, 스타일 적용

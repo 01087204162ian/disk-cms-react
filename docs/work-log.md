@@ -61,6 +61,36 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - `src/pages/staff/EmployeeSchedule.tsx`
 - **결과**: 모든 staff 페이지의 모달이 UI 표준에 맞게 통일됨
 
+### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 개발
+
+#### 16) 공통 컴포넌트 개발 완료
+- **Modal 컴포넌트**: 
+  - 헤더 그라데이션 배경 + X 버튼 자동 포함
+  - maxWidth 옵션 지원 (sm, md, lg, xl, 2xl, 4xl, 6xl)
+  - footer prop 지원 (선택적)
+  - UI 표준 준수
+- **FilterBar 컴포넌트**:
+  - `FilterBar.Select`: 표준 Select 요소 (높이 40px)
+  - `FilterBar.Input`: 표준 Input 요소 (높이 42px, 검색 아이콘 포함)
+  - `FilterBar.SearchButton`: 표준 검색 버튼
+  - `FilterBar.Stats`: 통계 정보 표시 (오른쪽 끝 배치)
+  - `actionButtons` prop 지원 (액션 버튼 영역)
+- **DataTable 컴포넌트**:
+  - 타입 안전한 제네릭 인터페이스
+  - 데스크톱 테이블 + 모바일 카드 지원
+  - 페이지네이션 내장 지원
+  - 정렬 가능 옵션 (향후 확장)
+  - 반응형 숨김 옵션 (hidden prop)
+  - 커스텀 셀 렌더링 지원
+- **파일**:
+  - `src/components/Modal.tsx` (신규)
+  - `src/components/FilterBar.tsx` (신규)
+  - `src/components/DataTable.tsx` (신규)
+  - `src/components/index.ts` (신규)
+- **문서**:
+  - `docs/UI_STANDARDS.md`: 공통 컴포넌트 사용 가이드 추가
+- **결과**: 재사용 가능한 공통 컴포넌트 개발 완료, UI 표준 준수
+
 ### 2026-01-07 (Phase 2 진행) - 부서 관리 페이지 제거 및 UI/UX 개선
 
 #### 13) 부서 관리 페이지 제거
@@ -299,9 +329,14 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - `src/components/Sidebar.tsx` (242줄)
 - `src/components/Layout.tsx`
 - `src/components/Header.tsx`
+- `src/components/Modal.tsx` (신규, 공통 컴포넌트)
+- `src/components/FilterBar.tsx` (신규, 공통 컴포넌트)
+- `src/components/DataTable.tsx` (신규, 공통 컴포넌트)
+- `src/components/index.ts` (신규, Export 파일)
 - `public/config/menu-config.json`
 - `MIGRATION_PLAN.md`
 - `docs/work-log.md` (본 파일)
+- `docs/UI_STANDARDS.md` (신규, UI 표준 가이드)
 
 ---
 
@@ -364,9 +399,10 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - [x] 직원리스트 엑셀 다운로드 (라우팅 순서 문제 해결 완료)
 
 ### 공통 컴포넌트 개발
-- [ ] DataTable 컴포넌트 (정렬, 필터, 페이지네이션)
-- [ ] Modal 컴포넌트
-- [ ] FilterBar 컴포넌트
+- [x] DataTable 컴포넌트 (정렬, 필터, 페이지네이션)
+- [x] Modal 컴포넌트
+- [x] FilterBar 컴포넌트
+- [ ] 공통 컴포넌트를 기존 페이지에 적용 (Employees.tsx 등)
 
 ---
 
