@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, LoadingSpinner, useToastHelpers, CheckCircle, Upload } from '../../../components'
+import { CheckCircle, Upload } from 'lucide-react'
+import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 
 interface PharmacyDetailModalProps {
