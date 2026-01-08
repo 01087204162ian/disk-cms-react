@@ -302,6 +302,280 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     )
   }
 
+  // 월별 실적 데이터 처리
+  const processMonthlyData = useMemo(() => {
+    if (!resultData || resultData.length === 0 || reportMode !== 'monthly') {
+      return { monthlyRows: [], totalThisYear: null, totalLastYear: null, currentYear: filters.year, lastYear: filters.year - 1 }
+    }
+
+    const currentYear = filters.year
+    const lastYear = currentYear - 1
+
+    // 올해/작년 데이터 분리
+    const thisYearData = resultData.filter((item: any) => parseInt(item.year) === currentYear)
+    const lastYearData = resultData.filter((item: any) => parseInt(item.year) === lastYear)
+
+    // 월별 맵 생성
+    const thisYearMap: Record<number, any> = {}
+    const lastYearMap: Record<number, any> = {}
+
+    thisYearData.forEach((item: any) => {
+      const month = parseInt(item.month)
+      thisYearMap[month] = item
+    })
+
+    lastYearData.forEach((item: any) => {
+      const month = parseInt(item.month)
+      lastYearMap[month] = item
+    })
+
+    // 12개월 데이터 및 합계
+    const monthlyRows: Array<{
+      month: number
+      thisYear: {
+        approval_count: number
+        approval_amount: number
+        cancel_count: number
+        cancel_amount: number
+        net_count: number
+        net_amount: number
+      }
+      lastYear: {
+        approval_count: number
+        approval_amount: number
+        cancel_count: number
+        cancel_amount: number
+        net_count: number
+        net_amount: number
+      }
+    }> = []
+
+    const totalThisYear = { approval_count: 0, approval_amount: 0, cancel_count: 0, cancel_amount: 0 }
+    const totalLastYear = { approval_count: 0, approval_amount: 0, cancel_count: 0, cancel_amount: 0 }
+
+    for (let month = 1; month <= 12; month++) {
+      const thisMonth = thisYearMap[month] || {}
+      const lastMonth = lastYearMap[month] || {}
+
+      const thisYearApprovalCount = parseInt(thisMonth.approval_count) || 0
+      const thisYearApprovalAmount = parseInt(thisMonth.approval_amount) || 0
+      const thisYearCancelCount = parseInt(thisMonth.cancel_count) || 0
+      const thisYearCancelAmount = parseInt(thisMonth.cancel_amount) || 0
+
+      const lastYearApprovalCount = parseInt(lastMonth.approval_count) || 0
+      const lastYearApprovalAmount = parseInt(lastMonth.approval_amount) || 0
+      const lastYearCancelCount = parseInt(lastMonth.cancel_count) || 0
+      const lastYearCancelAmount = parseInt(lastMonth.cancel_amount) || 0
+
+      monthlyRows.push({
+        month: month,
+        thisYear: {
+          approval_count: thisYearApprovalCount,
+          approval_amount: thisYearApprovalAmount,
+          cancel_count: thisYearCancelCount,
+          cancel_amount: thisYearCancelAmount,
+          net_count: thisYearApprovalCount - thisYearCancelCount,
+          net_amount: thisYearApprovalAmount - thisYearCancelAmount,
+        },
+        lastYear: {
+          approval_count: lastYearApprovalCount,
+          approval_amount: lastYearApprovalAmount,
+          cancel_count: lastYearCancelCount,
+          cancel_amount: lastYearCancelAmount,
+          net_count: lastYearApprovalCount - lastYearCancelCount,
+          net_amount: lastYearApprovalAmount - lastYearCancelAmount,
+        },
+      })
+
+      totalThisYear.approval_count += thisYearApprovalCount
+      totalThisYear.approval_amount += thisYearApprovalAmount
+      totalThisYear.cancel_count += thisYearCancelCount
+      totalThisYear.cancel_amount += thisYearCancelAmount
+
+      totalLastYear.approval_count += lastYearApprovalCount
+      totalLastYear.approval_amount += lastYearApprovalAmount
+      totalLastYear.cancel_count += lastYearCancelCount
+      totalLastYear.cancel_amount += lastYearCancelAmount
+    }
+
+    return { monthlyRows, totalThisYear, totalLastYear, currentYear, lastYear }
+  }, [resultData, reportMode, filters.year])
+
+  const renderMonthlyStats = () => {
+    const { totalThisYear, totalLastYear, currentYear, lastYear } = processMonthlyData
+
+    if (!totalThisYear || !totalLastYear) return null
+
+    const thisYearNetAmount = totalThisYear.approval_amount - totalThisYear.cancel_amount
+    const thisYearNetCount = totalThisYear.approval_count - totalThisYear.cancel_count
+    const lastYearNetAmount = totalLastYear.approval_amount - totalLastYear.cancel_amount
+    const lastYearNetCount = totalLastYear.approval_count - totalLastYear.cancel_count
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+        {/* 올해 통계 */}
+        <div className="relative">
+          <div className="absolute top-0 right-0 text-muted-foreground font-bold text-xs z-10 -mt-4">
+            {currentYear}년
+          </div>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-sm p-3 text-white">
+            <div className="grid grid-cols-3 text-center">
+              <div>
+                <div className="text-xs opacity-75 mb-1">승인</div>
+                <div className="font-bold text-sm">{formatCurrency(totalThisYear.approval_amount)}</div>
+                <div className="text-xs opacity-80">{totalThisYear.approval_count}</div>
+              </div>
+              <div>
+                <div className="text-xs opacity-75 mb-1">해지</div>
+                <div className="font-bold text-sm">{formatCurrency(totalThisYear.cancel_amount)}</div>
+                <div className="text-xs opacity-80">{totalThisYear.cancel_count}</div>
+              </div>
+              <div>
+                <div className="text-xs opacity-75 mb-1">합계</div>
+                <div className="font-bold text-sm">{formatCurrency(thisYearNetAmount)}</div>
+                <div className="text-xs opacity-80">{thisYearNetCount}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 작년 통계 */}
+        <div className="relative">
+          <div className="absolute top-0 right-0 text-muted-foreground font-bold text-xs z-10 -mt-4">
+            {lastYear}년
+          </div>
+          <div className="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg shadow-sm p-3 text-white">
+            <div className="grid grid-cols-3 text-center">
+              <div>
+                <div className="text-xs opacity-75 mb-1">승인</div>
+                <div className="font-bold text-sm">{formatCurrency(totalLastYear.approval_amount)}</div>
+                <div className="text-xs opacity-80">{totalLastYear.approval_count}</div>
+              </div>
+              <div>
+                <div className="text-xs opacity-75 mb-1">해지</div>
+                <div className="font-bold text-sm">{formatCurrency(totalLastYear.cancel_amount)}</div>
+                <div className="text-xs opacity-80">{totalLastYear.cancel_count}</div>
+              </div>
+              <div>
+                <div className="text-xs opacity-75 mb-1">합계</div>
+                <div className="font-bold text-sm">{formatCurrency(lastYearNetAmount)}</div>
+                <div className="text-xs opacity-80">{lastYearNetCount}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderMonthlyTable = () => {
+    const { monthlyRows, totalThisYear, totalLastYear, currentYear, lastYear } = processMonthlyData
+
+    if (!monthlyRows || monthlyRows.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <div className="text-4xl mb-3 opacity-30">📊</div>
+          <div>조회된 데이터가 없습니다.</div>
+        </div>
+      )
+    }
+
+    if (!totalThisYear || !totalLastYear) return null
+
+    const thisYearNetAmount = totalThisYear.approval_amount - totalThisYear.cancel_amount
+    const thisYearNetCount = totalThisYear.approval_count - totalThisYear.cancel_count
+    const lastYearNetAmount = totalLastYear.approval_amount - totalLastYear.cancel_amount
+    const lastYearNetCount = totalLastYear.approval_count - totalLastYear.cancel_count
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-border text-center align-middle">
+          <thead>
+            <tr className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+              <th className="border border-border py-2" rowSpan={2} style={{ minWidth: '100px', verticalAlign: 'middle' }}>
+                월
+              </th>
+              <th className="border border-border py-2" colSpan={3}>
+                {currentYear}년
+              </th>
+              <th className="border border-border py-2" colSpan={3}>
+                {lastYear}년
+              </th>
+            </tr>
+            <tr className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
+              <th className="border border-border py-2" style={{ width: '18%' }}>승인</th>
+              <th className="border border-border py-2" style={{ width: '18%' }}>해지</th>
+              <th className="border border-border py-2" style={{ width: '18%' }}>계</th>
+              <th className="border border-border py-2" style={{ width: '18%' }}>승인</th>
+              <th className="border border-border py-2" style={{ width: '18%' }}>해지</th>
+              <th className="border border-border py-2" style={{ width: '18%' }}>계</th>
+            </tr>
+          </thead>
+          <tbody>
+            {monthlyRows.map((row) => (
+              <tr key={row.month}>
+                <th className="border border-border py-2 bg-muted/50">{row.month}월</th>
+                <td className="border border-border py-2 text-end text-blue-600">
+                  {row.thisYear.approval_amount > 0
+                    ? `${formatCurrency(row.thisYear.approval_amount)} (${row.thisYear.approval_count})`
+                    : ''}
+                </td>
+                <td className="border border-border py-2 text-end text-red-600">
+                  {row.thisYear.cancel_amount > 0
+                    ? `${formatCurrency(row.thisYear.cancel_amount)} (${row.thisYear.cancel_count})`
+                    : ''}
+                </td>
+                <td className="border border-border py-2 text-end font-bold">
+                  {row.thisYear.net_amount !== 0
+                    ? `${formatCurrency(row.thisYear.net_amount)} (${row.thisYear.net_count})`
+                    : ''}
+                </td>
+                <td className="border border-border py-2 text-end text-blue-600">
+                  {row.lastYear.approval_amount > 0
+                    ? `${formatCurrency(row.lastYear.approval_amount)} (${row.lastYear.approval_count})`
+                    : ''}
+                </td>
+                <td className="border border-border py-2 text-end text-red-600">
+                  {row.lastYear.cancel_amount > 0
+                    ? `${formatCurrency(row.lastYear.cancel_amount)} (${row.lastYear.cancel_count})`
+                    : ''}
+                </td>
+                <td className="border border-border py-2 text-end font-bold">
+                  {row.lastYear.net_amount !== 0
+                    ? `${formatCurrency(row.lastYear.net_amount)} (${row.lastYear.net_count})`
+                    : ''}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot className="bg-muted">
+            <tr className="font-bold">
+              <th className="border border-border py-2">총합계</th>
+              <td className="border border-border py-2 text-end text-blue-600">
+                {formatCurrency(totalThisYear.approval_amount)} ({totalThisYear.approval_count})
+              </td>
+              <td className="border border-border py-2 text-end text-red-600">
+                {formatCurrency(totalThisYear.cancel_amount)} ({totalThisYear.cancel_count})
+              </td>
+              <td className="border border-border py-2 text-end text-base">
+                {formatCurrency(thisYearNetAmount)} ({thisYearNetCount})
+              </td>
+              <td className="border border-border py-2 text-end text-blue-600">
+                {formatCurrency(totalLastYear.approval_amount)} ({totalLastYear.approval_count})
+              </td>
+              <td className="border border-border py-2 text-end text-red-600">
+                {formatCurrency(totalLastYear.cancel_amount)} ({totalLastYear.cancel_count})
+              </td>
+              <td className="border border-border py-2 text-end text-base">
+                {formatCurrency(lastYearNetAmount)} ({lastYearNetCount})
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    )
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -402,11 +676,16 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         {/* 결과 영역 */}
         {!loading && resultData.length > 0 && (
           <>
-            {renderStatsCards()}
-            {reportMode === 'daily' ? renderCalendar() : (
-              <div className="text-center py-4 text-sm text-muted-foreground">
-                월별 실적 기능 구현 예정
-              </div>
+            {reportMode === 'daily' ? (
+              <>
+                {renderStatsCards()}
+                {renderCalendar()}
+              </>
+            ) : (
+              <>
+                {renderMonthlyStats()}
+                {renderMonthlyTable()}
+              </>
             )}
           </>
         )}
