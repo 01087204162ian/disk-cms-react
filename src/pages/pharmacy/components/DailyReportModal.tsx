@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Modal, Select, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 
@@ -14,6 +14,19 @@ interface Account {
 
 type ReportMode = 'daily' | 'monthly'
 
+interface DayData {
+  date: number | null
+  isCurrentMonth: boolean
+  approval_count: number
+  approval_amount: number
+  cancel_count: number
+  cancel_amount: number
+}
+
+interface CalendarWeek {
+  days: DayData[]
+}
+
 export default function DailyReportModal({ isOpen, onClose }: DailyReportModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
@@ -28,7 +41,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
   })
 
   // 결과 데이터
-  const [resultData, setResultData] = useState<any>(null)
+  const [resultData, setResultData] = useState<any[]>([])
   const [summary, setSummary] = useState<any>(null)
 
   // 거래처 목록 로드
@@ -72,7 +85,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     } catch (error: any) {
       console.error('실적 조회 오류:', error)
       toast.error(error?.response?.data?.message || error?.message || '실적을 조회하는 중 오류가 발생했습니다.')
-      setResultData(null)
+      setResultData([])
       setSummary(null)
     } finally {
       setLoading(false)
@@ -97,6 +110,81 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     if (!amount || amount === 0) return ''
     return parseInt(String(amount)).toLocaleString('ko-KR')
   }
+
+  // 달력 구조 생성
+  const buildCalendarStructure = (dailyData: any[], year: number, month: number): CalendarWeek[] => {
+    const firstDay = new Date(year, month - 1, 1)
+    const lastDay = new Date(year, month, 0)
+    const firstDayOfWeek = firstDay.getDay()
+    const lastDate = lastDay.getDate()
+
+    // 데이터를 날짜별 맵으로 변환
+    const dataMap: Record<number, any> = {}
+    dailyData.forEach((item) => {
+      const date = new Date(item.date)
+      const day = date.getDate()
+      dataMap[day] = item
+    })
+
+    const weeks: CalendarWeek[] = []
+    let week: DayData[] = []
+
+    // 첫 주의 빈 칸 (이전 달 날짜 표시 안 함)
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      week.push({
+        date: null,
+        isCurrentMonth: false,
+        approval_count: 0,
+        approval_amount: 0,
+        cancel_count: 0,
+        cancel_amount: 0,
+      })
+    }
+
+    // 현재 달의 날짜들
+    for (let date = 1; date <= lastDate; date++) {
+      const dayData = dataMap[date] || {}
+      
+      week.push({
+        date: date,
+        isCurrentMonth: true,
+        approval_count: parseInt(dayData.approval_count) || 0,
+        approval_amount: parseInt(dayData.approval_amount) || 0,
+        cancel_count: parseInt(dayData.cancel_count) || 0,
+        cancel_amount: parseInt(dayData.cancel_amount) || 0,
+      })
+
+      if (week.length === 7) {
+        weeks.push({ days: week })
+        week = []
+      }
+    }
+
+    // 마지막 주의 빈 칸 (다음 달 날짜 표시 안 함)
+    if (week.length > 0) {
+      while (week.length < 7) {
+        week.push({
+          date: null,
+          isCurrentMonth: false,
+          approval_count: 0,
+          approval_amount: 0,
+          cancel_count: 0,
+          cancel_amount: 0,
+        })
+      }
+      weeks.push({ days: week })
+    }
+
+    return weeks
+  }
+
+  // 달력 데이터
+  const calendarWeeks = useMemo(() => {
+    if (!resultData || resultData.length === 0 || reportMode !== 'daily') {
+      return []
+    }
+    return buildCalendarStructure(resultData, filters.year, filters.month)
+  }, [resultData, filters.year, filters.month, reportMode])
 
   const renderStatsCards = () => {
     if (!summary) return null
@@ -143,20 +231,73 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       )
     }
 
-    // 달력 구조 생성 (간단한 버전 - 필요시 개선)
+    const today = new Date()
+    const isCurrentMonth = today.getFullYear() === filters.year && today.getMonth() + 1 === filters.month
+    const todayDate = today.getDate()
+
     return (
-      <div className="space-y-4">
-        {resultData.map((item: any, index: number) => (
-          <div key={index} className="border rounded-lg p-3">
-            <div className="font-medium">{item.date || item.day}</div>
-            <div className="text-sm text-muted-foreground">
-              승인: {formatCurrency(item.approval_amount || 0)} ({formatCurrency(item.approval_count || 0)})
-              {item.cancel_amount > 0 && (
-                <> / 해지: {formatCurrency(item.cancel_amount || 0)} ({formatCurrency(item.cancel_count || 0)})</>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-border text-center" style={{ tableLayout: 'fixed' }}>
+          <thead>
+            <tr className="bg-muted">
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>일</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>월</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>화</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>수</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>목</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>금</th>
+              <th className="border border-border py-2" style={{ width: '14.28%' }}>토</th>
+            </tr>
+          </thead>
+          <tbody>
+            {calendarWeeks.map((week, weekIdx) => (
+              <tr key={weekIdx}>
+                {week.days.map((day, dayIdx) => {
+                  if (!day.date || !day.isCurrentMonth) {
+                    return (
+                      <td key={dayIdx} className="border border-border bg-muted/30" style={{ height: '120px' }} />
+                    )
+                  }
+
+                  const isToday = isCurrentMonth && day.date === todayDate
+                  const dayColor = dayIdx === 0 ? 'text-red-600' : dayIdx === 6 ? 'text-blue-600' : 'text-foreground'
+                  const borderClass = isToday ? 'border-3 border-yellow-500' : ''
+
+                  const hasData = day.approval_count > 0 || day.cancel_count > 0
+                  const netAmount = day.approval_amount - day.cancel_amount
+                  const netCount = day.approval_count - day.cancel_count
+
+                  return (
+                    <td
+                      key={dayIdx}
+                      className={`border border-border p-2 align-top ${borderClass}`}
+                      style={{ height: '120px' }}
+                    >
+                      <div className={`${dayColor} font-bold mb-2`}>{day.date}</div>
+                      {hasData && (
+                        <div className="text-xs text-right">
+                          {day.approval_count > 0 && (
+                            <div className="text-blue-600">
+                              승인 {formatCurrency(day.approval_amount)} ({formatCurrency(day.approval_count)})
+                            </div>
+                          )}
+                          {day.cancel_count > 0 && (
+                            <div className="text-red-600">
+                              해지 {formatCurrency(day.cancel_amount)} ({formatCurrency(day.cancel_count)})
+                            </div>
+                          )}
+                          <div className="font-bold mt-1 border-t border-border pt-1">
+                            계 {formatCurrency(netAmount)} ({formatCurrency(netCount)})
+                          </div>
+                        </div>
+                      )}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     )
   }
@@ -178,7 +319,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           <button
             onClick={() => {
               setReportMode(reportMode === 'daily' ? 'monthly' : 'daily')
-              setResultData(null)
+              setResultData([])
               setSummary(null)
             }}
             className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
@@ -259,7 +400,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         )}
 
         {/* 결과 영역 */}
-        {!loading && resultData !== null && (
+        {!loading && resultData.length > 0 && (
           <>
             {renderStatsCards()}
             {reportMode === 'daily' ? renderCalendar() : (
@@ -271,7 +412,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         )}
 
         {/* 초기 상태 */}
-        {!loading && resultData === null && (
+        {!loading && resultData.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <div className="text-4xl mb-3 opacity-30">📊</div>
             <div>조회 버튼을 클릭하여 실적을 확인하세요.</div>
