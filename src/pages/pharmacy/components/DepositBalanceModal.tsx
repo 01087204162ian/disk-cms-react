@@ -269,7 +269,9 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
       cell: (row) => (
         <div className="flex gap-1 justify-center" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
+              console.log('충전 모달 열기:', row.account_num, row.account_name)
               setChargeModal({
                 isOpen: true,
                 accountNum: row.account_num,
@@ -282,7 +284,9 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
             충전
           </button>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
+              console.log('예치리스트 모달 열기:', row.account_num, row.account_name)
               setListModal({
                 isOpen: true,
                 accountNum: row.account_num,
@@ -295,7 +299,9 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
             예치리스트
           </button>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation()
+              console.log('사용내역 모달 열기:', row.account_num, row.account_name)
               setUsageModal({
                 isOpen: true,
                 accountNum: row.account_num,

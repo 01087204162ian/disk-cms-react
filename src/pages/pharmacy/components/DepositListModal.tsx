@@ -52,10 +52,15 @@ export default function DepositListModal({
   const [endDate, setEndDate] = useState('')
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && accountNum && accountNum > 0) {
       loadDepositList()
     }
-  }, [isOpen, page, pageSize, startDate, endDate])
+  }, [isOpen, accountNum, page, pageSize, startDate, endDate])
+
+  // accountNum이 유효하지 않으면 모달을 렌더링하지 않음
+  if (!isOpen || !accountNum || accountNum <= 0) {
+    return null
+  }
 
   const loadDepositList = async () => {
     setLoading(true)

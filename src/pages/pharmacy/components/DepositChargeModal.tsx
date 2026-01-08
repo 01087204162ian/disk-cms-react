@@ -29,7 +29,7 @@ export default function DepositChargeModal({
 
   // 모달이 열릴 때 폼 초기화
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && accountNum && accountNum > 0) {
       setFormData({
         amount: '',
         deposit_date: new Date().toISOString().split('T')[0],
@@ -37,7 +37,12 @@ export default function DepositChargeModal({
       })
       setErrors({})
     }
-  }, [isOpen])
+  }, [isOpen, accountNum])
+
+  // accountNum이 유효하지 않으면 모달을 렌더링하지 않음
+  if (!isOpen || !accountNum || accountNum <= 0) {
+    return null
+  }
 
   // 금액 포맷팅 (콤마 제거)
   const formatAmount = (value: string): string => {
@@ -150,9 +155,9 @@ export default function DepositChargeModal({
       <div className="space-y-4">
         {/* 거래처 정보 */}
         <div className="bg-gray-50 p-3 rounded">
-          <div className="text-xs text-gray-600">거래처</div>
-          <div className="text-sm font-medium text-gray-900">{accountName}</div>
-          <div className="text-xs text-gray-500">거래처 번호: {accountNum}</div>
+          <div className="text-sm font-medium text-gray-900">
+            {accountName} (거래처 번호: {accountNum})
+          </div>
         </div>
 
         {/* 금액 입력 */}
