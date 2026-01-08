@@ -16,6 +16,9 @@ git pull "$REMOTE" "$BRANCH"
 echo "==> Install deps"
 npm ci || npm install
 
+echo "==> Build React app"
+npm run build
+
 echo "==> Reload via PM2"
 pm2 restart disk-cms-react
 pm2 save
