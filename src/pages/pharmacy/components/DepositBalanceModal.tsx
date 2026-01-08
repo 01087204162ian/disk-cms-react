@@ -117,10 +117,11 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
         setDeposits(data)
         setPagination(paginationData)
 
-        // 통계 계산
+        // 통계 계산 - API에서 받은 값들을 그대로 사용
         const totalDeposit = data.reduce((sum: number, d: DepositSummary) => sum + (parseInt(String(d.total_deposit)) || 0), 0)
         const totalUsed = data.reduce((sum: number, d: DepositSummary) => sum + (parseInt(String(d.used_amount)) || 0), 0)
-        const totalBalance = totalDeposit - totalUsed
+        // API에서 받은 current_balance 값을 합산 (백엔드에서 계산된 값 사용)
+        const totalBalance = data.reduce((sum: number, d: DepositSummary) => sum + (parseInt(String(d.current_balance)) || 0), 0)
 
         setSummaryStats({ totalDeposit, totalUsed, totalBalance })
       } else {
@@ -235,7 +236,8 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
       header: '현재 잔액',
       className: 'text-end',
       cell: (row) => {
-        const balance = (parseInt(String(row.total_deposit)) || 0) - (parseInt(String(row.used_amount)) || 0)
+        // API에서 받은 current_balance 값을 그대로 사용 (백엔드에서 계산된 값)
+        const balance = parseInt(String(row.current_balance)) || 0
         const balanceClass = balance >= 0 ? 'text-success' : 'text-destructive'
         return <span className={`font-bold ${balanceClass}`}>{formatCurrency(balance)}원</span>
       },
