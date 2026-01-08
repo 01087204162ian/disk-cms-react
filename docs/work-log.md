@@ -61,6 +61,109 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - `src/pages/staff/EmployeeSchedule.tsx`
 - **결과**: 모든 staff 페이지의 모달이 UI 표준에 맞게 통일됨
 
+### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 적용
+
+#### 18) 모든 staff 페이지에 공통 컴포넌트 적용 완료
+- **EmployeeSchedule.tsx**:
+  - Modal 컴포넌트로 3개 모달 교체 (기본 휴무일 설정, 반차 신청, 휴무일 변경 신청)
+  - 기존 커스텀 모달 구조를 Modal 컴포넌트로 통일
+  - footer prop으로 액션 버튼 구성
+- **Holidays.tsx**:
+  - Modal 컴포넌트로 2개 모달 교체 (공휴일 추가, 공휴일 수정)
+  - 기존 커스텀 모달 구조를 Modal 컴포넌트로 통일
+- **HalfDayApproval.tsx**:
+  - Modal 컴포넌트로 1개 모달 교체 (승인/거부 처리)
+  - 기존 커스텀 모달 구조를 Modal 컴포넌트로 통일
+  - footer prop으로 승인/거부 버튼 구성
+- **OrganizationChart.tsx**:
+  - FilterBar 컴포넌트 적용
+  - FilterSelect: 부서 필터
+  - FilterInput: 검색 입력
+  - StatsDisplay: 조직 현황 통계 (부서 개수, 직원 수, 마지막 갱신 시간)
+  - actionButtons: 새로고침 버튼
+- **파일**:
+  - `src/pages/staff/EmployeeSchedule.tsx`
+  - `src/pages/staff/Holidays.tsx`
+  - `src/pages/staff/HalfDayApproval.tsx`
+  - `src/pages/staff/OrganizationChart.tsx`
+- **결과**: 모든 staff 페이지의 모달과 필터가 공통 컴포넌트로 통일되어 코드 일관성 및 유지보수성 향상
+
+#### 19) Employees.tsx에 DataTable 컴포넌트 적용 완료
+- **테이블 구조 개선**:
+  - 기존 커스텀 테이블을 DataTable 컴포넌트로 교체
+  - columns 배열로 테이블 구조 정의 (11개 컬럼: 이름, 이메일, 연락처, 사번, 부서, 직급, 권한, 가입일, 마지막로그인, 상태, 작업)
+  - 각 컬럼에 cell 함수로 커스텀 렌더링 적용
+  - 반응형 숨김 처리 유지 (className 사용: `hidden lg:table-cell`, `hidden xl:table-cell`)
+- **모바일 카드 통합**:
+  - renderMobileCard 함수로 모바일 카드 렌더링 정의
+  - DataTable의 mobileCard prop으로 전달하여 자동 적용
+- **페이지네이션 통합**:
+  - 기존 커스텀 페이지네이션 코드 제거
+  - DataTable의 pagination prop으로 통합
+  - 페이지 크기 변경 기능 포함 (20, 50, 100개 옵션)
+- **코드 간소화**:
+  - 약 180줄의 테이블/페이지네이션 코드를 DataTable 컴포넌트 한 줄로 교체
+  - 코드 중복 제거 및 재사용성 향상
+- **사용하지 않는 import 제거**:
+  - ChevronLeft, ChevronRight 아이콘 제거 (DataTable 내부에서 사용)
+- **파일**:
+  - `src/pages/staff/Employees.tsx`: DataTable 컴포넌트 적용 완료
+- **결과**: Employees.tsx 코드가 간결해지고 재사용 가능한 구조로 개선됨
+
+### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 추가 개발
+
+#### 20) 공통 컴포넌트 추가 개발 완료
+- **FormInput 컴포넌트**:
+  - 입력 필드 표준화 컴포넌트
+  - variant 지원: `default`, `filter`, `modal` (각각 다른 스타일 적용)
+  - label, error, helperText 지원 (선택적)
+  - leftIcon, rightIcon 지원
+  - filter variant일 때 검색 아이콘 자동 추가
+  - forwardRef 지원
+  - UI 표준 준수 (높이, 패딩, 폰트 등)
+- **DatePicker 컴포넌트**:
+  - 날짜 선택기 컴포넌트
+  - FormInput 기반으로 구현
+  - Calendar 아이콘 자동 포함
+  - variant 지원 (default, filter, modal)
+  - min, max 속성 지원
+  - value, onChange 인터페이스 일관성 유지
+- **LoadingSpinner 컴포넌트**:
+  - 로딩 인디케이터 컴포넌트
+  - size 지원: `sm`, `md`, `lg`
+  - color 지원: `primary`, `muted`, `white`
+  - text 속성으로 로딩 메시지 표시 가능
+  - fullScreen 모드 지원 (전체 화면 오버레이)
+  - 단독 사용 또는 컨테이너 내 사용 가능
+- **Toast/Notification 컴포넌트**:
+  - 알림 메시지 컴포넌트 시스템
+  - ToastProvider: 전역 Toast 상태 관리
+  - useToast: Toast 표시/제거 훅
+  - useToastHelpers: 편의 함수 훅 (success, error, warning, info)
+  - type 지원: `success`, `error`, `warning`, `info`
+  - 자동 사라짐 (duration 설정 가능, 기본 3초)
+  - 수동 닫기 버튼 포함
+  - 우측 상단 고정 배치 (top-20 right-4)
+  - 아이콘 자동 표시 (타입별)
+- **Select/Dropdown 컴포넌트**:
+  - 선택 박스 컴포넌트
+  - variant 지원: `default`, `filter`, `modal`
+  - options 배열로 옵션 정의
+  - placeholder 지원
+  - label, error, helperText 지원 (선택적)
+  - ChevronDown 아이콘 자동 포함
+  - UI 표준 준수 (높이, 패딩, 폰트 등)
+  - appearance-none으로 브라우저 기본 스타일 제거
+- **파일**:
+  - `src/components/FormInput.tsx` (신규)
+  - `src/components/DatePicker.tsx` (신규)
+  - `src/components/LoadingSpinner.tsx` (신규)
+  - `src/components/Toast.tsx` (신규)
+  - `src/components/Select.tsx` (신규)
+  - `src/components/index.ts`: 모든 컴포넌트 export 추가
+  - `src/App.tsx`: ToastProvider 추가
+- **결과**: 재사용 가능한 공통 컴포넌트 추가 개발 완료, 마이그레이션 속도 향상 및 일관성 개선 예상
+
 ### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 개발
 
 #### 16) 공통 컴포넌트 개발 완료
