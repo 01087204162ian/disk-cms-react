@@ -1,6 +1,7 @@
 // 공통 컴포넌트 Export
 export { default as Modal } from './Modal'
-export { default as FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay } from './FilterBar'
+export { default as FilterBar } from './FilterBar'
+export { FilterSelect as FilterSelect, FilterInput as FilterInput, FilterSearchButton as FilterSearchButton, StatsDisplay as StatsDisplay } from './FilterBar'
 export { default as DataTable, type Column } from './DataTable'
 
 // 기존 컴포넌트

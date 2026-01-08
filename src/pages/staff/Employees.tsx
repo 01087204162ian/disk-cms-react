@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import {
-  Search,
   Download,
   RefreshCw,
   Edit,
@@ -13,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay } from '../../components'
 
 interface Employee {
   email: string
@@ -518,121 +518,9 @@ export default function Employees() {
   return (
     <div className="space-y-6">
       {/* 필터 영역 */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* 부서 필터 */}
-          <select
-            value={filters.department}
-            onChange={(e) => handleFilterChange('department', e.target.value)}
-            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
-          >
-            <option value="">전체 부서</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-
-          {/* 상태 필터 */}
-          <select
-            value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
-          >
-            <option value="">전체</option>
-            <option value="0">승인대기</option>
-            <option value="1">활성</option>
-            <option value="2">비활성</option>
-          </select>
-
-          {/* 권한 필터 */}
-          <select
-            value={filters.role}
-            onChange={(e) => handleFilterChange('role', e.target.value)}
-            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
-          >
-            <option value="">전체 권한</option>
-            <option value="SUPER_ADMIN">최고관리자</option>
-            <option value="DEPT_MANAGER">부서장</option>
-            <option value="SYSTEM_ADMIN">시스템관리자</option>
-            <option value="EMPLOYEE">직원</option>
-          </select>
-
-          {/* 페이지 크기 */}
-          <select
-            value={pageSize}
-            onChange={(e) => {
-              setPageSize(Number(e.target.value))
-              setCurrentPage(1)
-            }}
-            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
-          >
-            <option value="20">20개</option>
-            <option value="50">50개</option>
-            <option value="100">100개</option>
-          </select>
-
-          {/* 검색 영역 */}
-          <div className="flex-1 relative min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="이름, 이메일, 사번으로 검색"
-              className="w-full pl-10 pr-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal"
-              style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '42px', height: '42px' }}
-            />
-          </div>
-          <button
-            onClick={handleSearch}
-            className="h-10 px-3 py-0 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm leading-none font-normal"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
-          >
-            <Search className="w-4 h-4" />
-            검색
-          </button>
-          
-          {/* 통계 정보 - 오른쪽 끝 */}
-          <div className="flex flex-wrap items-center gap-4 text-xs ml-auto">
-            <span className="text-foreground">
-              전체 <strong>{stats.total}</strong>명
-            </span>
-            <span className="text-yellow-600">
-              승인대기 <strong>{stats.pending}</strong>명
-            </span>
-            <span className="text-green-600">
-              활성 <strong>{stats.active}</strong>명
-            </span>
-            <span className="text-muted-foreground">
-              비활성 <strong>{stats.inactive}</strong>명
-            </span>
-            <span className="text-muted-foreground">
-              갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
-            </span>
-          </div>
-        </div>
-
-        {loadError ? (
-          <div className="mt-3 text-sm text-destructive">
-            {loadError}
-          </div>
-        ) : null}
-        {actionError ? (
-          <div className="mt-3 text-sm text-destructive">
-            {actionError}
-          </div>
-        ) : null}
-
-        {/* 액션 버튼 */}
-        <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex flex-wrap gap-2">
+      <FilterBar
+        actionButtons={
+          <>
             <button
               onClick={openDepartmentModal}
               className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
@@ -661,9 +549,88 @@ export default function Employees() {
               <RefreshCw className="w-3 h-3" />
               <span className="hidden md:inline">새로고침</span>
             </button>
-          </div>
+          </>
+        }
+      >
+        {/* 부서 필터 */}
+        <FilterSelect
+          value={filters.department}
+          onChange={(value) => handleFilterChange('department', value)}
+          options={[
+            { value: '', label: '전체 부서' },
+            ...departments.map((dept) => ({ value: String(dept.id), label: dept.name })),
+          ]}
+          placeholder="전체 부서"
+        />
+
+        {/* 상태 필터 */}
+        <FilterSelect
+          value={filters.status}
+          onChange={(value) => handleFilterChange('status', value)}
+          options={[
+            { value: '', label: '전체' },
+            { value: '0', label: '승인대기' },
+            { value: '1', label: '활성' },
+            { value: '2', label: '비활성' },
+          ]}
+          placeholder="전체"
+        />
+
+        {/* 권한 필터 */}
+        <FilterSelect
+          value={filters.role}
+          onChange={(value) => handleFilterChange('role', value)}
+          options={[
+            { value: '', label: '전체 권한' },
+            { value: 'SUPER_ADMIN', label: '최고관리자' },
+            { value: 'DEPT_MANAGER', label: '부서장' },
+            { value: 'SYSTEM_ADMIN', label: '시스템관리자' },
+            { value: 'EMPLOYEE', label: '직원' },
+          ]}
+          placeholder="전체 권한"
+        />
+
+        {/* 페이지 크기 */}
+        <FilterSelect
+          value={String(pageSize)}
+          onChange={(value) => {
+            setPageSize(Number(value))
+            setCurrentPage(1)
+          }}
+          options={[
+            { value: '20', label: '20개' },
+            { value: '50', label: '50개' },
+            { value: '100', label: '100개' },
+          ]}
+        />
+
+        {/* 검색 영역 */}
+        <FilterInput
+          value={filters.search}
+          onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
+          onSearch={handleSearch}
+          placeholder="이름, 이메일, 사번으로 검색"
+        />
+        
+        <FilterSearchButton onClick={handleSearch} />
+        
+        {/* 통계 정보 */}
+        <StatsDisplay
+          stats={[
+            { label: '전체', value: stats.total, color: 'foreground' },
+            { label: '승인대기', value: stats.pending, color: 'yellow' },
+            { label: '활성', value: stats.active, color: 'green' },
+            { label: '비활성', value: stats.inactive, color: 'muted' },
+          ]}
+          lastRefresh={lastRefresh}
+        />
+      </FilterBar>
+
+      {(loadError || actionError) && (
+        <div className="mt-3 text-sm text-destructive">
+          {loadError || actionError}
         </div>
-      </div>
+      )}
 
       {/* 테이블 */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -899,29 +866,38 @@ export default function Employees() {
 
       {/* 수정/상세 모달 */}
       {editOpen && editTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-4xl rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 - 보라색 그라데이션 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <div>
-                <h5 className="text-lg font-semibold text-white m-0">
-                  <small className="block mt-1 text-sm font-normal text-white/85">
-                    {editTarget.name} ({editTarget.email})
-                  </small>
-                </h5>
-              </div>
+        <Modal
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          title={`${editTarget.name} (${editTarget.email})`}
+          maxWidth="4xl"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setEditOpen(false)}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={submitEdit}
+                className="px-4 py-2 rounded-lg bg-[#667eea] text-white hover:bg-[#5568d3] text-xs font-medium"
               >
-                ×
+                수정
               </button>
+              {editTarget.is_active === 1 ? (
+                <button
+                  onClick={() => openResignDateModal(editTarget)}
+                  className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-xs font-medium"
+                >
+                  비활성화
+                </button>
+              ) : editTarget.is_active === 2 ? (
+                <button
+                  onClick={() => confirmActivate(editTarget)}
+                  className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 text-xs font-medium"
+                >
+                  재활성화
+                </button>
+              ) : null}
             </div>
-
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="grid grid-cols-[100px_1fr_100px_1fr] gap-y-1 gap-x-4 items-center">
+          }
+        >
+          <div className="grid grid-cols-[100px_1fr_100px_1fr] gap-y-1 gap-x-4 items-center">
                 {/* 이름 */}
                 <label className="text-xs font-medium text-gray-700 py-1">이름:</label>
                 <input
@@ -1138,121 +1114,69 @@ export default function Employees() {
                 </div>
               </div>
 
-              {actionError ? <div className="mt-4 text-sm text-red-600">{actionError}</div> : null}
-
-              {/* 푸터 */}
-              <div className="mt-6 flex gap-2 justify-end border-t pt-4">
-                <button
-                  onClick={submitEdit}
-                  className="px-4 py-2 rounded-lg bg-[#667eea] text-white hover:bg-[#5568d3] text-sm font-medium"
-                >
-                  수정
-                </button>
-                {editTarget.is_active === 1 ? (
-                  <button
-                    onClick={() => openResignDateModal(editTarget)}
-                    className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
-                  >
-                    비활성화
-                  </button>
-                ) : editTarget.is_active === 2 ? (
-                  <button
-                    onClick={() => confirmActivate(editTarget)}
-                    className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 text-sm font-medium"
-                  >
-                    재활성화
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          </div>
-        </div>
+          {actionError ? <div className="mt-4 text-xs text-red-600">{actionError}</div> : null}
+        </Modal>
       ) : null}
 
       {/* 퇴사일 입력 모달 */}
       {resignDateModalOpen && resignDateTarget && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <h5 className="text-lg font-semibold text-white m-0">퇴사일 지정</h5>
+        <Modal
+          isOpen={resignDateModalOpen}
+          onClose={() => {
+            setResignDateModalOpen(false)
+            setResignDateTarget(null)
+            setResignDate('')
+          }}
+          title="퇴사일 지정"
+          maxWidth="md"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => {
-                  setResignDateModalOpen(false)
-                  setResignDateTarget(null)
-                  setResignDate('')
-                }}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={confirmDeactivate}
+                className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-xs font-medium"
               >
-                ×
+                비활성화
               </button>
             </div>
-
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="mb-4">
-                <label htmlFor="resignDateInput" className="block text-sm font-medium text-gray-700 mb-2">
-                  퇴사일을 선택하세요:
-                </label>
-                <input
-                  type="date"
-                  id="resignDateInput"
-                  value={resignDate}
-                  onChange={(e) => setResignDate(e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <div className="mt-2 text-xs text-gray-500">
-                  해당 직원의 퇴사일을 지정합니다.
-                </div>
-              </div>
-
-              {actionError ? <div className="mb-4 text-sm text-red-600">{actionError}</div> : null}
-
-              {/* 푸터 */}
-              <div className="flex gap-2 justify-end border-t pt-4">
-                <button
-                  onClick={confirmDeactivate}
-                  className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
-                >
-                  비활성화
-                </button>
-              </div>
+          }
+        >
+          <div className="mb-4">
+            <input
+              type="date"
+              id="resignDateInput"
+              value={resignDate}
+              onChange={(e) => setResignDate(e.target.value)}
+              placeholder="퇴사일 선택"
+              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <div className="mt-2 text-xs text-gray-500">
+              해당 직원의 퇴사일을 지정합니다.
             </div>
           </div>
-        </div>
+
+          {actionError ? <div className="mb-4 text-xs text-red-600">{actionError}</div> : null}
+        </Modal>
       )}
 
       {/* 부서 관리 모달 */}
       {departmentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-6xl max-h-[90vh] rounded-xl bg-background border border-border overflow-hidden flex flex-col">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <div>
-                <h5 className="text-lg font-semibold text-white m-0">
-                  <Building className="inline-block w-5 h-5 mr-2" />
-                  부서 관리
-                </h5>
-                <small className="block mt-1 text-sm font-normal text-white/85">
-                  부서 추가, 수정, 삭제 관리
-                </small>
-              </div>
-              <button
-                onClick={() => {
-                  setDepartmentModalOpen(false)
-                  setDepartmentError(null)
-                }}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* 본문 */}
-            <div className="flex-1 overflow-y-auto p-6 bg-white">
+        <Modal
+          isOpen={departmentModalOpen}
+          onClose={() => {
+            setDepartmentModalOpen(false)
+            setDepartmentError(null)
+          }}
+          title={
+            <>
+              <Building className="inline-block w-5 h-5 mr-2" />
+              부서 관리
+            </>
+          }
+          subtitle="부서 추가, 수정, 삭제 관리"
+          maxWidth="6xl"
+          maxHeight="90vh"
+        >
               {departmentError && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                   {departmentError}
@@ -1439,10 +1363,7 @@ export default function Employees() {
                   </div>
                 )}
               </div>
-            </div>
-
-          </div>
-        </div>
+        </Modal>
       )}
     </div>
   )

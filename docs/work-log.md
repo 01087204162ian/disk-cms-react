@@ -91,6 +91,32 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - `docs/UI_STANDARDS.md`: 공통 컴포넌트 사용 가이드 추가
 - **결과**: 재사용 가능한 공통 컴포넌트 개발 완료, UI 표준 준수
 
+#### 17) Employees.tsx에 공통 컴포넌트 적용
+- **FilterBar 컴포넌트 적용**:
+  - 기존 필터 영역을 `FilterBar` 컴포넌트로 교체
+  - `FilterSelect` 컴포넌트로 모든 select 요소 교체 (부서, 상태, 권한, 페이지 크기)
+  - `FilterInput` 컴포넌트로 검색 입력란 교체
+  - `FilterSearchButton` 컴포넌트로 검색 버튼 교체
+  - `StatsDisplay` 컴포넌트로 통계 정보 표시 교체
+  - `actionButtons` prop으로 액션 버튼 영역 구성 (부서 관리, 근무 일정 관리, 엑셀 다운로드, 새로고침)
+- **Modal 컴포넌트 적용**:
+  - 수정/상세 모달: `Modal` 컴포넌트로 교체, `footer` prop으로 푸터 버튼 구성 (수정, 비활성화/재활성화)
+  - 퇴사일 지정 모달: `Modal` 컴포넌트로 교체, `footer` prop으로 비활성화 버튼 구성
+  - 부서 관리 모달: `Modal` 컴포넌트로 교체, `title`에 ReactNode 지원 추가 (Building 아이콘 포함), `subtitle` prop 추가, `maxHeight` prop 추가 (`90vh`)
+- **Modal 컴포넌트 개선**:
+  - `title` prop을 `string | ReactNode`로 확장하여 아이콘 포함 가능하도록 개선
+  - `subtitle` prop 추가 (헤더에 부제목 표시)
+  - `maxHeight` prop 추가 (모달 최대 높이 설정)
+  - flex 레이아웃으로 개선 (헤더, 본문, 푸터 분리)
+- **import 정리**:
+  - 사용하지 않는 `Search` 아이콘 import 제거
+  - 공통 컴포넌트 import 정리 (`Modal`, `FilterBar`, `FilterSelect`, `FilterInput`, `FilterSearchButton`, `StatsDisplay`)
+- **파일**:
+  - `src/pages/staff/Employees.tsx`: 공통 컴포넌트 적용 완료
+  - `src/components/Modal.tsx`: `title`, `subtitle`, `maxHeight` prop 추가
+  - `src/components/index.ts`: 공통 컴포넌트 export 정리
+- **결과**: Employees.tsx가 공통 컴포넌트를 사용하여 코드 중복 제거 및 일관성 향상, 모든 린터 오류 해결 완료
+
 ### 2026-01-07 (Phase 2 진행) - 부서 관리 페이지 제거 및 UI/UX 개선
 
 #### 13) 부서 관리 페이지 제거
