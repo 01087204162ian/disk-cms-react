@@ -630,11 +630,7 @@ export default function Applications() {
   return (
     <div className="space-y-6">
       {/* 필터 영역 */}
-      <FilterBar
-        actionButtons={
-          <FilterBar.Stats stats={[{ label: '전체', value: pagination.totalCount }]} />
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.account}
           onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
