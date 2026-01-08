@@ -525,7 +525,7 @@ export default function Employees() {
             value={filters.department}
             onChange={(e) => handleFilterChange('department', e.target.value)}
             className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
+            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
           >
             <option value="">전체 부서</option>
             {departments.map((dept) => (
@@ -540,7 +540,7 @@ export default function Employees() {
             value={filters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
+            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
           >
             <option value="">전체</option>
             <option value="0">승인대기</option>
@@ -553,7 +553,7 @@ export default function Employees() {
             value={filters.role}
             onChange={(e) => handleFilterChange('role', e.target.value)}
             className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
+            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
           >
             <option value="">전체 권한</option>
             <option value="SUPER_ADMIN">최고관리자</option>
@@ -570,7 +570,7 @@ export default function Employees() {
               setCurrentPage(1)
             }}
             className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer"
-            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
+            style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
           >
             <option value="20">20개</option>
             <option value="50">50개</option>
@@ -586,13 +586,14 @@ export default function Employees() {
               onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="이름, 이메일, 사번으로 검색"
-              className="h-10 w-full pl-10 pr-4 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal"
-              style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
+              className="h-10 w-full pl-10 pr-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal"
+              style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
             />
           </div>
           <button
             onClick={handleSearch}
-            className="h-10 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm"
+            className="h-10 px-3 py-0 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 text-sm leading-none font-normal"
+            style={{ fontFamily: 'inherit', lineHeight: '1.5' }}
           >
             <Search className="w-4 h-4" />
             검색
