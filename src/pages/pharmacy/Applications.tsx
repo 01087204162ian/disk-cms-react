@@ -91,7 +91,15 @@ export default function Applications() {
       if (filters.status) params.status = filters.status
       if (filters.search) params.search = filters.search
 
+      console.log('API 요청 파라미터:', params)
       const res = await api.get('/api/pharmacy/list', { params })
+      console.log('API 응답:', { 
+        success: res.data?.success, 
+        dataLength: res.data?.data?.length, 
+        total: res.data?.total_count || res.data?.total,
+        currentPage: currentPage,
+        pageSize: currentPageSize
+      })
       if (res.data?.success) {
         // API 응답 구조에 맞게 데이터 변환
         const data = res.data.data || []
@@ -372,9 +380,10 @@ export default function Applications() {
   }, [])
 
   useEffect(() => {
+    // 필터나 페이지 크기가 변경될 때만 실행 (페이지 변경은 onPageChange에서 처리)
     loadApplications()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.currentPage, pagination.pageSize, filters])
+  }, [pagination.pageSize, filters])
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
@@ -740,9 +749,15 @@ export default function Applications() {
           pageSize: pagination.pageSize,
           totalCount: pagination.totalCount,
           onPageChange: (page) => {
-            setPagination((prev) => ({ ...prev, currentPage: page }))
-            // 페이지 변경 시 즉시 데이터 로드 (새 페이지 번호로)
-            loadApplications(page, pagination.pageSize)
+            console.log('페이지 변경 요청:', page, '현재 페이지:', pagination.currentPage, '페이지 크기:', pagination.pageSize)
+            setPagination((prev) => {
+              const newPage = page
+              const newPageSize = prev.pageSize
+              console.log('페이지네이션 상태 업데이트:', { currentPage: newPage, pageSize: newPageSize, totalCount: prev.totalCount })
+              // 상태 업데이트와 동시에 데이터 로드 (최신 상태 값 사용)
+              loadApplications(newPage, newPageSize)
+              return { ...prev, currentPage: newPage }
+            })
           },
         }}
         mobileCard={mobileCard}
