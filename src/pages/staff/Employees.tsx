@@ -592,6 +592,26 @@ export default function Employees() {
             <Search className="w-4 h-4" />
             검색
           </button>
+          
+          {/* 통계 정보 - 오른쪽 끝 */}
+          <div className="flex flex-wrap items-center gap-4 text-xs ml-auto">
+            <span className="font-medium">직원 현황:</span>
+            <span className="text-foreground">
+              전체 <strong>{stats.total}</strong>명
+            </span>
+            <span className="text-yellow-600">
+              승인대기 <strong>{stats.pending}</strong>명
+            </span>
+            <span className="text-green-600">
+              활성 <strong>{stats.active}</strong>명
+            </span>
+            <span className="text-muted-foreground">
+              비활성 <strong>{stats.inactive}</strong>명
+            </span>
+            <span className="text-muted-foreground">
+              갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
+            </span>
+          </div>
         </div>
 
         {loadError ? (
@@ -605,61 +625,39 @@ export default function Employees() {
           </div>
         ) : null}
 
-        {/* 통계 정보 */}
+        {/* 액션 버튼 */}
         <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4 text-sm">
-              <span className="font-medium">직원 현황:</span>
-              <span className="text-foreground">
-                전체 <strong>{stats.total}</strong>명
-              </span>
-              <span className="text-yellow-600">
-                승인대기 <strong>{stats.pending}</strong>명
-              </span>
-              <span className="text-green-600">
-                활성 <strong>{stats.active}</strong>명
-              </span>
-              <span className="text-muted-foreground">
-                비활성 <strong>{stats.inactive}</strong>명
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              마지막 갱신: {lastRefresh.toLocaleTimeString('ko-KR')}
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={openDepartmentModal}
+              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
+            >
+              <Building className="w-3 h-3" />
+              <span className="hidden md:inline">부서 관리</span>
+            </button>
+            <button
+              onClick={() => navigate('/staff/employee-schedule')}
+              className="px-3 py-1.5 bg-success text-success-foreground rounded-lg text-xs font-medium hover:bg-success/90 transition-colors flex items-center gap-1.5"
+            >
+              <Calendar className="w-3 h-3" />
+              <span className="hidden md:inline">근무 일정 관리</span>
+            </button>
+            <button
+              onClick={handleExcelDownload}
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+            >
+              <Download className="w-3 h-3" />
+              <span className="hidden lg:inline">엑셀 다운로드</span>
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-xs font-medium hover:bg-secondary/90 transition-colors flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span className="hidden md:inline">새로고침</span>
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* 액션 버튼 */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={openDepartmentModal}
-          className="px-4 py-2 bg-info text-info-foreground rounded-lg font-medium hover:bg-info/90 transition-colors flex items-center gap-2"
-        >
-          <Building className="w-4 h-4" />
-          <span className="hidden md:inline">부서 관리</span>
-        </button>
-        <button
-            onClick={() => navigate('/staff/employee-schedule')}
-          className="px-4 py-2 bg-success text-success-foreground rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center gap-2"
-        >
-          <Calendar className="w-4 h-4" />
-          <span className="hidden md:inline">근무 일정 관리</span>
-        </button>
-        <button
-          onClick={handleExcelDownload}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
-        >
-          <Download className="w-4 h-4" />
-          <span className="hidden lg:inline">엑셀 다운로드</span>
-        </button>
-        <button
-          onClick={handleRefresh}
-          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/90 transition-colors flex items-center gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span className="hidden md:inline">새로고침</span>
-        </button>
       </div>
 
       {/* 테이블 */}
@@ -704,35 +702,35 @@ export default function Employees() {
                   {employees.map((employee) => (
                     <tr key={employee.email} className="hover:bg-accent/50 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">{employee.name}</div>
+                        <div className="font-medium text-foreground text-xs">{employee.name}</div>
                       </td>
                       <td className="px-4 py-3">
                         <a
                           href={`mailto:${employee.email}`}
-                          className="text-primary hover:underline"
+                          className="text-primary hover:underline text-xs"
                         >
                           {employee.email}
                         </a>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                         {employee.phone || '-'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                         {employee.employee_id || '-'}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm text-foreground">
+                        <span className="text-xs text-foreground">
                           {employee.department?.name || '미지정'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground hidden xl:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden xl:table-cell">
                         {employee.position || '-'}
                       </td>
                       <td className="px-4 py-3">{getRoleBadge(employee.role)}</td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
                         {new Date(employee.created_at).toLocaleDateString('ko-KR')}
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground hidden lg:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
                         {employee.last_login_at
                           ? new Date(employee.last_login_at).toLocaleDateString('ko-KR')
                           : '-'}
@@ -743,27 +741,27 @@ export default function Employees() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button
-                            className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-colors"
+                            className="p-1.5 text-warning hover:bg-warning/10 rounded-lg transition-colors"
                             title="수정"
                             onClick={() => openEdit(employee)}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-3.5 h-3.5" />
                           </button>
                           {employee.is_active === 1 ? (
                             <button
-                              className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                              className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                               title="비활성화"
                               onClick={() => openResignDateModal(employee)}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           ) : (
                             <button
-                              className="p-2 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+                              className="p-1.5 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
                               title="활성화"
                               onClick={() => confirmActivate(employee)}
                             >
-                              <RefreshCw className="w-4 h-4" />
+                              <RefreshCw className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
