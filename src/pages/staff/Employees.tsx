@@ -595,7 +595,6 @@ export default function Employees() {
           
           {/* 통계 정보 - 오른쪽 끝 */}
           <div className="flex flex-wrap items-center gap-4 text-xs ml-auto">
-            <span className="font-medium">직원 현황:</span>
             <span className="text-foreground">
               전체 <strong>{stats.total}</strong>명
             </span>
@@ -1256,34 +1255,28 @@ export default function Employees() {
 
               {/* 새 부서 추가 영역 */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h6 className="text-sm font-semibold mb-3 text-gray-700">
-                  새 부서 추가
-                </h6>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">부서코드 *</label>
                     <input
                       type="text"
                       value={newDeptCode}
                       onChange={(e) => setNewDeptCode(e.target.value.toUpperCase())}
-                      placeholder="예: DEV"
+                      placeholder="부서코드 * (예: DEV)"
                       maxLength={20}
                       className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div className="md:col-span-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">부서명 *</label>
                     <input
                       type="text"
                       value={newDeptName}
                       onChange={(e) => setNewDeptName(e.target.value)}
-                      placeholder="예: 개발팀"
+                      placeholder="부서명 * (예: 개발팀)"
                       maxLength={50}
                       className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div className="md:col-span-3">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">부서장</label>
                     <select
                       value={newDeptManager}
                       onChange={(e) => setNewDeptManager(e.target.value)}
@@ -1298,7 +1291,6 @@ export default function Employees() {
                     </select>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">상태</label>
                     <select
                       value={newDeptStatus}
                       onChange={(e) => setNewDeptStatus(e.target.value)}
@@ -1318,11 +1310,10 @@ export default function Employees() {
                   </div>
                 </div>
                 <div className="mt-3">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">부서 설명</label>
                   <textarea
                     value={newDeptDescription}
                     onChange={(e) => setNewDeptDescription(e.target.value)}
-                    placeholder="부서 설명을 입력하세요 (선택사항)"
+                    placeholder="부서 설명 (선택사항)"
                     rows={2}
                     maxLength={500}
                     className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1332,9 +1323,6 @@ export default function Employees() {
 
               {/* 기존 부서 목록 */}
               <div>
-                <h6 className="text-sm font-semibold mb-3 text-gray-700">
-                  기존 부서 목록 ({departmentList.length}개)
-                </h6>
                 {departmentLoading ? (
                   <div className="text-center py-8 text-sm text-gray-500">
                     부서 목록을 불러오는 중...
