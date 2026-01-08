@@ -34,7 +34,7 @@ interface PharmacyApplication {
   area?: number // 사업장 면적 (0이면 화재설계번호 입력 필드 숨김)
   chemist_design_number?: string
   area_design_number?: string
-  original_status?: number // 상태 변경 추적용
+  original_status?: number // 상태 변경 추적용//
 }
 
 const STATUS_OPTIONS = [
