@@ -156,6 +156,94 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - `docs/UI_STANDARDS.md`: 새 컴포넌트 사용 가이드 추가
 - **결과**: 개발자들이 새 컴포넌트를 쉽게 사용할 수 있도록 문서화 완료
 
+### 2026-01-07 (Phase 3 진행) - 보험 상품 모듈 개발 시작
+
+#### 23) 보험 상품 모듈용 공통 컴포넌트 개발 완료
+- **FileUpload 컴포넌트** (`src/components/FileUpload.tsx`):
+  - 파일 업로드 기능
+  - 파일 종류 선택 옵션
+  - 파일 크기 제한 (기본 10MB)
+  - 업로드된 파일 목록 표시
+  - 다운로드/삭제 기능
+  - Props: `accept`, `multiple`, `maxSize`, `fileTypeOptions`, `uploadedFiles`, `onUpload`, `onDelete`, `onDownload`
+- **ExportButton 컴포넌트** (`src/components/ExportButton.tsx`):
+  - 엑셀 다운로드 버튼
+  - 반응형 레이블 표시 (모바일에서 숨김)
+  - 아이콘 옵션 (excel/download)
+  - 로딩 상태 지원
+  - Variant 지원 (sm, default, lg)
+- **FileDownloadLink 컴포넌트** (`src/components/FileDownloadLink.tsx`):
+  - 파일 다운로드 링크
+  - 링크/버튼 variant 지원
+  - 파일 아이콘 표시
+- **ButtonGroup 컴포넌트** (`src/components/ButtonGroup.tsx`):
+  - 버튼 그룹 레이아웃
+  - 간격, 정렬, 래핑 옵션
+- **파일**:
+  - `src/components/FileUpload.tsx`
+  - `src/components/ExportButton.tsx`
+  - `src/components/FileDownloadLink.tsx`
+  - `src/components/ButtonGroup.tsx`
+  - `src/components/index.ts`: 새 컴포넌트 export 추가
+- **결과**: 보험 상품 모듈에서 필요한 공통 UI 컴포넌트 개발 완료
+
+#### 24) 약국배상책임보험 Applications 페이지 개발 완료
+- **기본 구조**:
+  - 필터 영역: 거래처, 상태, 페이지 크기, 검색
+  - 액션 버튼 영역: 일별실적, 예치잔액, 엑셀 다운로드, 새로고침, 업체추가, API 관리
+  - 테이블: DataTable 컴포넌트로 데스크톱/모바일 지원
+  - 페이징 기능
+- **API 연동**:
+  - `/api/pharmacy/list`: 약국 목록 조회
+  - `/api/pharmacy/accounts`: 거래처 목록 조회
+  - `/api/pharmacy/list` (export): 엑셀 다운로드
+  - 데이터 구조 변환 및 상태명 매핑
+- **모달 컴포넌트**:
+  - `AddCompanyModal`: 업체 추가/수정/삭제
+  - `PharmacyDetailModal`: 약국 상세 정보 조회/수정
+  - `DailyReportModal`: 일별실적 (기본 구조)
+  - `DepositBalanceModal`: 예치잔액 (기본 구조)
+  - `ApiManagerModal`: API 관리 (기본 구조)
+- **파일**:
+  - `src/pages/pharmacy/Applications.tsx`: 메인 페이지
+  - `src/pages/pharmacy/components/AddCompanyModal.tsx`: 업체 추가 모달
+  - `src/pages/pharmacy/components/PharmacyDetailModal.tsx`: 상세 모달
+  - `src/pages/pharmacy/components/DailyReportModal.tsx`: 일별실적 모달 (기본 구조)
+  - `src/pages/pharmacy/components/DepositBalanceModal.tsx`: 예치잔액 모달 (기본 구조)
+  - `src/pages/pharmacy/components/ApiManagerModal.tsx`: API 관리 모달 (기본 구조)
+  - `src/App.tsx`: 라우트 추가 (`/pharmacy/applications`)
+- **결과**: 약국배상책임보험 Applications 페이지의 핵심 기능 구현 완료
+
+#### 25) 약국배상책임보험 상세 모달 구현 완료
+- **기능**:
+  - 약국 상세 정보 조회 (`/api/pharmacy/id-detail/:id`)
+  - 약국 정보 수정 (`/api/pharmacy/id-update/:id`)
+  - 전문증권 발행 (`/api/pharmacy/issue-certificate`)
+- **폼 필드**:
+  - 기본 정보: 업체명, 사업자번호, 신청일, 일반전화
+  - 신청자 정보: 성명, 주민번호, 이메일, 휴대전화
+  - 사업장 정보: 주소, 전문인 수, 사업장 면적, 재고자산
+  - 보험 정보: 보험료(콤마 포맷팅), 전문인증권번호, 보험시작일, 보험종료일, 메모
+- **UI**:
+  - FormInput, DatePicker 컴포넌트 사용
+  - 보험료 콤마 포맷팅 자동 처리
+  - 저장 및 전문증권 발행 버튼 (footer)
+- **파일**:
+  - `src/pages/pharmacy/components/PharmacyDetailModal.tsx`: 완전 구현
+- **결과**: 약국 상세 정보 조회 및 수정 기능 완료
+- **새 컴포넌트 사용 가이드 추가**:
+  - FormInput 컴포넌트 사용 가이드 (variant, label, error, helperText 등)
+  - DatePicker 컴포넌트 사용 가이드 (value, onChange, min, max 등)
+  - Select 컴포넌트 사용 가이드 (options, placeholder, variant 등)
+  - LoadingSpinner 컴포넌트 사용 가이드 (size, color, text, fullScreen 등)
+  - Toast 컴포넌트 사용 가이드 (useToastHelpers, ToastProvider 설정 등)
+- **적용 대상 페이지 업데이트**:
+  - 모든 staff 페이지가 완료 상태로 업데이트
+  - 각 컴포넌트별 예시 코드 포함
+- **파일**:
+  - `docs/UI_STANDARDS.md`: 새 컴포넌트 사용 가이드 추가
+- **결과**: 개발자들이 새 컴포넌트를 쉽게 사용할 수 있도록 문서화 완료
+
 ### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 추가 개발
 
 #### 20) 공통 컴포넌트 추가 개발 완료
@@ -677,3 +765,29 @@ work-log.md 파일 학습하자
 **작성자**: AI Assistant  
 **최종 업데이트**: 2026년 1월 7일  
 **프로젝트**: Disk-CMS React 마이그레이션
+
+---
+
+## 📊 작업 통계
+
+### 완료된 작업 수
+- **Phase 1**: 9개 작업 완료
+- **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
+- **Phase 3**: 진행 중 (보험 상품 모듈)
+  - 약국배상책임보험: 3개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달)
+- **총 25개 작업 완료**
+
+### 개발된 공통 컴포넌트
+- ✅ Modal (모달)
+- ✅ FilterBar (필터 바)
+- ✅ DataTable (데이터 테이블)
+- ✅ FormInput (입력 필드)
+- ✅ DatePicker (날짜 선택기)
+- ✅ Select (선택 박스)
+- ✅ LoadingSpinner (로딩 인디케이터)
+- ✅ Toast (알림 메시지)
+- ✅ FileUpload (파일 업로드)
+- ✅ ExportButton (엑셀 다운로드 버튼)
+- ✅ FileDownloadLink (파일 다운로드 링크)
+- ✅ ButtonGroup (버튼 그룹)
+- **총 12개 공통 컴포넌트**
