@@ -153,16 +153,12 @@ export default function Holidays() {
       if (!res.data?.success) throw new Error(res.data?.message || '검증에 실패했습니다.')
       const summary = res.data?.data?.summary
       const message = summary
-        ? `검증 완료: ${summary.total}개 공휴일 중 ${summary.valid}개 유효, ${summary.invalid}개 무효`
+        ? `검증 완료: 오류 ${summary.errors || 0} / 경고 ${summary.warnings || 0}`
         : res.data?.message || '검증 완료'
       setMessage(message)
       toast.success(message)
-        summary
-          ? `검증 완료: 오류 ${summary.errors} / 경고 ${summary.warnings}`
-          : (res.data?.message || '검증 완료')
-      )
     } catch (e: any) {
-      alert(e?.message || '검증 중 오류가 발생했습니다.')
+      toast.error(e?.message || '검증 중 오류가 발생했습니다.')
     }
   }
 
