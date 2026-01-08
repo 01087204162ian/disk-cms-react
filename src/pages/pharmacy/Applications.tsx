@@ -93,10 +93,14 @@ export default function Applications() {
 
       console.log('API 요청 파라미터:', params)
       const res = await api.get('/api/pharmacy/list', { params })
-      console.log('API 응답:', { 
+      console.log('API 응답 전체:', res.data)
+      console.log('API 응답 요약:', { 
         success: res.data?.success, 
         dataLength: res.data?.data?.length, 
-        total: res.data?.total_count || res.data?.total,
+        total_count: res.data?.total_count,
+        total: res.data?.total,
+        pagination: res.data?.pagination,
+        allKeys: Object.keys(res.data || {}),
         currentPage: currentPage,
         pageSize: currentPageSize
       })
@@ -141,9 +145,29 @@ export default function Applications() {
         
         console.log('변환된 데이터 샘플 (첫 번째 항목):', transformedData[0] || null)
         setApplications(transformedData)
+        
+        // totalCount 추출 시도 (여러 가능한 위치 확인)
+        const totalCount = 
+          res.data.pagination?.total_count ||
+          res.data.pagination?.total ||
+          res.data.total_count ||
+          res.data.total ||
+          (res.data.count !== undefined ? res.data.count : null) ||
+          data.length // 마지막 대안: 현재 페이지 데이터 개수 (부정확하지만 페이지네이션은 작동함)
+        
+        console.log('총 개수 추출:', {
+          'pagination.total_count': res.data.pagination?.total_count,
+          'pagination.total': res.data.pagination?.total,
+          'total_count': res.data.total_count,
+          'total': res.data.total,
+          'count': res.data.count,
+          'data.length (fallback)': data.length,
+          '최종 사용 값': totalCount
+        })
+        
         setPagination((prev) => ({
           ...prev,
-          totalCount: res.data.total_count || res.data.total || data.length,
+          totalCount: totalCount,
         }))
       }
     } catch (error: any) {
