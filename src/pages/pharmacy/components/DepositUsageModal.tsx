@@ -36,21 +36,6 @@ interface Pagination {
   total_pages: number
 }
 
-interface Summary {
-  total_used: number
-  total_used_formatted: string
-  total_pro_preminum: number
-  total_pro_preminum_formatted: string
-  total_area_preminum: number
-  total_area_preminum_formatted: string
-  net_change: number
-  net_change_formatted: string
-  net_pro_change: number
-  net_pro_change_formatted: string
-  net_area_change: number
-  net_area_change_formatted: string
-}
-
 export default function DepositUsageModal({
   isOpen,
   onClose,
@@ -61,7 +46,6 @@ export default function DepositUsageModal({
   const [loading, setLoading] = useState(false)
   const [usageList, setUsageList] = useState<UsageItem[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
-  const [summary, setSummary] = useState<Summary | null>(null)
   const [page, setPage] = useState(1)
   const [pageSize] = useState(20)
   const [exporting, setExporting] = useState(false)
@@ -90,7 +74,6 @@ export default function DepositUsageModal({
       if (response.data.success) {
         setUsageList(response.data.data || [])
         setPagination(response.data.pagination || null)
-        setSummary(response.data.summary || null)
       } else {
         throw new Error(response.data.error || '사용 내역을 불러오는데 실패했습니다.')
       }

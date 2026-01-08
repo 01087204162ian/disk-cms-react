@@ -14,6 +14,54 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ### 2026-01-08 (Phase 3 진행) - 약국배상책임보험 예치금 관리 시스템 구현
 
+#### 30) 예치금 충전/리스트/사용내역 모달 구현 완료
+- **예치금 충전 모달** (`DepositChargeModal.tsx`):
+  - 거래처별 예치금 충전 기능
+  - 금액 입력 (콤마 자동 포맷팅, 최대 10억원)
+  - 입금일 선택 (DatePicker, 오늘 날짜 기본값)
+  - 메모 입력 (최대 500자)
+  - 폼 검증 및 에러 메시지 표시
+  - 충전 완료 후 예치금 현황 자동 갱신
+- **예치금 리스트 모달** (`DepositListModal.tsx`):
+  - 거래처별 예치금 입금 내역 조회 (sort='99')
+  - 테이블: 번호, 예치일, 예치금액
+  - 페이지네이션 지원 (20개씩)
+  - 합계 및 잔액 표시 (테이블 하단)
+  - 엑셀 다운로드 기능 (ExcelJS 사용)
+  - 파일명: `예치리스트_{거래처명}_{날짜}.xlsx`
+- **예치금 사용내역 모달** (`DepositUsageModal.tsx`):
+  - 거래처별 예치금 사용 내역 조회
+  - 테이블: 번호, 신청번호, 사용일, 승인보험료, 전문인보험료, 화재보험료, 구분
+  - 구분별 배지 표시 (승인=사용, 취소/해지완료=환급)
+  - 순 변동액 계산 및 표시 (사용-환급)
+  - 페이지네이션 지원 (20개씩)
+  - 엑셀 다운로드 기능
+  - 파일명: `사용내역_{거래처명}_{날짜}.xlsx`
+- **PHP API 구현**:
+  - `imet/api/pharmacy/pharmacy-deposit-add.php`: 예치금 충전 API (POST)
+  - `imet/api/pharmacy/pharmacy-deposit-list.php`: 예치금 리스트 조회 API (GET, 페이징 지원)
+  - `imet/api/pharmacy/pharmacy-deposit-usage.php`: 사용 내역 조회 API (GET, 페이징 지원)
+- **Node.js 프록시 라우터** (`routes/pharmacy/deposits.js`):
+  - `POST /api/pharmacy-deposits/deposit`: 예치금 충전 프록시
+  - `GET /api/pharmacy-deposits/list/:accountNum`: 예치금 리스트 조회 프록시
+  - `GET /api/pharmacy-deposits/usage/:accountNum`: 사용 내역 조회 프록시
+  - 파라미터 검증 및 에러 핸들링
+  - 타임아웃 설정 (30초)
+- **DepositBalanceModal 통합**:
+  - "충전", "예치리스트", "사용내역" 버튼 클릭 시 각 모달 열기
+  - 서브 모달 상태 관리 (chargeModal, listModal, usageModal)
+  - 충전 완료 시 예치금 현황 자동 갱신
+- **파일**:
+  - `src/pages/pharmacy/components/DepositChargeModal.tsx`: 예치금 충전 모달 (231줄)
+  - `src/pages/pharmacy/components/DepositListModal.tsx`: 예치금 리스트 모달 (312줄)
+  - `src/pages/pharmacy/components/DepositUsageModal.tsx`: 사용내역 모달 (378줄)
+  - `src/pages/pharmacy/components/DepositBalanceModal.tsx`: 서브 모달 통합
+  - `imet/api/pharmacy/pharmacy-deposit-add.php`: PHP API 구현
+  - `imet/api/pharmacy/pharmacy-deposit-list.php`: PHP API 구현
+  - `imet/api/pharmacy/pharmacy-deposit-usage.php`: PHP API 구현
+  - `routes/pharmacy/deposits.js`: 프록시 라우터 업데이트
+- **결과**: 예치금 현황 조회 모달의 모든 기능 완전 구현 완료, 충전/리스트/사용내역 조회 및 엑셀 다운로드 기능 제공
+
 #### 29) 예치금 현황 조회 모달 완전 구현 완료
 - **예치금 현황 조회 모달** (`DepositBalanceModal.tsx`):
   - 전체 거래처 예치금 현황 조회 기능
@@ -857,7 +905,7 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 8일 (예치금 현황 조회 모달 구현 완료)  
+**최종 업데이트**: 2026년 1월 8일 (예치금 충전/리스트/사용내역 모달 구현 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
@@ -868,8 +916,8 @@ work-log.md 파일 학습하자
 - **Phase 1**: 9개 작업 완료
 - **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
 - **Phase 3**: 진행 중 (보험 상품 모듈)
-  - 약국배상책임보험: 7개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달)
-- **총 29개 작업 완료**
+  - 약국배상책임보험: 8개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달)
+- **총 30개 작업 완료**
 
 ### 개발된 공통 컴포넌트
 - ✅ Modal (모달)
