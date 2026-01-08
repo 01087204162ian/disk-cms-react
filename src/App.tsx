@@ -4,7 +4,6 @@ import Register from './pages/Register'
 import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/staff/Employees'
-import Departments from './pages/staff/Departments'
 import EmployeeSchedule from './pages/staff/EmployeeSchedule'
 import Holidays from './pages/staff/Holidays'
 import HalfDayApproval from './pages/staff/HalfDayApproval'
@@ -33,7 +32,6 @@ function App() {
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/staff/employees" element={<Employees />} />
-                  <Route path="/staff/departments" element={<Departments />} />
                   <Route path="/staff/employee-schedule" element={<EmployeeSchedule />} />
                   <Route path="/staff/holidays" element={<Holidays />} />
                   <Route path="/staff/half-day-approval" element={<HalfDayApproval />} />

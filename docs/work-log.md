@@ -12,6 +12,17 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-07 (Phase 2 진행) - 부서 관리 페이지 제거 및 UI/UX 개선
+
+#### 13) 부서 관리 페이지 제거
+- **변경 사항**: 좌측 메뉴의 "부서 관리" 페이지 삭제 (모달로만 처리)
+- **이유**: 직원 관리 페이지에서 모달로 부서 관리 기능을 제공하므로 별도 페이지 불필요
+- **수정 파일**:
+  - `public/config/menu-config.json`: 부서 관리 메뉴 항목 제거
+  - `src/App.tsx`: 부서 관리 라우트 및 import 제거
+  - `src/pages/staff/Departments.tsx`: 파일 삭제
+- **결과**: 좌측 메뉴에서 부서 관리 항목 제거, 직원 관리 페이지의 모달로만 부서 관리 가능
+
 ### 2026-01-07 (Phase 2 진행) - 직원 관리 UI/UX 개선 및 부서 관리 모달 추가
 
 #### 10) 직원 수정 모달 UI/UX 개선
@@ -92,17 +103,20 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - 비활성화/재활성, `PATCH /api/staff/employees/:email/deactivate|activate`
   - 휴지통 아이콘 중복 제거
 
-#### 6) 부서 관리 페이지 (Departments.tsx)
+#### 6) 부서 관리 모달 (Employees.tsx 내 모달로 처리)
 - 기능: 관리 목록(`manage`), 추가/수정/삭제(권한별 제한), 검색/필터
+- 위치: 직원 관리 페이지 내 "부서 관리" 버튼 클릭 시 모달로 표시
 - API:
   - `GET /api/staff/departments/manage`
   - `POST /api/staff/departments`
   - `PUT /api/staff/departments/:id`
   - `DELETE /api/staff/departments/:id`
+- 변경: 별도 페이지에서 모달로 변경 (2026-01-07)
 
 #### 7) 라우팅/메뉴 업데이트
-- `App.tsx`: `staff/employee-schedule`, `staff/holidays`, `staff/half-day-approval`, `staff/organization-chart`, `staff/departments` 라우트 추가
-- `menu-config.json`: "부서 관리", "조직도" 등 메뉴 추가/정렬
+- `App.tsx`: `staff/employee-schedule`, `staff/holidays`, `staff/half-day-approval`, `staff/organization-chart` 라우트 추가
+- `menu-config.json`: "조직도" 등 메뉴 추가/정렬
+- 부서 관리: 별도 페이지 대신 직원 관리 페이지의 모달로 처리 (2026-01-07)
 
 #### 8) 엑셀 다운로드 ✅
 - 백엔드: `GET /api/staff/employees/export` 구현(필터 반영, exceljs 사용)
@@ -233,7 +247,6 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - `src/pages/staff/Holidays.tsx`
 - `src/pages/staff/HalfDayApproval.tsx`
 - `src/pages/staff/OrganizationChart.tsx`
-- `src/pages/staff/Departments.tsx`
 - `src/components/Sidebar.tsx` (242줄)
 - `src/components/Layout.tsx`
 - `src/components/Header.tsx`
@@ -297,7 +310,7 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 - [x] 공휴일 관리 페이지 (staff/holidays)
 - [x] 반차 승인 페이지 (staff/half-day-approval)
 - [x] 조직도 페이지 (staff/organization-chart)
-- [x] 부서 관리 페이지 (staff/departments)
+- [x] 부서 관리 모달 (직원 관리 페이지에서 모달로 처리)
 - [x] 직원리스트 작업 버튼(수정/활성/비활성)
 - [x] 직원리스트 엑셀 다운로드 (라우팅 순서 문제 해결 완료)
 
