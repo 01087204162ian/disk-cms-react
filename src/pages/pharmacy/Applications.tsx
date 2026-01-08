@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react'
-import { Plus, Key, TrendingUp, Wallet, RefreshCw } from 'lucide-react'
+import { useEffect, useState, useMemo, useRef } from 'react'
+import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -8,6 +8,8 @@ import {
   ExportButton,
   ButtonGroup,
   useToastHelpers,
+  Select,
+  FormInput,
 } from '../../components'
 import AddCompanyModal from './components/AddCompanyModal'
 import DailyReportModal from './components/DailyReportModal'
@@ -30,7 +32,13 @@ interface PharmacyApplication {
   status_name: string
   memo?: string
   premium?: number
+  premium_raw?: number
   account?: string
+  chemist?: number // 전문인 수 (0이면 전문설계번호 입력 필드 숨김)
+  area?: number // 사업장 면적 (0이면 화재설계번호 입력 필드 숨김)
+  chemist_design_number?: string
+  area_design_number?: string
+  original_status?: number // 상태 변경 추적용
 }
 
 const STATUS_OPTIONS = [
@@ -92,19 +100,25 @@ export default function Applications() {
         const transformedData = data.map((item: any) => ({
           id: item.num,
           company_name: item.company || '',
-          business_number: item.business_number || '',
-          manager: item.chemist || item.manager || '',
-          phone: item.phone || item.mobile || '',
-          contact: item.contact || item.tel || '',
-          design_number_professional: item.design_number_professional || item.professional_design || '',
-          design_number_fire: item.design_number_fire || item.fire_design || '',
+          business_number: item.business_number || item.school2 || '',
+          manager: item.damdangja || item.manager || '',
+          phone: item.hphone || item.mobile || '',
+          contact: item.hphone2 || item.tel || '',
+          design_number_professional: item.chemist_design_number || item.design_number_professional || '',
+          design_number_fire: item.area_design_number || item.design_number_fire || '',
           request_date: item.request_date || item.created_at || '',
           approval_date: item.approval_date || item.approved_at || '',
-          status: item.status || item.status_id || 0,
-          status_name: item.status_name || getStatusName(item.status || item.status_id || 0),
+          status: getStatusCode(item.status || item.status_id || 0),
+          status_name: getStatusText(item.status || item.status_id || 0),
           memo: item.memo || item.remark || '',
           premium: item.premium || item.insurance_premium || 0,
-          account: item.account_company || item.account || '',
+          premium_raw: item.premium_raw || item.premium || 0,
+          account: item.account_directory || item.account_company || item.account || '',
+          chemist: item.chemist || 0,
+          area: item.area || 0,
+          chemist_design_number: item.chemist_design_number || '',
+          area_design_number: item.area_design_number || '',
+          original_status: getStatusCode(item.status || item.status_id || 0),
         }))
         setApplications(transformedData)
         setPagination((prev) => ({
@@ -120,18 +134,205 @@ export default function Applications() {
     }
   }
 
-  // 상태명 변환 함수
-  const getStatusName = (status: number): string => {
-    const statusMap: Record<number, string> = {
-      7: '보류',
-      10: '메일보냄',
-      13: '승인',
-      14: '증권발급',
-      15: '해지요청',
-      16: '해지완료',
-      17: '설계중',
+  // 상태 코드를 텍스트로 변환
+  const getStatusText = (status: number | string): string => {
+    const statusMap: Record<string, string> = {
+      '1': '접수',
+      '12': '해피콜',
+      '10': '메일 보냄',
+      '13': '승인',
+      '6': '계약완료',
+      '7': '보류',
+      '14': '증권발급',
+      '15': '해지요청',
+      '16': '해지완료',
+      '17': '설계중',
+      '11': '질문서받음',
+      '9': '단순산출',
+      '2': '보험료',
+      '3': '청약서안내',
+      '4': '자필서류',
+      '8': '카드승인',
+      '5': '입금확인',
     }
-    return statusMap[status] || '알 수 없음'
+    return statusMap[String(status)] || String(status) || '알 수 없음'
+  }
+
+  // 상태 텍스트를 코드로 변환
+  const getStatusCode = (status: number | string): number => {
+    const statusMap: Record<string, string> = {
+      '1': '접수',
+      '12': '해피콜',
+      '10': '메일 보냄',
+      '13': '승인',
+      '6': '계약완료',
+      '7': '보류',
+      '14': '증권발급',
+      '15': '해지요청',
+      '16': '해지완료',
+      '17': '설계중',
+      '11': '질문서받음',
+      '9': '단순산출',
+      '2': '보험료',
+      '3': '청약서안내',
+      '4': '자필서류',
+      '8': '카드승인',
+      '5': '입금확인',
+    }
+
+    // 이미 코드인 경우
+    if (Object.keys(statusMap).includes(String(status))) {
+      return parseInt(String(status), 10)
+    }
+
+    // 텍스트인 경우 코드 찾기
+    for (const [code, text] of Object.entries(statusMap)) {
+      if (text === status) {
+        return parseInt(code, 10)
+      }
+    }
+
+    return typeof status === 'number' ? status : 0
+  }
+
+  // 상태별 선택 가능한 옵션 생성
+  const getStatusOptions = (currentStatus: number): Array<{ value: string; label: string }> => {
+    const statusMap: Record<string, string> = {
+      '1': '접수',
+      '12': '해피콜',
+      '10': '메일 보냄',
+      '13': '승인',
+      '6': '계약완료',
+      '7': '보류',
+      '14': '증권발급',
+      '15': '해지요청',
+      '16': '해지완료',
+      '17': '설계중',
+      '11': '질문서받음',
+      '9': '단순산출',
+      '2': '보험료',
+      '3': '청약서안내',
+      '4': '자필서류',
+      '8': '카드승인',
+      '5': '입금확인',
+    }
+
+    const currentStatusCode = String(currentStatus)
+
+    // 승인(13) 상태: 특정 옵션만 선택 가능
+    if (currentStatusCode === '13') {
+      return [
+        { value: '1', label: '접수' },
+        { value: '10', label: '메일 보냄' },
+        { value: '7', label: '보류' },
+        { value: '13', label: '승인' },
+      ]
+    }
+
+    // 해지요청(15) 상태: 특정 옵션만 선택 가능
+    if (currentStatusCode === '15') {
+      return [
+        { value: '15', label: '해지요청' },
+        { value: '16', label: '해지완료' },
+        { value: '6', label: '계약완료' },
+        { value: '14', label: '증권발급' },
+      ]
+    }
+
+    // 기본: 모든 옵션 선택 가능
+    return Object.entries(statusMap).map(([code, text]) => ({
+      value: code,
+      label: text,
+    }))
+  }
+
+  // 상태 변경 처리
+  const handleStatusChange = async (pharmacyId: number, newStatus: string, oldStatus: number) => {
+    if (String(newStatus) === String(oldStatus)) return
+
+    // 해지요청(15) → 해지완료(16) 변경 시 특별 처리 (추후 해지 모달 추가 가능)
+    if (newStatus === '16' && oldStatus === 15) {
+      if (!confirm('해지완료로 변경하시겠습니까?')) {
+        return
+      }
+    } else {
+      const statusText = getStatusText(newStatus)
+      if (!confirm(`상태를 "${statusText}"로 변경하시겠습니까?`)) {
+        return
+      }
+    }
+
+    try {
+      const res = await api.post('/api/pharmacy2/update-status', {
+        pharmacy_id: pharmacyId,
+        status: newStatus,
+        old_status: String(oldStatus),
+      })
+
+      if (res.data?.success) {
+        toast.success(res.data.message || '상태가 변경되었습니다.')
+        await loadApplications()
+      }
+    } catch (error: any) {
+      console.error('상태 변경 오류:', error)
+      toast.error(error?.response?.data?.message || error?.message || '상태 변경에 실패했습니다.')
+    }
+  }
+
+  // 메모 저장 처리
+  const handleMemoSave = async (pharmacyId: number, memo: string) => {
+    try {
+      const res = await api.post(`/api/pharmacy2/${pharmacyId}/memo`, { memo })
+      if (res.data?.success) {
+        toast.success('메모가 저장되었습니다.')
+        // 로컬 상태 업데이트
+        setApplications((prev) =>
+          prev.map((item) => (item.id === pharmacyId ? { ...item, memo } : item))
+        )
+      }
+    } catch (error: any) {
+      console.error('메모 저장 오류:', error)
+      toast.error(error?.response?.data?.message || error?.message || '메모 저장에 실패했습니다.')
+    }
+  }
+
+  // 설계번호 저장 처리
+  const handleDesignNumberSave = async (pharmacyId: number, designNumber: string, designType: 'expert' | 'fire') => {
+    if (!designNumber.trim()) return
+
+    try {
+      const res = await api.post('/api/pharmacy2/design-number', {
+        pharmacyId,
+        designNumber: designNumber.trim(),
+        designType,
+      })
+
+      if (res.data?.success) {
+        toast.success('설계번호가 저장되었습니다.')
+        await loadApplications()
+      }
+    } catch (error: any) {
+      console.error('설계번호 저장 오류:', error)
+      toast.error(error?.response?.data?.message || error?.message || '설계번호 저장에 실패했습니다.')
+    }
+  }
+
+  // 보험료 검증
+  const verifyPremium = async (pharmacyId: number) => {
+    try {
+      const res = await api.get(`/api/pharmacy/premium-verify?pharmacy_id=${pharmacyId}`)
+      if (res.data?.success) {
+        if (res.data.is_match) {
+          toast.success('보험료가 일치합니다.')
+        } else {
+          const message = `보험료 불일치 발견!\n\nDB 저장값: ${res.data.db_premium?.toLocaleString('ko-KR')}원\n계산값: ${res.data.calculated_premium?.toLocaleString('ko-KR')}원\n차이: ${res.data.difference?.toLocaleString('ko-KR')}원`
+          alert(message)
+        }
+      }
+    } catch (error: any) {
+      console.error('보험료 검증 오류:', error)
+      toast.error(error?.response?.data?.message || error?.message || '보험료 검증에 실패했습니다.')
+    }
   }
 
   // 거래처 목록 로드
@@ -253,12 +454,48 @@ export default function Applications() {
         header: '전문설계번호',
         className: 'hidden lg:table-cell',
         hidden: true,
+        cell: (row) => {
+          if (!row.chemist || row.chemist < 1) return <span className="text-gray-400">-</span>
+          return (
+            <FormInput
+              type="text"
+              value={row.chemist_design_number || ''}
+              placeholder="전문인설계번호"
+              variant="default"
+              className="w-full text-xs"
+              onBlur={(e) => {
+                const newValue = e.target.value
+                if (newValue !== (row.chemist_design_number || '')) {
+                  handleDesignNumberSave(row.id, newValue, 'expert')
+                }
+              }}
+            />
+          )
+        },
       },
       {
         key: 'design_number_fire',
         header: '화재설계번호',
         className: 'hidden lg:table-cell',
         hidden: true,
+        cell: (row) => {
+          if (!row.area || row.area < 1) return <span className="text-gray-400">-</span>
+          return (
+            <FormInput
+              type="text"
+              value={row.area_design_number || ''}
+              placeholder="화재설계번호"
+              variant="default"
+              className="w-full text-xs"
+              onBlur={(e) => {
+                const newValue = e.target.value
+                if (newValue !== (row.area_design_number || '')) {
+                  handleDesignNumberSave(row.id, newValue, 'fire')
+                }
+              }}
+            />
+          )
+        },
       },
       {
         key: 'request_date',
@@ -275,34 +512,65 @@ export default function Applications() {
       {
         key: 'status',
         header: '상태',
-        cell: (row) => (
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded-full ${
-              row.status === 13
-                ? 'bg-green-100 text-green-800'
-                : row.status === 7
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : row.status === 14
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-gray-100 text-gray-800'
-            }`}
-          >
-            {row.status_name}
-          </span>
-        ),
+        cell: (row) => {
+          const statusOptions = getStatusOptions(row.status)
+          return (
+            <Select
+              value={String(row.status)}
+              onChange={(value) => handleStatusChange(row.id, value, row.original_status || row.status)}
+              options={statusOptions}
+              variant="default"
+              className="w-full text-xs"
+            />
+          )
+        },
       },
       {
         key: 'memo',
         header: '메모',
         className: 'hidden xl:table-cell',
         hidden: true,
-        cell: (row) => <span className="text-gray-600">{row.memo || '-'}</span>,
+        cell: (row) => {
+          let lastSavedMemo = row.memo || ''
+          return (
+            <FormInput
+              type="text"
+              value={row.memo || ''}
+              placeholder="메모"
+              variant="default"
+              className="w-full text-xs"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  const newValue = (e.target as HTMLInputElement).value.trim()
+                  if (newValue !== lastSavedMemo) {
+                    lastSavedMemo = newValue
+                    handleMemoSave(row.id, newValue)
+                  }
+                }
+              }}
+            />
+          )
+        },
       },
       {
         key: 'premium',
         header: '보험료',
         className: 'text-right',
-        cell: (row) => (row.premium ? row.premium.toLocaleString('ko-KR') + '원' : '-'),
+        cell: (row) => (
+          <div className="flex items-center justify-end gap-1">
+            <span>{row.premium ? row.premium.toLocaleString('ko-KR') + '원' : '-'}</span>
+            {row.premium && (
+              <button
+                onClick={() => verifyPremium(row.id)}
+                className="p-0.5 text-blue-500 hover:text-blue-700"
+                title="보험료 검증"
+              >
+                <CheckCircle className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        ),
       },
       {
         key: 'account',
