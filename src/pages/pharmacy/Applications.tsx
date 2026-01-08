@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle } from 'lucide-react'
 import api from '../../lib/api'
 import {
@@ -517,7 +517,7 @@ export default function Applications() {
           return (
             <Select
               value={String(row.status)}
-              onChange={(value) => handleStatusChange(row.id, value, row.original_status || row.status)}
+              onChange={(e) => handleStatusChange(row.id, e.target.value, row.original_status || row.status)}
               options={statusOptions}
               variant="default"
               className="w-full text-xs"
