@@ -15,7 +15,7 @@ interface Account {
 type ReportMode = 'daily' | 'monthly'
 
 export default function DailyReportModal({ isOpen, onClose }: DailyReportModalProps) {
-  const { toast } = useToastHelpers()
+  const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
   const [reportMode, setReportMode] = useState<ReportMode>('daily')
@@ -204,7 +204,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
             </label>
             <Select
               value={filters.account}
-              onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
+              onChange={(e) => setFilters((prev) => ({ ...prev, account: e.target.value }))}
               options={[
                 { value: '', label: '전체 거래처' },
                 ...accounts.map((acc) => ({ value: acc.num, label: acc.directory })),
@@ -219,7 +219,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
             </label>
             <Select
               value={String(filters.year)}
-              onChange={(value) => setFilters((prev) => ({ ...prev, year: parseInt(value) }))}
+              onChange={(e) => setFilters((prev) => ({ ...prev, year: parseInt(e.target.value) }))}
               options={yearOptions}
             />
           </div>
@@ -232,7 +232,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
               </label>
               <Select
                 value={String(filters.month)}
-                onChange={(value) => setFilters((prev) => ({ ...prev, month: parseInt(value) }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, month: parseInt(e.target.value) }))}
                 options={monthOptions}
               />
             </div>
