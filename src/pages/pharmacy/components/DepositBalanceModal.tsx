@@ -25,18 +25,14 @@ interface Pagination {
   total_pages: number
 }
 
-type ViewMode = 'summary' | 'charge' | 'list' | 'usage'
-
 export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('summary')
-  const [selectedAccount, setSelectedAccount] = useState<{ num: number; name: string } | null>(null)
   
   // 필터 상태
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize] = useState(20)
 
   // 데이터 상태
   const [deposits, setDeposits] = useState<DepositSummary[]>([])
@@ -49,10 +45,10 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
 
   // 모달이 열릴 때 데이터 로드
   useEffect(() => {
-    if (isOpen && viewMode === 'summary') {
+    if (isOpen) {
       loadDepositSummary()
     }
-  }, [isOpen, viewMode, page, pageSize, search])
+  }, [isOpen, page, pageSize, search])
 
   // 전체 예치금 현황 로드
   const loadDepositSummary = async () => {
@@ -113,17 +109,20 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
   const columns: Column<DepositSummary>[] = [
     {
       key: 'account_num',
-      label: '#',
+      header: '#',
       className: 'text-center w-16',
-      cell: (row, index) => (
-        <span className="text-muted-foreground">
-          {(pagination ? (pagination.current_page - 1) * pagination.limit : 0) + (index || 0) + 1}
-        </span>
-      ),
+      cell: (row) => {
+        const index = deposits.indexOf(row)
+        return (
+          <span className="text-muted-foreground">
+            {(pagination ? (pagination.current_page - 1) * pagination.limit : 0) + index + 1}
+          </span>
+        )
+      },
     },
     {
       key: 'account_name',
-      label: '거래처명',
+      header: '거래처명',
       cell: (row) => (
         <div>
           <div className="font-medium text-foreground">{row.account_name}</div>
@@ -133,7 +132,7 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
     },
     {
       key: 'total_deposit',
-      label: '예치금 총액',
+      header: '예치금 총액',
       className: 'text-end',
       cell: (row) => (
         <span className="font-semibold text-[#667eea]">{formatCurrency(row.total_deposit)}원</span>
@@ -141,7 +140,7 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
     },
     {
       key: 'used_amount',
-      label: '사용금액',
+      header: '사용금액',
       className: 'text-end',
       cell: (row) => (
         <span className="font-semibold text-[#f5576c]">{formatCurrency(row.used_amount)}원</span>
@@ -149,7 +148,7 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
     },
     {
       key: 'current_balance',
-      label: '현재 잔액',
+      header: '현재 잔액',
       className: 'text-end',
       cell: (row) => {
         const balance = (parseInt(String(row.total_deposit)) || 0) - (parseInt(String(row.used_amount)) || 0)
@@ -159,45 +158,42 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
     },
     {
       key: 'actions',
-      label: '관리',
+      header: '관리',
       className: 'text-center',
-      cell: (row) => {
-        const balance = (parseInt(String(row.total_deposit)) || 0) - (parseInt(String(row.used_amount)) || 0)
-        return (
-          <div className="flex gap-1 justify-center">
-            <button
-              onClick={() => {
-                setSelectedAccount({ num: row.account_num, name: row.account_name })
-                setViewMode('charge')
-              }}
-              className="px-2 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors"
-            >
-              <Plus className="w-3 h-3 inline mr-1" />
-              충전
-            </button>
-            <button
-              onClick={() => {
-                setSelectedAccount({ num: row.account_num, name: row.account_name })
-                setViewMode('list')
-              }}
-              className="px-2 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors"
-            >
-              <List className="w-3 h-3 inline mr-1" />
-              예치리스트
-            </button>
-            <button
-              onClick={() => {
-                setSelectedAccount({ num: row.account_num, name: row.account_name })
-                setViewMode('usage')
-              }}
-              className="px-2 py-1 text-xs border border-blue-500 text-blue-600 rounded hover:bg-blue-500 hover:text-white transition-colors"
-            >
-              <History className="w-3 h-3 inline mr-1" />
-              사용내역
-            </button>
-          </div>
-        )
-      },
+      cell: (row) => (
+        <div className="flex gap-1 justify-center" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => {
+              // TODO: 충전 모달 열기
+              console.log('충전 모달 열기:', row.account_num, row.account_name)
+            }}
+            className="px-2 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors"
+          >
+            <Plus className="w-3 h-3 inline mr-1" />
+            충전
+          </button>
+          <button
+            onClick={() => {
+              // TODO: 예치리스트 모달 열기
+              console.log('예치리스트 모달 열기:', row.account_num, row.account_name)
+            }}
+            className="px-2 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors"
+          >
+            <List className="w-3 h-3 inline mr-1" />
+            예치리스트
+          </button>
+          <button
+            onClick={() => {
+              // TODO: 사용내역 모달 열기
+              console.log('사용내역 모달 열기:', row.account_num, row.account_name)
+            }}
+            className="px-2 py-1 text-xs border border-blue-500 text-blue-600 rounded hover:bg-blue-500 hover:text-white transition-colors"
+          >
+            <History className="w-3 h-3 inline mr-1" />
+            사용내역
+          </button>
+        </div>
+      ),
     },
   ]
 
@@ -242,36 +238,33 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
     >
       <div className="space-y-4">
         {/* 통계 카드 */}
-        {viewMode === 'summary' && renderSummaryCards()}
+        {renderSummaryCards()}
 
         {/* 필터 영역 */}
-        {viewMode === 'summary' && (
-          <FilterBar
-            actionButtons={
-              <>
-                <button
-                  onClick={handleRefresh}
-                  className="px-3 py-1.5 text-xs border border-border rounded hover:bg-muted transition-colors flex items-center gap-1"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  새로고침
-                </button>
-              </>
-            }
-          >
-            <FilterBar.Input
-              value={search}
-              onChange={(value) => setSearch(value)}
-              placeholder="거래처명으로 검색"
-              onSearch={handleSearch}
-            />
-            <FilterBar.SearchButton onClick={handleSearch} />
-          </FilterBar>
-        )}
+        <FilterBar
+          actionButtons={
+            <>
+              <button
+                onClick={handleRefresh}
+                className="px-3 py-1.5 text-xs border border-border rounded hover:bg-muted transition-colors flex items-center gap-1"
+              >
+                <RefreshCw className="w-3 h-3" />
+                새로고침
+              </button>
+            </>
+          }
+        >
+          <FilterBar.Input
+            value={search}
+            onChange={(value) => setSearch(value)}
+            placeholder="거래처명으로 검색"
+            onSearch={handleSearch}
+          />
+          <FilterBar.SearchButton onClick={handleSearch} />
+        </FilterBar>
 
         {/* 테이블 */}
-        {viewMode === 'summary' && (
-          <DataTable
+        <DataTable
             columns={columns}
             data={deposits}
             loading={loading}
@@ -279,7 +272,6 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
               pagination
                 ? {
                     currentPage: pagination.current_page,
-                    totalPages: pagination.total_pages,
                     totalCount: pagination.total_count,
                     pageSize: pagination.limit,
                     onPageChange: (newPage) => {
@@ -290,12 +282,9 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
             }
             emptyMessage="검색된 데이터가 없습니다."
           />
-        )}
 
         {/* TODO: 서브 모달 구현 */}
-        {/* {viewMode === 'charge' && <DepositChargeModal ... />} */}
-        {/* {viewMode === 'list' && <DepositListModal ... />} */}
-        {/* {viewMode === 'usage' && <DepositUsageModal ... />} */}
+        {/* 충전 모달, 예치리스트 모달, 사용내역 모달은 추후 구현 */}
       </div>
     </Modal>
   )
