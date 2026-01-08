@@ -9,10 +9,8 @@ import {
   Trash2,
   Building,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react'
-import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay } from '../../components'
+import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay, DataTable, type Column } from '../../components'
 
 interface Employee {
   email: string
@@ -511,9 +509,176 @@ export default function Employees() {
     )
   }
 
-  const totalPages = Math.ceil(totalCount / pageSize)
-  const startIndex = (currentPage - 1) * pageSize + 1
-  const endIndex = Math.min(currentPage * pageSize, totalCount)
+  // DataTable columns 정의
+  const columns: Column<Employee>[] = [
+    {
+      key: 'name',
+      header: '이름',
+      cell: (row) => <div className="font-medium text-foreground">{row.name}</div>,
+    },
+    {
+      key: 'email',
+      header: '이메일',
+      cell: (row) => (
+        <a href={`mailto:${row.email}`} className="text-primary hover:underline">
+          {row.email}
+        </a>
+      ),
+    },
+    {
+      key: 'phone',
+      header: '연락처',
+      cell: (row) => <span className="text-muted-foreground">{row.phone || '-'}</span>,
+      className: 'hidden lg:table-cell',
+    },
+    {
+      key: 'employee_id',
+      header: '사번',
+      cell: (row) => <span className="text-muted-foreground">{row.employee_id || '-'}</span>,
+      className: 'hidden lg:table-cell',
+    },
+    {
+      key: 'department',
+      header: '부서',
+      cell: (row) => <span>{row.department?.name || '미지정'}</span>,
+    },
+    {
+      key: 'position',
+      header: '직급',
+      cell: (row) => <span className="text-muted-foreground">{row.position || '-'}</span>,
+      className: 'hidden xl:table-cell',
+    },
+    {
+      key: 'role',
+      header: '권한',
+      cell: (row) => getRoleBadge(row.role),
+    },
+    {
+      key: 'created_at',
+      header: '가입일',
+      cell: (row) => (
+        <span className="text-muted-foreground">
+          {new Date(row.created_at).toLocaleDateString('ko-KR')}
+        </span>
+      ),
+    },
+    {
+      key: 'last_login_at',
+      header: '마지막로그인',
+      cell: (row) => (
+        <span className="text-muted-foreground">
+          {row.last_login_at ? new Date(row.last_login_at).toLocaleDateString('ko-KR') : '-'}
+        </span>
+      ),
+      className: 'hidden lg:table-cell',
+    },
+    {
+      key: 'status',
+      header: '상태',
+      cell: (row) => getStatusBadge(row.status, row.is_active),
+    },
+    {
+      key: 'actions',
+      header: '작업',
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          <button
+            className="p-1.5 text-warning hover:bg-warning/10 rounded-lg transition-colors"
+            title="수정"
+            onClick={(e) => {
+              e.stopPropagation()
+              openEdit(row)
+            }}
+          >
+            <Edit className="w-3.5 h-3.5" />
+          </button>
+          {row.is_active === 1 ? (
+            <button
+              className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+              title="비활성화"
+              onClick={(e) => {
+                e.stopPropagation()
+                openResignDateModal(row)
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              className="p-1.5 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+              title="활성화"
+              onClick={(e) => {
+                e.stopPropagation()
+                confirmActivate(row)
+              }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ]
+
+  // 모바일 카드 렌더링 함수
+  const renderMobileCard = (employee: Employee) => (
+    <div className="p-4 space-y-3">
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="font-medium text-foreground">{employee.name}</h3>
+          <p className="text-sm text-muted-foreground">{employee.email}</p>
+        </div>
+        {getStatusBadge(employee.status, employee.is_active)}
+      </div>
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <div>
+          <span className="text-muted-foreground">부서:</span>{' '}
+          <span className="text-foreground">{employee.department?.name || '미지정'}</span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">권한:</span> {getRoleBadge(employee.role)}
+        </div>
+        {employee.phone && (
+          <div>
+            <span className="text-muted-foreground">연락처:</span>{' '}
+            <span className="text-foreground">{employee.phone}</span>
+          </div>
+        )}
+        <div>
+          <span className="text-muted-foreground">가입일:</span>{' '}
+          <span className="text-foreground">
+            {new Date(employee.created_at).toLocaleDateString('ko-KR')}
+          </span>
+        </div>
+      </div>
+      <div className="flex gap-2 pt-2">
+        <button
+          className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+          onClick={() => openEdit(employee)}
+        >
+          <Edit className="w-4 h-4" />
+          수정
+        </button>
+        {employee.is_active === 1 ? (
+          <button
+            className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            onClick={() => openResignDateModal(employee)}
+          >
+            <Trash2 className="w-4 h-4" />
+            비활성
+          </button>
+        ) : (
+          <button
+            className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+            onClick={() => confirmActivate(employee)}
+          >
+            <RefreshCw className="w-4 h-4" />
+            활성
+          </button>
+        )}
+      </div>
+    </div>
+  )
 
   return (
     <div className="space-y-6">
@@ -633,236 +798,28 @@ export default function Employees() {
       )}
 
       {/* 테이블 */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : employees.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            직원 데이터가 없습니다.
-          </div>
-        ) : (
-          <>
-            {/* 데스크톱 테이블 */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-accent">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">이름</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">이메일</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
-                      연락처
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
-                      사번
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">부서</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden xl:table-cell">
-                      직급
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">권한</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">가입일</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground hidden lg:table-cell">
-                      마지막로그인
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">상태</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-foreground">작업</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {employees.map((employee) => (
-                    <tr key={employee.email} className="hover:bg-accent/50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground text-xs">{employee.name}</div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <a
-                          href={`mailto:${employee.email}`}
-                          className="text-primary hover:underline text-xs"
-                        >
-                          {employee.email}
-                        </a>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
-                        {employee.phone || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
-                        {employee.employee_id || '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="text-xs text-foreground">
-                          {employee.department?.name || '미지정'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground hidden xl:table-cell">
-                        {employee.position || '-'}
-                      </td>
-                      <td className="px-4 py-3">{getRoleBadge(employee.role)}</td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {new Date(employee.created_at).toLocaleDateString('ko-KR')}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
-                        {employee.last_login_at
-                          ? new Date(employee.last_login_at).toLocaleDateString('ko-KR')
-                          : '-'}
-                      </td>
-                      <td className="px-4 py-3">
-                        {getStatusBadge(employee.status, employee.is_active)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            className="p-1.5 text-warning hover:bg-warning/10 rounded-lg transition-colors"
-                            title="수정"
-                            onClick={() => openEdit(employee)}
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          {employee.is_active === 1 ? (
-                            <button
-                              className="p-1.5 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                              title="비활성화"
-                              onClick={() => openResignDateModal(employee)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          ) : (
-                            <button
-                              className="p-1.5 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
-                              title="활성화"
-                              onClick={() => confirmActivate(employee)}
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 모바일 카드 */}
-            <div className="md:hidden divide-y divide-border">
-              {employees.map((employee) => (
-                <div key={employee.email} className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium text-foreground">{employee.name}</h3>
-                      <p className="text-sm text-muted-foreground">{employee.email}</p>
-                    </div>
-                    {getStatusBadge(employee.status, employee.is_active)}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">부서:</span>{' '}
-                      <span className="text-foreground">
-                        {employee.department?.name || '미지정'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">권한:</span>{' '}
-                      {getRoleBadge(employee.role)}
-                    </div>
-                    {employee.phone && (
-                      <div>
-                        <span className="text-muted-foreground">연락처:</span>{' '}
-                        <span className="text-foreground">{employee.phone}</span>
-                      </div>
-                    )}
-                    <div>
-                      <span className="text-muted-foreground">가입일:</span>{' '}
-                      <span className="text-foreground">
-                        {new Date(employee.created_at).toLocaleDateString('ko-KR')}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                      onClick={() => openEdit(employee)}
-                    >
-                      <Edit className="w-4 h-4" />
-                      수정
-                    </button>
-                    {employee.is_active === 1 ? (
-                      <button
-                        className="px-3 py-2 bg-destructive/10 text-destructive rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                        onClick={() => openResignDateModal(employee)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        비활성
-                      </button>
-                    ) : (
-                      <button
-                        className="px-3 py-2 bg-green-100 text-green-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                        onClick={() => confirmActivate(employee)}
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        활성
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* 페이징 */}
-      {totalCount > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-muted-foreground">
-            {startIndex} ~ {endIndex} / 전체 {totalCount}개
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum
-                if (totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i
-                } else {
-                  pageNum = currentPage - 2 + i
-                }
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === pageNum
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background text-foreground hover:bg-accent'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                )
-              })}
-            </div>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <DataTable
+        data={employees}
+        columns={columns}
+        loading={loading}
+        emptyMessage="직원 데이터가 없습니다."
+        mobileCard={renderMobileCard}
+        pagination={
+          totalCount > 0
+            ? {
+                currentPage,
+                pageSize,
+                totalCount,
+                onPageChange: setCurrentPage,
+                onPageSizeChange: (size) => {
+                  setPageSize(size)
+                  setCurrentPage(1)
+                },
+                pageSizeOptions: [20, 50, 100],
+              }
+            : undefined
+        }
+      />
 
       {/* 수정/상세 모달 */}
       {editOpen && editTarget ? (

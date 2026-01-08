@@ -44,7 +44,7 @@ export default function DataTable<T extends Record<string, any>>({
   const renderTableHeader = () => (
     <thead className="bg-accent">
       <tr>
-        {visibleColumns.map((column) => (
+        {columns.map((column) => (
           <th
             key={column.key}
             className={`px-4 py-3 text-left text-sm font-medium text-foreground ${column.className || ''}`}
@@ -65,7 +65,7 @@ export default function DataTable<T extends Record<string, any>>({
           className={`hover:bg-accent/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
           onClick={() => onRowClick?.(row)}
         >
-          {visibleColumns.map((column) => (
+          {columns.map((column) => (
             <td key={column.key} className={`px-4 py-3 text-xs ${column.className || ''}`}>
               {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
             </td>
