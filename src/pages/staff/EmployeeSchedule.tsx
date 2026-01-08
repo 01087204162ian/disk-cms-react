@@ -3,6 +3,7 @@ import api from '../../lib/api'
 import { dayNamesShort, formatYmd } from '../../lib/date'
 import { useAuthStore } from '../../store/authStore'
 import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
+import { Modal } from '../../components'
 
 type WorkScheduleStatus = {
   has_work_days: boolean
@@ -663,214 +664,185 @@ export default function EmployeeSchedule() {
 
       {/* 기본 휴무일 설정 모달 */}
       {setWorkDaysOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <h5 className="text-lg font-semibold text-white m-0">기본 휴무일 설정</h5>
+        <Modal
+          isOpen={setWorkDaysOpen}
+          onClose={() => setSetWorkDaysOpen(false)}
+          title="기본 휴무일 설정"
+          maxWidth="md"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setSetWorkDaysOpen(false)}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={submitSetWorkDays}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium"
               >
-                ×
+                설정하기
               </button>
             </div>
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="text-xs text-muted-foreground mb-4">
-                주 4일 근무제를 사용하려면 먼저 기본 휴무일(월~금)을 1개 선택해야 합니다.
-              </div>
-
-              <div className="mt-4">
-                <select
-                  value={baseOffDay}
-                  onChange={(e) => setBaseOffDay(parseInt(e.target.value, 10))}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={1}>월요일</option>
-                  <option value={2}>화요일</option>
-                  <option value={3}>수요일</option>
-                  <option value={4}>목요일</option>
-                  <option value={5}>금요일</option>
-                </select>
-              </div>
-
-              {setWorkDaysError ? <div className="mt-3 text-xs text-destructive">{setWorkDaysError}</div> : null}
-
-              <div className="mt-6 flex gap-2 justify-end">
-                <button
-                  onClick={submitSetWorkDays}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
-                >
-                  설정하기
-                </button>
-              </div>
-            </div>
+          }
+        >
+          <div className="text-xs text-muted-foreground mb-4">
+            주 4일 근무제를 사용하려면 먼저 기본 휴무일(월~금)을 1개 선택해야 합니다.
           </div>
-        </div>
+
+          <div className="mt-4">
+            <select
+              value={baseOffDay}
+              onChange={(e) => setBaseOffDay(parseInt(e.target.value, 10))}
+              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value={1}>월요일</option>
+              <option value={2}>화요일</option>
+              <option value={3}>수요일</option>
+              <option value={4}>목요일</option>
+              <option value={5}>금요일</option>
+            </select>
+          </div>
+
+          {setWorkDaysError ? <div className="mt-3 text-xs text-destructive">{setWorkDaysError}</div> : null}
+        </Modal>
       ) : null}
 
       {/* 반차 신청 모달 */}
       {halfDayOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <h5 className="text-lg font-semibold text-white m-0">반차 신청</h5>
+        <Modal
+          isOpen={halfDayOpen}
+          onClose={() => setHalfDayOpen(false)}
+          title="반차 신청"
+          maxWidth="lg"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setHalfDayOpen(false)}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={submitHalfDay}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium"
               >
-                ×
+                신청
               </button>
             </div>
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="text-xs text-muted-foreground mb-4">반차(오전/오후)를 신청합니다.</div>
+          }
+        >
+          <div className="text-xs text-muted-foreground mb-4">반차(오전/오후)를 신청합니다.</div>
 
-              <div className="mt-4 grid grid-cols-1 gap-3">
-                <div>
-                  <input
-                    type="date"
-                    value={halfDayDate}
-                    onChange={(e) => {
-                      const v = e.target.value
-                      setHalfDayDate(v)
-                      loadNextOffDays(v)
-                    }}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <select
-                    value={halfDayType}
-                    onChange={(e) => setHalfDayType(e.target.value as any)}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">반차 타입 선택</option>
-                    <option value="HALF_AM">오전 반차</option>
-                    <option value="HALF_PM">오후 반차</option>
-                  </select>
-                </div>
-                <div>
-                  <textarea
-                    value={halfDayReason}
-                    onChange={(e) => setHalfDayReason(e.target.value)}
-                    placeholder="사유"
-                    rows={3}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {nextOffDays.length > 0 ? (
-                  <div>
-                    <select
-                      value={compensationDate}
-                      onChange={(e) => setCompensationDate(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">보충 일정 선택 (선택사항)</option>
-                      {nextOffDays.map((o) => (
-                        <option key={o.date} value={o.date}>
-                          {o.date} ({o.dayName}) - {o.weekNumber}주 후
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ) : null}
-
-                {halfDayError ? <div className="text-xs text-destructive">{halfDayError}</div> : null}
-              </div>
-
-              <div className="mt-6 flex gap-2 justify-end">
-                <button
-                  onClick={submitHalfDay}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
-                >
-                  신청
-                </button>
-              </div>
+          <div className="mt-4 grid grid-cols-1 gap-3">
+            <div>
+              <input
+                type="date"
+                value={halfDayDate}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setHalfDayDate(v)
+                  loadNextOffDays(v)
+                }}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
+            <div>
+              <select
+                value={halfDayType}
+                onChange={(e) => setHalfDayType(e.target.value as any)}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">반차 타입 선택</option>
+                <option value="HALF_AM">오전 반차</option>
+                <option value="HALF_PM">오후 반차</option>
+              </select>
+            </div>
+            <div>
+              <textarea
+                value={halfDayReason}
+                onChange={(e) => setHalfDayReason(e.target.value)}
+                placeholder="사유"
+                rows={3}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {nextOffDays.length > 0 ? (
+              <div>
+                <select
+                  value={compensationDate}
+                  onChange={(e) => setCompensationDate(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">보충 일정 선택 (선택사항)</option>
+                  {nextOffDays.map((o) => (
+                    <option key={o.date} value={o.date}>
+                      {o.date} ({o.dayName}) - {o.weekNumber}주 후
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            {halfDayError ? <div className="text-xs text-destructive">{halfDayError}</div> : null}
           </div>
-        </div>
+        </Modal>
       ) : null}
 
       {/* 휴무일 변경 신청 모달 */}
       {tempChangeOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <h5 className="text-lg font-semibold text-white m-0">휴무일 변경 신청</h5>
+        <Modal
+          isOpen={tempChangeOpen}
+          onClose={() => setTempChangeOpen(false)}
+          title="휴무일 변경 신청"
+          maxWidth="lg"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setTempChangeOpen(false)}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={submitTempChange}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium"
               >
-                ×
+                신청
               </button>
             </div>
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="text-xs text-muted-foreground mb-4">
-                변경할 주의 <strong>주 시작일(월요일)</strong>과 변경할 휴무일을 선택하세요.
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-3">
-                <div>
-                  <input
-                    type="date"
-                    value={tempWeekStart}
-                    onChange={(e) => setTempWeekStart(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <select
-                    value={tempOffDay}
-                    onChange={(e) => setTempOffDay(parseInt(e.target.value, 10))}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value={1}>월요일</option>
-                    <option value={2}>화요일</option>
-                    <option value={3}>수요일</option>
-                    <option value={4}>목요일</option>
-                    <option value={5}>금요일</option>
-                  </select>
-                </div>
-                <div>
-                  <input
-                    value={tempSubstituteEmployee}
-                    onChange={(e) => setTempSubstituteEmployee(e.target.value)}
-                    placeholder="대체 근무자 이메일 (선택사항)"
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <textarea
-                    value={tempReason}
-                    onChange={(e) => setTempReason(e.target.value)}
-                    placeholder="사유"
-                    rows={3}
-                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                {tempChangeError ? <div className="text-xs text-destructive">{tempChangeError}</div> : null}
-              </div>
-
-              <div className="mt-6 flex gap-2 justify-end">
-                <button
-                  onClick={submitTempChange}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
-                >
-                  신청
-                </button>
-              </div>
-            </div>
+          }
+        >
+          <div className="text-xs text-muted-foreground mb-4">
+            변경할 주의 <strong>주 시작일(월요일)</strong>과 변경할 휴무일을 선택하세요.
           </div>
-        </div>
+
+          <div className="mt-4 grid grid-cols-1 gap-3">
+            <div>
+              <input
+                type="date"
+                value={tempWeekStart}
+                onChange={(e) => setTempWeekStart(e.target.value)}
+                placeholder="주 시작일 (월요일) 선택"
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <select
+                value={tempOffDay}
+                onChange={(e) => setTempOffDay(parseInt(e.target.value, 10))}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={1}>월요일</option>
+                <option value={2}>화요일</option>
+                <option value={3}>수요일</option>
+                <option value={4}>목요일</option>
+                <option value={5}>금요일</option>
+              </select>
+            </div>
+            <div>
+              <input
+                value={tempSubstituteEmployee}
+                onChange={(e) => setTempSubstituteEmployee(e.target.value)}
+                placeholder="대체 근무자 이메일 (선택사항)"
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <textarea
+                value={tempReason}
+                onChange={(e) => setTempReason(e.target.value)}
+                placeholder="사유"
+                rows={3}
+                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            {tempChangeError ? <div className="text-xs text-destructive">{tempChangeError}</div> : null}
+          </div>
+        </Modal>
       ) : null}
 
       {/* 로딩 오버레이(간단) */}

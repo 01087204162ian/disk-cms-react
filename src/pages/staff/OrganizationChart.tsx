@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../../lib/api'
-import { RefreshCw, Search } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
+import { FilterBar, FilterSelect, FilterInput, StatsDisplay } from '../../components'
 
 type Department = {
   id: number
@@ -121,13 +122,8 @@ export default function OrganizationChart() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-xl border border-border p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="text-sm text-muted-foreground">
-            조직 현황: 부서 <strong className="text-foreground">{departments.length}</strong>개 · 직원{' '}
-            <strong className="text-foreground">{employees.length}</strong>명 · 마지막 갱신{' '}
-            <strong className="text-foreground">{lastRefresh.toLocaleString('ko-KR')}</strong>
-          </div>
+      <FilterBar
+        actionButtons={
           <button
             onClick={loadData}
             className="px-3 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm inline-flex items-center gap-2"
@@ -135,33 +131,32 @@ export default function OrganizationChart() {
             <RefreshCw className="w-4 h-4" />
             새로고침
           </button>
-        </div>
+        }
+      >
+        <FilterSelect
+          value={departmentFilter}
+          onChange={(value) => setDepartmentFilter(value)}
+          options={[
+            { value: '', label: '전체 부서' },
+            ...departments.map((d) => ({ value: String(d.id), label: d.name })),
+          ]}
+          placeholder="전체 부서"
+        />
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <select
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-          >
-            <option value="">전체 부서</option>
-            {departments.map((d) => (
-              <option key={d.id} value={String(d.id)}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+        <FilterInput
+          value={search}
+          onChange={(value) => setSearch(value)}
+          placeholder="이름, 이메일 검색"
+        />
 
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-input bg-background">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="이름/이메일 검색"
-              className="outline-none bg-transparent text-sm w-56 max-w-[60vw]"
-            />
-          </div>
-        </div>
-      </div>
+        <StatsDisplay
+          stats={[
+            { label: '부서', value: departments.length, color: 'foreground' },
+            { label: '직원', value: employees.length, color: 'foreground' },
+          ]}
+          lastRefresh={lastRefresh}
+        />
+      </FilterBar>
 
       {loading ? (
         <div className="bg-card rounded-xl border border-border p-12 text-center text-sm text-muted-foreground">

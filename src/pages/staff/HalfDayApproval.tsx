@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { RefreshCw, Check, X } from 'lucide-react'
+import { Modal } from '../../components'
 
 type PendingHalfDay = {
   id: number
@@ -261,99 +262,89 @@ export default function HalfDayApproval() {
       </div>
 
       {modalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-background border border-border overflow-hidden">
-            {/* 헤더 */}
-            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
-              <h5 className="text-lg font-semibold text-white m-0">승인/거부 처리</h5>
+        <Modal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          title="승인/거부 처리"
+          maxWidth="lg"
+          footer={
+            <div className="flex gap-2 justify-end">
               <button
-                onClick={closeModal}
-                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
-                aria-label="닫기"
+                onClick={reject}
+                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-xs font-medium inline-flex items-center gap-2"
               >
-                ×
+                <X className="w-4 h-4" />
+                거부
+              </button>
+              <button
+                onClick={approve}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs font-medium inline-flex items-center gap-2"
+              >
+                <Check className="w-4 h-4" />
+                승인
               </button>
             </div>
-            {/* 본문 */}
-            <div className="p-6 bg-white">
-              <div className="mt-4 text-xs space-y-2">
-                {selectedHalfDay ? (
-                  <>
-                    <div>
-                      <strong>신청자:</strong> {selectedHalfDay.user_name} ({selectedHalfDay.user_id})
-                    </div>
-                    <div>
-                      <strong>날짜:</strong> {selectedHalfDay.date}
-                    </div>
-                    <div>
-                      <strong>타입:</strong> {selectedHalfDay.leave_type_name}
-                    </div>
-                    {selectedHalfDay.reason ? (
-                      <div>
-                        <strong>사유:</strong> {selectedHalfDay.reason}
-                      </div>
-                    ) : null}
-                    {selectedHalfDay.compensation_date ? (
-                      <div>
-                        <strong>보충일:</strong> {selectedHalfDay.compensation_date}
-                      </div>
-                    ) : null}
-                  </>
+          }
+        >
+          <div className="mt-4 text-xs space-y-2">
+            {selectedHalfDay ? (
+              <>
+                <div>
+                  <strong>신청자:</strong> {selectedHalfDay.user_name} ({selectedHalfDay.user_id})
+                </div>
+                <div>
+                  <strong>날짜:</strong> {selectedHalfDay.date}
+                </div>
+                <div>
+                  <strong>타입:</strong> {selectedHalfDay.leave_type_name}
+                </div>
+                {selectedHalfDay.reason ? (
+                  <div>
+                    <strong>사유:</strong> {selectedHalfDay.reason}
+                  </div>
                 ) : null}
-
-                {selectedChange ? (
-                  <>
-                    <div>
-                      <strong>신청자:</strong> {selectedChange.user_name} ({selectedChange.user_id})
-                    </div>
-                    <div>
-                      <strong>주 시작일:</strong> {selectedChange.week_start_date}
-                    </div>
-                    <div>
-                      <strong>변경:</strong> {selectedChange.original_off_day_name} → {selectedChange.temporary_off_day_name}
-                    </div>
-                    {selectedChange.reason ? (
-                      <div>
-                        <strong>사유:</strong> {selectedChange.reason}
-                      </div>
-                    ) : null}
-                    <div>
-                      <strong>대체자:</strong> {selectedChange.substitute_employee_name || selectedChange.substitute_employee || '-'}
-                    </div>
-                  </>
+                {selectedHalfDay.compensation_date ? (
+                  <div>
+                    <strong>보충일:</strong> {selectedHalfDay.compensation_date}
+                  </div>
                 ) : null}
-              </div>
+              </>
+            ) : null}
 
-              <div className="mt-4">
-                <textarea
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="거부 사유 (거부 시 필수)"
-                  rows={3}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {modalError ? <div className="mt-2 text-xs text-destructive">{modalError}</div> : null}
-              </div>
-
-              <div className="mt-6 flex gap-2 justify-end">
-                <button
-                  onClick={reject}
-                  className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-xs inline-flex items-center gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  거부
-                </button>
-                <button
-                  onClick={approve}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs inline-flex items-center gap-2"
-                >
-                  <Check className="w-4 h-4" />
-                  승인
-                </button>
-              </div>
-            </div>
+            {selectedChange ? (
+              <>
+                <div>
+                  <strong>신청자:</strong> {selectedChange.user_name} ({selectedChange.user_id})
+                </div>
+                <div>
+                  <strong>주 시작일:</strong> {selectedChange.week_start_date}
+                </div>
+                <div>
+                  <strong>변경:</strong> {selectedChange.original_off_day_name} → {selectedChange.temporary_off_day_name}
+                </div>
+                {selectedChange.reason ? (
+                  <div>
+                    <strong>사유:</strong> {selectedChange.reason}
+                  </div>
+                ) : null}
+                <div>
+                  <strong>대체자:</strong> {selectedChange.substitute_employee_name || selectedChange.substitute_employee || '-'}
+                </div>
+              </>
+            ) : null}
           </div>
-        </div>
+
+          <div className="mt-4">
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="거부 사유 (거부 시 필수)"
+              rows={3}
+              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {modalError ? <div className="mt-2 text-xs text-destructive">{modalError}</div> : null}
+          </div>
+        </Modal>
       ) : null}
     </div>
   )
