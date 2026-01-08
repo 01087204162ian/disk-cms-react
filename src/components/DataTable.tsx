@@ -89,9 +89,13 @@ export default function DataTable<T extends Record<string, any>>({
     const endIndex = Math.min(currentPage * pageSize, totalCount)
 
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
-        <div className="text-sm text-muted-foreground">
-          {startIndex} ~ {endIndex} / 전체 {totalCount}개
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-border">
+        <div className="text-xs text-muted-foreground flex items-center gap-1">
+          <span className="font-medium text-foreground">{startIndex}</span>
+          <span>~</span>
+          <span className="font-medium text-foreground">{endIndex}</span>
+          <span>/</span>
+          <span className="font-medium text-foreground">전체 {totalCount.toLocaleString('ko-KR')}개</span>
         </div>
         <div className="flex items-center gap-2">
           {onPageSizeChange && pageSizeOptions && (

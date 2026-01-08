@@ -78,12 +78,14 @@ export default function Applications() {
   const [selectedPharmacyId, setSelectedPharmacyId] = useState<number | null>(null)
 
   // 데이터 로드
-  const loadApplications = async () => {
+  const loadApplications = async (page?: number, pageSize?: number) => {
     try {
       setLoading(true)
+      const currentPage = page !== undefined ? page : pagination.currentPage
+      const currentPageSize = pageSize !== undefined ? pageSize : pagination.pageSize
       const params: any = {
-        page: pagination.currentPage,
-        limit: pagination.pageSize,
+        page: currentPage,
+        limit: currentPageSize,
       }
       if (filters.account) params.account = filters.account
       if (filters.status) params.status = filters.status
@@ -737,7 +739,11 @@ export default function Applications() {
           currentPage: pagination.currentPage,
           pageSize: pagination.pageSize,
           totalCount: pagination.totalCount,
-          onPageChange: (page) => setPagination((prev) => ({ ...prev, currentPage: page })),
+          onPageChange: (page) => {
+            setPagination((prev) => ({ ...prev, currentPage: page }))
+            // 페이지 변경 시 즉시 데이터 로드 (새 페이지 번호로)
+            loadApplications(page, pagination.pageSize)
+          },
         }}
         mobileCard={mobileCard}
       />
