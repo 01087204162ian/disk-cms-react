@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle, Download } from 'lucide-react'
+import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle, Download, AlertTriangle } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -12,6 +12,7 @@ import DailyReportModal from './components/DailyReportModal'
 import DepositBalanceModal from './components/DepositBalanceModal'
 import ApiManagerModal from './components/ApiManagerModal'
 import PharmacyDetailModal from './components/PharmacyDetailModal'
+import SettlementCleanupModal from './components/SettlementCleanupModal'
 
 interface PharmacyApplication {
   id: number
@@ -76,6 +77,7 @@ export default function Applications() {
   const [apiManagerModalOpen, setApiManagerModalOpen] = useState(false)
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedPharmacyId, setSelectedPharmacyId] = useState<number | null>(null)
+  const [cleanupModalOpen, setCleanupModalOpen] = useState(false)
 
   // 데이터 로드
   const loadApplications = async (page?: number, pageSize?: number) => {
@@ -716,6 +718,13 @@ export default function Applications() {
               <span className="hidden md:inline">새로고침</span>
             </button>
             <button
+              onClick={() => setCleanupModalOpen(true)}
+              className="px-3 py-1.5 bg-warning text-warning-foreground rounded-lg text-xs font-medium hover:bg-warning/90 transition-colors flex items-center gap-1.5"
+            >
+              <AlertTriangle className="w-3 h-3" />
+              <span className="hidden md:inline">정리</span>
+            </button>
+            <button
               onClick={() => setApiManagerModalOpen(true)}
               className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
             >
@@ -818,6 +827,12 @@ export default function Applications() {
         onUpdate={() => {
           loadApplications()
         }}
+      />
+
+      {/* 정리 모달 */}
+      <SettlementCleanupModal
+        isOpen={cleanupModalOpen}
+        onClose={() => setCleanupModalOpen(false)}
       />
     </div>
   )
