@@ -419,22 +419,16 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
             {currentYear}년
           </div>
           <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-sm p-2 text-white">
-            <div className="grid grid-cols-3 text-center gap-2">
-              <div>
-                <div className="text-xs opacity-75 mb-1">승인</div>
-                <div className="font-bold text-sm">{formatCurrency(totalThisYear.approval_amount)}</div>
-                <div className="text-xs opacity-80">{totalThisYear.approval_count}</div>
-              </div>
-              <div>
-                <div className="text-xs opacity-75 mb-1">해지</div>
-                <div className="font-bold text-sm">{formatCurrency(totalThisYear.cancel_amount)}</div>
-                <div className="text-xs opacity-80">{totalThisYear.cancel_count}</div>
-              </div>
-              <div>
-                <div className="text-xs opacity-75 mb-1">합계</div>
-                <div className="font-bold text-sm">{formatCurrency(thisYearNetAmount)}</div>
-                <div className="text-xs opacity-80">{thisYearNetCount}</div>
-              </div>
+            <div className="flex justify-around items-center text-xs">
+              <span className="whitespace-nowrap">
+                승인 {formatCurrency(totalThisYear.approval_amount)}({totalThisYear.approval_count})
+              </span>
+              <span className="whitespace-nowrap">
+                해지 {formatCurrency(totalThisYear.cancel_amount)}({totalThisYear.cancel_count})
+              </span>
+              <span className="whitespace-nowrap">
+                합계 {formatCurrency(thisYearNetAmount)}({thisYearNetCount})
+              </span>
             </div>
           </div>
         </div>
@@ -445,22 +439,16 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
             {lastYear}년
           </div>
           <div className="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg shadow-sm p-2 text-white">
-            <div className="grid grid-cols-3 text-center gap-2">
-              <div>
-                <div className="text-xs opacity-75 mb-1">승인</div>
-                <div className="font-bold text-sm">{formatCurrency(totalLastYear.approval_amount)}</div>
-                <div className="text-xs opacity-80">{totalLastYear.approval_count}</div>
-              </div>
-              <div>
-                <div className="text-xs opacity-75 mb-1">해지</div>
-                <div className="font-bold text-sm">{formatCurrency(totalLastYear.cancel_amount)}</div>
-                <div className="text-xs opacity-80">{totalLastYear.cancel_count}</div>
-              </div>
-              <div>
-                <div className="text-xs opacity-75 mb-1">합계</div>
-                <div className="font-bold text-sm">{formatCurrency(lastYearNetAmount)}</div>
-                <div className="text-xs opacity-80">{lastYearNetCount}</div>
-              </div>
+            <div className="flex justify-around items-center text-xs">
+              <span className="whitespace-nowrap">
+                승인 {formatCurrency(totalLastYear.approval_amount)}({totalLastYear.approval_count})
+              </span>
+              <span className="whitespace-nowrap">
+                해지 {formatCurrency(totalLastYear.cancel_amount)}({totalLastYear.cancel_count})
+              </span>
+              <span className="whitespace-nowrap">
+                합계 {formatCurrency(lastYearNetAmount)}({lastYearNetCount})
+              </span>
             </div>
           </div>
         </div>
