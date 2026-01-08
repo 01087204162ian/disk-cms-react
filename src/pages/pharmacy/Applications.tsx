@@ -716,18 +716,18 @@ export default function Applications() {
               <span className="hidden md:inline">새로고침</span>
             </button>
             <button
-              onClick={() => setAddCompanyModalOpen(true)}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
-            >
-              <Plus className="w-3 h-3" />
-              <span className="hidden md:inline">업체추가</span>
-            </button>
-            <button
               onClick={() => setApiManagerModalOpen(true)}
               className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
             >
               <Key className="w-3 h-3" />
               <span className="hidden md:inline">API 관리</span>
+            </button>
+            <button
+              onClick={() => setAddCompanyModalOpen(true)}
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5 ml-auto"
+            >
+              <Plus className="w-3 h-3" />
+              <span className="hidden md:inline">업체추가</span>
             </button>
           </>
         }

@@ -144,7 +144,7 @@ export default function FilterBar({ children, actionButtons, className = '' }: F
       {/* 액션 버튼 영역 */}
       {actionButtons && (
         <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex flex-wrap gap-2">{actionButtons}</div>
+          <div className="flex flex-wrap gap-2 items-center justify-between">{actionButtons}</div>
         </div>
       )}
     </div>
