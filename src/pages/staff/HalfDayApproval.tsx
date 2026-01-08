@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { RefreshCw, Check, X } from 'lucide-react'
-import { Modal, FormInput, LoadingSpinner } from '../../components'
+import { Modal, LoadingSpinner } from '../../components'
 
 type PendingHalfDay = {
   id: number

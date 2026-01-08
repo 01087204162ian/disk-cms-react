@@ -10,7 +10,7 @@ import {
   Building,
   Calendar,
 } from 'lucide-react'
-import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay, DataTable, type Column, FormInput, DatePicker, Select, LoadingSpinner } from '../../components'
+import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay, DataTable, type Column, FormInput, DatePicker, Select } from '../../components'
 
 interface Employee {
   email: string
