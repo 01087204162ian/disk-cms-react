@@ -1,8 +1,8 @@
-import { forwardRef, InputHTMLAttributes, useState } from 'react'
+import { forwardRef } from 'react'
 import { Calendar } from 'lucide-react'
 import FormInput, { type FormInputProps } from './FormInput'
 
-export interface DatePickerProps extends Omit<FormInputProps, 'type' | 'leftIcon'> {
+export interface DatePickerProps extends Omit<FormInputProps, 'type' | 'leftIcon' | 'onChange'> {
   value?: string
   onChange?: (value: string) => void
   min?: string
@@ -15,10 +15,6 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value
       onChange?.(newValue)
-      // props.onChange도 호출 (기존 React input 이벤트 호환)
-      if (props.onChange && typeof props.onChange !== 'function') {
-        ;(props.onChange as any)?.(e)
-      }
     }
 
     return (

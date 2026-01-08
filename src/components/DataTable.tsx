@@ -38,7 +38,6 @@ export default function DataTable<T extends Record<string, any>>({
   mobileCard,
   className = '',
 }: DataTableProps<T>) {
-  const visibleColumns = columns.filter((col) => !col.hidden)
 
   // 데스크톱 테이블 헤더
   const renderTableHeader = () => (
