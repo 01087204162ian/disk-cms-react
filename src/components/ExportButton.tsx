@@ -1,4 +1,3 @@
-import React from 'react'
 import { FileSpreadsheet, Download } from 'lucide-react'
 
 export interface ExportButtonProps {

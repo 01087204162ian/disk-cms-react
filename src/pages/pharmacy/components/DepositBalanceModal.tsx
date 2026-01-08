@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
-import api from '../../../lib/api'
+import { Modal } from '../../../components'
 
 interface DepositBalanceModalProps {
   isOpen: boolean
@@ -8,8 +6,6 @@ interface DepositBalanceModalProps {
 }
 
 export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceModalProps) {
-  const toast = useToastHelpers()
-  const [loading, setLoading] = useState(false)
 
   // TODO: 예치잔액 데이터 로드 및 표시
 

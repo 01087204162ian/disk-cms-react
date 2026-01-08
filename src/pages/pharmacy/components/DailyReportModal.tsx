@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { Modal, Select, DatePicker, LoadingSpinner, useToastHelpers } from '../../../components'
-import api from '../../../lib/api'
+import { Modal } from '../../../components'
 
 interface DailyReportModalProps {
   isOpen: boolean
@@ -8,14 +6,6 @@ interface DailyReportModalProps {
 }
 
 export default function DailyReportModal({ isOpen, onClose }: DailyReportModalProps) {
-  const toast = useToastHelpers()
-  const [loading, setLoading] = useState(false)
-  const [accounts, setAccounts] = useState<Array<{ value: string; label: string }>>([])
-  const [filters, setFilters] = useState({
-    account: '',
-    year: new Date().getFullYear().toString(),
-    month: (new Date().getMonth() + 1).toString().padStart(2, '0'),
-  })
 
   // TODO: 일별실적 데이터 로드 및 표시
 

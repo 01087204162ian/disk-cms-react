@@ -1,4 +1,3 @@
-import React from 'react'
 import { Download, File as FileIcon } from 'lucide-react'
 
 export interface FileDownloadLinkProps {

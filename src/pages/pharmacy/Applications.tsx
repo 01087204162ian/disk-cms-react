@@ -7,10 +7,6 @@ import {
   type Column,
   ExportButton,
   ButtonGroup,
-  LoadingSpinner,
-  Modal,
-  FormInput,
-  Select,
   useToastHelpers,
 } from '../../components'
 import AddCompanyModal from './components/AddCompanyModal'
@@ -354,26 +350,24 @@ export default function Applications() {
       {/* 필터 영역 */}
       <FilterBar
         actionButtons={
-          <FilterBar.Stats>
-            전체 {pagination.totalCount}건
-          </FilterBar.Stats>
+          <FilterBar.Stats stats={[{ label: '전체', value: pagination.totalCount, unit: '건' }]} />
         }
       >
         <FilterBar.Select
           value={filters.account}
-          onChange={(e) => setFilters((prev) => ({ ...prev, account: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
           options={accounts}
         />
         <FilterBar.Select
           value={filters.status}
-          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
           options={STATUS_OPTIONS}
         />
         <FilterBar.Select
           value={filters.pageSize}
-          onChange={(e) => {
-            setFilters((prev) => ({ ...prev, pageSize: e.target.value }))
-            setPagination((prev) => ({ ...prev, pageSize: parseInt(e.target.value, 10), currentPage: 1 }))
+          onChange={(value) => {
+            setFilters((prev) => ({ ...prev, pageSize: value }))
+            setPagination((prev) => ({ ...prev, pageSize: parseInt(value, 10), currentPage: 1 }))
           }}
           options={[
             { value: '20', label: '20개' },
@@ -383,11 +377,9 @@ export default function Applications() {
         />
         <FilterBar.Input
           value={filters.search}
-          onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
           placeholder="업체명, 사업자번호, 담당자로 검색"
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') handleSearch()
-          }}
+          onSearch={handleSearch}
         />
         <FilterBar.SearchButton onClick={handleSearch} />
       </FilterBar>

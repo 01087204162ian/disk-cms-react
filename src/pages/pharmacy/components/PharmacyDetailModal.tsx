@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Modal, FormInput, Select, DatePicker, LoadingSpinner, useToastHelpers } from '../../../components'
+import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 
 interface PharmacyDetailModalProps {
@@ -9,7 +9,7 @@ interface PharmacyDetailModalProps {
   onUpdate?: () => void
 }
 
-export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpdate }: PharmacyDetailModalProps) {
+export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId }: PharmacyDetailModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<any>(null)

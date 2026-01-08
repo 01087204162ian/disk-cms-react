@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Modal, FormInput, Select, LoadingSpinner, useToastHelpers, DataTable, type Column } from '../../../components'
+import { Modal, FormInput, LoadingSpinner, useToastHelpers, DataTable, type Column } from '../../../components'
 import api from '../../../lib/api'
 
 interface Company {

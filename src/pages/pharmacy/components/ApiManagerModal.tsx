@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
-import api from '../../../lib/api'
+import { Modal } from '../../../components'
 
 interface ApiManagerModalProps {
   isOpen: boolean
@@ -8,8 +6,6 @@ interface ApiManagerModalProps {
 }
 
 export default function ApiManagerModal({ isOpen, onClose }: ApiManagerModalProps) {
-  const toast = useToastHelpers()
-  const [loading, setLoading] = useState(false)
 
   // TODO: API 키 관리 기능 구현
 
