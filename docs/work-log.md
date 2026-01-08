@@ -37,13 +37,29 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - 데스크톱: `w-3.5 h-3.5`, 모바일: `w-4 h-4`
 - **적용 페이지**:
   - ✅ `src/pages/staff/Employees.tsx` - 완료
-  - ⏳ `src/pages/staff/Holidays.tsx` - 표준 적용 필요
-  - ⏳ `src/pages/staff/HalfDayApproval.tsx` - 표준 적용 필요
-  - ⏳ `src/pages/staff/EmployeeSchedule.tsx` - 표준 적용 필요
+  - ✅ `src/pages/staff/Holidays.tsx` - 완료 (공휴일 추가/수정 모달)
+  - ✅ `src/pages/staff/HalfDayApproval.tsx` - 완료 (승인/거부 처리 모달)
+  - ✅ `src/pages/staff/EmployeeSchedule.tsx` - 완료 (기본 휴무일 설정, 반차 신청, 휴무일 변경 신청 모달)
 - **파일**: 
   - `src/pages/staff/Employees.tsx`
   - `docs/UI_STANDARDS.md` (신규)
-- **결과**: 일관된 UI/UX 제공을 위한 표준 정의 완료, Employees 페이지에 적용 완료, 다른 페이지 표준 적용 예정
+- **결과**: 일관된 UI/UX 제공을 위한 표준 정의 완료, 모든 staff 페이지 모달에 표준 적용 완료
+
+#### 15) 다른 페이지 모달 표준 적용
+- **Holidays.tsx**:
+  - 공휴일 추가 모달: 헤더 그라데이션 + X 버튼 추가, 레이블 제거 및 플레이스홀더 사용, 본문 `text-xs` 적용
+  - 공휴일 수정 모달: 동일한 표준 적용
+- **HalfDayApproval.tsx**:
+  - 승인/거부 처리 모달: 헤더 그라데이션 + X 버튼 추가, 본문 `text-xs` 적용, 거부 사유 입력란 플레이스홀더 사용
+- **EmployeeSchedule.tsx**:
+  - 기본 휴무일 설정 모달: 헤더 그라데이션 + X 버튼 추가, 본문 `text-xs` 적용
+  - 반차 신청 모달: 헤더 그라데이션 + X 버튼 추가, 레이블 제거 및 플레이스홀더 사용, 본문 `text-xs` 적용
+  - 휴무일 변경 신청 모달: 헤더 그라데이션 + X 버튼 추가, 레이블 제거 및 플레이스홀더 사용, 본문 `text-xs` 적용
+- **파일**: 
+  - `src/pages/staff/Holidays.tsx`
+  - `src/pages/staff/HalfDayApproval.tsx`
+  - `src/pages/staff/EmployeeSchedule.tsx`
+- **결과**: 모든 staff 페이지의 모달이 UI 표준에 맞게 통일됨
 
 ### 2026-01-07 (Phase 2 진행) - 부서 관리 페이지 제거 및 UI/UX 개선
 

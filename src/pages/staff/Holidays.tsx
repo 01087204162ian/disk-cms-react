@@ -279,37 +279,48 @@ export default function Holidays() {
       {/* Add modal */}
       {addOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-background border border-border p-6">
-            <div className="text-lg font-semibold">공휴일 추가</div>
-            <div className="mt-4 grid grid-cols-1 gap-3">
-              <div>
-                <div className="text-sm font-medium mb-1">날짜</div>
-                <input
-                  type="date"
-                  value={addDate}
-                  onChange={(e) => setAddDate(e.target.value)}
-                  max={toYmd(new Date(baseYear + 1, 11, 31))}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-                />
-              </div>
-              <div>
-                <div className="text-sm font-medium mb-1">공휴일명</div>
-                <input
-                  value={addName}
-                  onChange={(e) => setAddName(e.target.value)}
-                  placeholder="예: 신정"
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-                />
-              </div>
-              {addError ? <div className="text-sm text-destructive">{addError}</div> : null}
-            </div>
-            <div className="mt-6 flex gap-2 justify-end">
+          <div className="w-full max-w-lg rounded-xl bg-background border border-border overflow-hidden">
+            {/* 헤더 */}
+            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
+              <h5 className="text-lg font-semibold text-white m-0">공휴일 추가</h5>
               <button
-                onClick={submitAdd}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
+                onClick={() => setAddOpen(false)}
+                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+                aria-label="닫기"
               >
-                추가
+                ×
               </button>
+            </div>
+            {/* 본문 */}
+            <div className="p-6 bg-white">
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <input
+                    type="date"
+                    value={addDate}
+                    onChange={(e) => setAddDate(e.target.value)}
+                    max={toYmd(new Date(baseYear + 1, 11, 31))}
+                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <input
+                    value={addName}
+                    onChange={(e) => setAddName(e.target.value)}
+                    placeholder="공휴일명 * (예: 신정)"
+                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                {addError ? <div className="text-xs text-destructive">{addError}</div> : null}
+              </div>
+              <div className="mt-6 flex gap-2 justify-end">
+                <button
+                  onClick={submitAdd}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
+                >
+                  추가
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -318,34 +329,47 @@ export default function Holidays() {
       {/* Edit modal */}
       {editOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-background border border-border p-6">
-            <div className="text-lg font-semibold">공휴일 수정</div>
-            <div className="mt-4 grid grid-cols-1 gap-3">
-              <div>
-                <div className="text-sm font-medium mb-1">공휴일명</div>
-                <input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={editIsActive}
-                  onChange={(e) => setEditIsActive(e.target.checked)}
-                />
-                활성
-              </label>
-              {editError ? <div className="text-sm text-destructive">{editError}</div> : null}
-            </div>
-            <div className="mt-6 flex gap-2 justify-end">
+          <div className="w-full max-w-lg rounded-xl bg-background border border-border overflow-hidden">
+            {/* 헤더 */}
+            <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between">
+              <h5 className="text-lg font-semibold text-white m-0">공휴일 수정</h5>
               <button
-                onClick={submitEdit}
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
+                onClick={() => setEditOpen(false)}
+                className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+                aria-label="닫기"
               >
-                저장
+                ×
               </button>
+            </div>
+            {/* 본문 */}
+            <div className="p-6 bg-white">
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="공휴일명 *"
+                    className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={editIsActive}
+                    onChange={(e) => setEditIsActive(e.target.checked)}
+                  />
+                  활성
+                </label>
+                {editError ? <div className="text-xs text-destructive">{editError}</div> : null}
+              </div>
+              <div className="mt-6 flex gap-2 justify-end">
+                <button
+                  onClick={submitEdit}
+                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
+                >
+                  저장
+                </button>
+              </div>
             </div>
           </div>
         </div>
