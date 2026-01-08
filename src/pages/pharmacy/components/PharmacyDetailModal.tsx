@@ -420,7 +420,7 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             {/* 전문인수 */}
             <label className="text-xs font-medium text-gray-700 py-1">
               전문인수
-              {isLockedStatus && <span className="ml-2 text-xs text-gray-500">(변경불가)</span>}
+              {isLockedStatus && <span className="ml-1 text-[10px] text-gray-500">(변경불가)</span>}
             </label>
             <select
               value={detail.expert_count}
@@ -439,9 +439,9 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             {/* 보상한도 */}
             <label className="text-xs font-medium text-gray-700 py-1">
               보상한도
-              {isLockedStatus && <span className="ml-2 text-xs text-gray-500">(변경불가)</span>}
-              {hasSingleLimit && <span className="ml-2 text-xs text-blue-600">(1억 고정)</span>}
-              {hasMultipleLimits && !isLockedStatus && <span className="ml-2 text-xs text-green-600">(선택가능)</span>}
+              {isLockedStatus && <span className="ml-1 text-[10px] text-gray-500">(변경불가)</span>}
+              {hasSingleLimit && <span className="ml-1 text-[10px] text-blue-600">(1억 고정)</span>}
+              {hasMultipleLimits && !isLockedStatus && <span className="ml-1 text-[10px] text-green-600">(선택가능)</span>}
             </label>
             <select
               value={detail.coverage_limit}
@@ -456,7 +456,7 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             {/* 재고자산 */}
             <label className="text-xs font-medium text-gray-700 py-1">
               재고자산
-              {isLockedStatus && <span className="ml-2 text-xs text-gray-500">(변경불가)</span>}
+              {isLockedStatus && <span className="ml-1 text-[10px] text-gray-500">(변경불가)</span>}
             </label>
             <select
               value={detail.inventory_value}
@@ -475,7 +475,7 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             {/* 사업장면적 */}
             <label className="text-xs font-medium text-gray-700 py-1">
               사업장면적
-              {isLockedStatus && <span className="ml-2 text-xs text-gray-500">(변경불가)</span>}
+              {isLockedStatus && <span className="ml-1 text-[10px] text-gray-500">(변경불가)</span>}
             </label>
             <input
               type="text"
