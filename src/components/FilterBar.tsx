@@ -113,10 +113,12 @@ export function StatsDisplay({ stats, lastRefresh, className = '' }: StatsDispla
         <span key={index} className={colorClasses[stat.color || 'foreground']}>
           {typeof stat.value === 'number' ? (
             <>
-              {stat.label} <strong>{stat.value}</strong>명
+              {stat.label} <strong>{stat.value.toLocaleString('ko-KR')}</strong>건
             </>
           ) : (
-            stat.label
+            <>
+              {stat.label} {stat.value}
+            </>
           )}
         </span>
       ))}

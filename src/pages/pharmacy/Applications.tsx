@@ -632,7 +632,7 @@ export default function Applications() {
       {/* 필터 영역 */}
       <FilterBar
         actionButtons={
-          <FilterBar.Stats stats={[{ label: '전체', value: `${pagination.totalCount}건` }]} />
+          <FilterBar.Stats stats={[{ label: '전체', value: pagination.totalCount }]} />
         }
       >
         <FilterBar.Select
