@@ -8,8 +8,6 @@ import {
   ExportButton,
   ButtonGroup,
   useToastHelpers,
-  Select,
-  FormInput,
 } from '../../components'
 import AddCompanyModal from './components/AddCompanyModal'
 import DailyReportModal from './components/DailyReportModal'
@@ -466,17 +464,16 @@ export default function Applications() {
       {
         key: 'design_number_professional',
         header: '전문설계번호',
-        className: 'hidden lg:table-cell',
+        className: 'hidden lg:table-cell p-0',
         hidden: true,
         cell: (row) => {
           if (!row.chemist || row.chemist < 1) return <span className="text-gray-400">-</span>
           return (
-            <FormInput
+            <input
               type="text"
               value={row.chemist_design_number || ''}
               placeholder="전문인설계번호"
-              variant="default"
-              className="w-full text-xs"
+              className="w-full text-xs border-0 bg-white px-2 py-1 focus:outline-none"
               onBlur={(e) => {
                 const newValue = e.target.value
                 if (newValue !== (row.chemist_design_number || '')) {
@@ -490,17 +487,16 @@ export default function Applications() {
       {
         key: 'design_number_fire',
         header: '화재설계번호',
-        className: 'hidden lg:table-cell',
+        className: 'hidden lg:table-cell p-0',
         hidden: true,
         cell: (row) => {
           if (!row.area || row.area < 1) return <span className="text-gray-400">-</span>
           return (
-            <FormInput
+            <input
               type="text"
               value={row.area_design_number || ''}
               placeholder="화재설계번호"
-              variant="default"
-              className="w-full text-xs"
+              className="w-full text-xs border-0 bg-white px-2 py-1 focus:outline-none"
               onBlur={(e) => {
                 const newValue = e.target.value
                 if (newValue !== (row.area_design_number || '')) {
@@ -526,33 +522,37 @@ export default function Applications() {
       {
         key: 'status',
         header: '상태',
+        className: 'p-0',
         cell: (row) => {
           const statusOptions = getStatusOptions(row.status)
           return (
-            <Select
+            <select
               value={String(row.status)}
               onChange={(e) => handleStatusChange(row.id, e.target.value, row.original_status || row.status)}
-              options={statusOptions}
-              variant="default"
-              className="w-full text-xs"
-            />
+              className="w-full text-xs border-0 bg-white px-2 py-1 focus:outline-none appearance-none cursor-pointer"
+            >
+              {statusOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           )
         },
       },
       {
         key: 'memo',
         header: '메모',
-        className: 'hidden xl:table-cell',
+        className: 'hidden xl:table-cell p-0',
         hidden: true,
         cell: (row) => {
           let lastSavedMemo = row.memo || ''
           return (
-            <FormInput
+            <input
               type="text"
               value={row.memo || ''}
               placeholder="메모"
-              variant="default"
-              className="w-full text-xs"
+              className="w-full text-xs border-0 bg-white px-2 py-1 focus:outline-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()

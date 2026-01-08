@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Modal, LoadingSpinner, useToastHelpers, FormInput, DatePicker } from '../../../components'
+import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 
 interface PharmacyDetailModalProps {
@@ -181,147 +181,134 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
         {loading ? (
           <LoadingSpinner size="md" />
         ) : detail ? (
-          <div className="grid grid-cols-[100px_1fr_100px_1fr] gap-y-2 gap-x-4 items-center text-xs">
+          <div className="grid grid-cols-[100px_1fr_100px_1fr] gap-y-1 gap-x-4 items-center">
             {/* 기본 정보 */}
-            <label className="text-xs font-medium text-gray-700">업체명:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">업체명:</label>
+            <input
               type="text"
               value={detail.company}
               onChange={(e) => setDetail({ ...detail, company: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">사업자번호:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">사업자번호:</label>
+            <input
               type="text"
               value={detail.business_number}
               onChange={(e) => setDetail({ ...detail, business_number: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">신청일:</label>
-            <DatePicker
+            <label className="text-xs font-medium text-gray-700 py-1">신청일:</label>
+            <input
+              type="date"
               value={detail.application_date}
-              onChange={(value) => setDetail({ ...detail, application_date: value })}
-              variant="modal"
-              className="col-span-1"
+              onChange={(e) => setDetail({ ...detail, application_date: e.target.value })}
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">일반전화:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">일반전화:</label>
+            <input
               type="tel"
               value={detail.general_phone}
               onChange={(e) => setDetail({ ...detail, general_phone: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
 
             {/* 신청자 정보 */}
-            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2">신청자 정보</label>
-            <label className="text-xs font-medium text-gray-700">성명:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2 py-1">신청자 정보</label>
+            <label className="text-xs font-medium text-gray-700 py-1">성명:</label>
+            <input
               type="text"
               value={detail.applicant_name}
               onChange={(e) => setDetail({ ...detail, applicant_name: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">주민번호:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">주민번호:</label>
+            <input
               type="text"
               value={detail.resident_number}
               onChange={(e) => setDetail({ ...detail, resident_number: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">이메일:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">이메일:</label>
+            <input
               type="email"
               value={detail.email}
               onChange={(e) => setDetail({ ...detail, email: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">휴대전화:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">휴대전화:</label>
+            <input
               type="tel"
               value={detail.mobile_phone}
               onChange={(e) => setDetail({ ...detail, mobile_phone: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
 
             {/* 사업장 정보 */}
-            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2">사업장 정보</label>
-            <label className="text-xs font-medium text-gray-700">주소:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2 py-1">사업장 정보</label>
+            <label className="text-xs font-medium text-gray-700 py-1">주소:</label>
+            <input
               type="text"
               value={detail.address}
               onChange={(e) => setDetail({ ...detail, address: e.target.value })}
-              variant="modal"
-              className="col-span-3"
+              className="col-span-3 px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">전문인 수:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">전문인 수:</label>
+            <input
               type="number"
               value={detail.expert_count}
               onChange={(e) => setDetail({ ...detail, expert_count: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">사업장 면적:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">사업장 면적:</label>
+            <input
               type="number"
               value={detail.business_area}
               onChange={(e) => setDetail({ ...detail, business_area: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">재고자산:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">재고자산:</label>
+            <input
               type="number"
               value={detail.inventory_value}
               onChange={(e) => setDetail({ ...detail, inventory_value: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
 
             {/* 보험 정보 */}
-            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2">보험 정보</label>
-            <label className="text-xs font-medium text-gray-700">보험료:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 col-span-4 mt-2 py-1">보험 정보</label>
+            <label className="text-xs font-medium text-gray-700 py-1">보험료:</label>
+            <input
               type="text"
               value={formatPremium(detail.premium)}
               onChange={(e) => handlePremiumChange(e.target.value)}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">전문인증권번호:</label>
-            <FormInput
+            <label className="text-xs font-medium text-gray-700 py-1">전문인증권번호:</label>
+            <input
               type="text"
               value={detail.certificate_number}
               onChange={(e) => setDetail({ ...detail, certificate_number: e.target.value })}
-              variant="modal"
-              className="col-span-1"
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">보험시작일:</label>
-            <DatePicker
+            <label className="text-xs font-medium text-gray-700 py-1">보험시작일:</label>
+            <input
+              type="date"
               value={detail.insurance_start_date}
-              onChange={(value) => setDetail({ ...detail, insurance_start_date: value })}
-              variant="modal"
-              className="col-span-1"
+              onChange={(e) => setDetail({ ...detail, insurance_start_date: e.target.value })}
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">보험종료일:</label>
-            <DatePicker
+            <label className="text-xs font-medium text-gray-700 py-1">보험종료일:</label>
+            <input
+              type="date"
               value={detail.insurance_end_date}
-              onChange={(value) => setDetail({ ...detail, insurance_end_date: value })}
-              variant="modal"
-              className="col-span-1"
+              onChange={(e) => setDetail({ ...detail, insurance_end_date: e.target.value })}
+              className="px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left"
             />
-            <label className="text-xs font-medium text-gray-700">메모:</label>
+            <label className="text-xs font-medium text-gray-700 py-1">메모:</label>
             <textarea
               value={detail.message}
               onChange={(e) => setDetail({ ...detail, message: e.target.value })}
-              className="col-span-3 px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="col-span-3 px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left resize-none"
               rows={3}
               placeholder="메모"
             />
