@@ -586,8 +586,8 @@ export default function Employees() {
               onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="이름, 이메일, 사번으로 검색"
-              className="h-10 w-full pl-10 pr-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal"
-              style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '40px', height: '40px' }}
+              className="w-full pl-10 pr-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal"
+              style={{ fontFamily: 'inherit', lineHeight: '1.5', boxSizing: 'border-box', minHeight: '42px', height: '42px' }}
             />
           </div>
           <button
