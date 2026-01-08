@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, FilterBar, DataTable, LoadingSpinner, DatePicker, useToastHelpers } from '../../../components'
+import { Modal, FilterBar, DataTable, DatePicker, useToastHelpers } from '../../../components'
 import { History, RefreshCw } from 'lucide-react'
 import api from '../../../lib/api'
 import type { Column } from '../../../components/DataTable'
