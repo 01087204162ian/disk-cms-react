@@ -764,12 +764,6 @@ export default function EmployeeSchedule() {
 
             <div className="mt-6 flex gap-2 justify-end">
               <button
-                onClick={() => setHalfDayOpen(false)}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                취소
-              </button>
-              <button
                 onClick={submitHalfDay}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
               >
@@ -835,12 +829,6 @@ export default function EmployeeSchedule() {
             </div>
 
             <div className="mt-6 flex gap-2 justify-end">
-              <button
-                onClick={() => setTempChangeOpen(false)}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                취소
-              </button>
               <button
                 onClick={submitTempChange}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"

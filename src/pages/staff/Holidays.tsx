@@ -305,12 +305,6 @@ export default function Holidays() {
             </div>
             <div className="mt-6 flex gap-2 justify-end">
               <button
-                onClick={() => setAddOpen(false)}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                취소
-              </button>
-              <button
                 onClick={submitAdd}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"
               >
@@ -346,12 +340,6 @@ export default function Holidays() {
               {editError ? <div className="text-sm text-destructive">{editError}</div> : null}
             </div>
             <div className="mt-6 flex gap-2 justify-end">
-              <button
-                onClick={() => setEditOpen(false)}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                취소
-              </button>
               <button
                 onClick={submitEdit}
                 className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-sm"

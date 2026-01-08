@@ -326,12 +326,6 @@ export default function HalfDayApproval() {
 
             <div className="mt-6 flex gap-2 justify-end">
               <button
-                onClick={closeModal}
-                className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm"
-              >
-                닫기
-              </button>
-              <button
                 onClick={reject}
                 className="px-4 py-2 rounded-lg border border-input bg-background hover:bg-muted text-sm inline-flex items-center gap-2"
               >

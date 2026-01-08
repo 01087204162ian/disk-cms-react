@@ -6,7 +6,6 @@ import {
   Search,
   Download,
   RefreshCw,
-  Eye,
   Edit,
   Trash2,
   Building,
@@ -744,13 +743,6 @@ export default function Employees() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <button
-                            className="p-2 text-info hover:bg-info/10 rounded-lg transition-colors"
-                            title="상세보기"
-                            onClick={() => openEdit(employee)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
                             className="p-2 text-warning hover:bg-warning/10 rounded-lg transition-colors"
                             title="수정"
                             onClick={() => openEdit(employee)}
@@ -818,13 +810,6 @@ export default function Employees() {
                     </div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <button
-                      className="flex-1 px-3 py-2 bg-info/10 text-info rounded-lg text-sm font-medium flex items-center justify-center gap-2"
-                      onClick={() => openEdit(employee)}
-                    >
-                      <Eye className="w-4 h-4" />
-                      상세보기
-                    </button>
                     <button
                       className="flex-1 px-3 py-2 bg-warning/10 text-warning rounded-lg text-sm font-medium flex items-center justify-center gap-2"
                       onClick={() => openEdit(employee)}
@@ -1155,12 +1140,6 @@ export default function Employees() {
               {/* 푸터 */}
               <div className="mt-6 flex gap-2 justify-end border-t pt-4">
                 <button
-                  onClick={() => setEditOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm"
-                >
-                  닫기
-                </button>
-                <button
                   onClick={submitEdit}
                   className="px-4 py-2 rounded-lg bg-[#667eea] text-white hover:bg-[#5568d3] text-sm font-medium"
                 >
@@ -1230,17 +1209,6 @@ export default function Employees() {
 
               {/* 푸터 */}
               <div className="flex gap-2 justify-end border-t pt-4">
-                <button
-                  onClick={() => {
-                    setResignDateModalOpen(false)
-                    setResignDateTarget(null)
-                    setResignDate('')
-                    setActionError(null)
-                  }}
-                  className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm"
-                >
-                  취소
-                </button>
                 <button
                   onClick={confirmDeactivate}
                   className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium"
@@ -1481,18 +1449,6 @@ export default function Employees() {
               </div>
             </div>
 
-            {/* 푸터 */}
-            <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-end">
-              <button
-                onClick={() => {
-                  setDepartmentModalOpen(false)
-                  setDepartmentError(null)
-                }}
-                className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium"
-              >
-                닫기
-              </button>
-            </div>
           </div>
         </div>
       )}
