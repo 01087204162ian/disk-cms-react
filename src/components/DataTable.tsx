@@ -65,11 +65,15 @@ export default function DataTable<T extends Record<string, any>>({
           className={`hover:bg-accent/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
           onClick={() => onRowClick?.(row)}
         >
-          {columns.map((column) => (
-            <td key={column.key} className={`px-4 py-3 text-xs ${column.className || ''}`}>
-              {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
-            </td>
-          ))}
+          {columns.map((column) => {
+            const hasZeroPadding = column.className?.includes('p-0')
+            const defaultPadding = hasZeroPadding ? '' : 'px-4 py-3'
+            return (
+              <td key={column.key} className={`${defaultPadding} text-xs ${column.className || ''}`}>
+                {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
+              </td>
+            )
+          })}
         </tr>
       ))}
     </tbody>

@@ -1,12 +1,10 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle } from 'lucide-react'
+import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle, Download } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
   DataTable,
   type Column,
-  ExportButton,
-  ButtonGroup,
   useToastHelpers,
 } from '../../components'
 import AddCompanyModal from './components/AddCompanyModal'
@@ -512,12 +510,32 @@ export default function Applications() {
         header: '가입요청일',
         className: 'hidden xl:table-cell',
         hidden: true,
-        cell: (row) => (row.request_date ? new Date(row.request_date).toLocaleDateString('ko-KR') : '-'),
+        cell: (row) => {
+          if (!row.request_date) return '-'
+          const date = new Date(row.request_date)
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          const hours = String(date.getHours()).padStart(2, '0')
+          const minutes = String(date.getMinutes()).padStart(2, '0')
+          const seconds = String(date.getSeconds()).padStart(2, '0')
+          return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+        },
       },
       {
         key: 'approval_date',
         header: '승인일',
-        cell: (row) => (row.approval_date ? new Date(row.approval_date).toLocaleDateString('ko-KR') : '-'),
+        cell: (row) => {
+          if (!row.approval_date) return '-'
+          const date = new Date(row.approval_date)
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          const hours = String(date.getHours()).padStart(2, '0')
+          const minutes = String(date.getMinutes()).padStart(2, '0')
+          const seconds = String(date.getSeconds()).padStart(2, '0')
+          return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+        },
       },
       {
         key: 'status',
@@ -630,7 +648,54 @@ export default function Applications() {
   return (
     <div className="space-y-6">
       {/* 필터 영역 */}
-      <FilterBar>
+      <FilterBar
+        actionButtons={
+          <>
+            <button
+              onClick={() => setDailyReportModalOpen(true)}
+              className="px-3 py-1.5 bg-success text-success-foreground rounded-lg text-xs font-medium hover:bg-success/90 transition-colors flex items-center gap-1.5"
+            >
+              <TrendingUp className="w-3 h-3" />
+              <span className="hidden md:inline">일별실적</span>
+            </button>
+            <button
+              onClick={() => setDepositBalanceModalOpen(true)}
+              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
+            >
+              <Wallet className="w-3 h-3" />
+              <span className="hidden md:inline">예치잔액</span>
+            </button>
+            <button
+              onClick={handleExportExcel}
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+            >
+              <Download className="w-3 h-3" />
+              <span className="hidden md:inline">엑셀 다운로드</span>
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-xs font-medium hover:bg-secondary/90 transition-colors flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3 h-3" />
+              <span className="hidden md:inline">새로고침</span>
+            </button>
+            <button
+              onClick={() => setAddCompanyModalOpen(true)}
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
+            >
+              <Plus className="w-3 h-3" />
+              <span className="hidden md:inline">업체추가</span>
+            </button>
+            <button
+              onClick={() => setApiManagerModalOpen(true)}
+              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
+            >
+              <Key className="w-3 h-3" />
+              <span className="hidden md:inline">API 관리</span>
+            </button>
+          </>
+        }
+      >
         <FilterBar.Select
           value={filters.account}
           onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
@@ -662,56 +727,6 @@ export default function Applications() {
         <FilterBar.SearchButton onClick={handleSearch} />
       </FilterBar>
 
-      {/* 액션 버튼 영역 */}
-      <ButtonGroup justify="between" wrap>
-        <ButtonGroup gap="sm">
-          <button
-            onClick={() => setDailyReportModalOpen(true)}
-            className="px-3 py-1.5 bg-green-500 text-white rounded text-xs font-medium hover:bg-green-600 transition-colors flex items-center gap-1"
-          >
-            <TrendingUp className="w-3 h-3" />
-            <span className="hidden md:inline">일별실적</span>
-          </button>
-          <button
-            onClick={() => setDepositBalanceModalOpen(true)}
-            className="px-3 py-1.5 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors flex items-center gap-1"
-          >
-            <Wallet className="w-3 h-3" />
-            <span className="hidden md:inline">예치잔액</span>
-          </button>
-          <ExportButton
-            onClick={handleExportExcel}
-            variant="sm"
-            label="승인건중 설계리스트 엑셀"
-            showLabel={false}
-            className="bg-red-500 hover:bg-red-600"
-          />
-          <button
-            onClick={handleRefresh}
-            className="px-3 py-1.5 bg-gray-500 text-white rounded text-xs font-medium hover:bg-gray-600 transition-colors flex items-center gap-1"
-          >
-            <RefreshCw className="w-3 h-3" />
-            <span className="hidden md:inline">새로고침</span>
-          </button>
-        </ButtonGroup>
-        <ButtonGroup gap="sm">
-          <button
-            onClick={() => setAddCompanyModalOpen(true)}
-            className="px-3 py-1.5 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors flex items-center gap-1"
-          >
-            <Plus className="w-3 h-3" />
-            <span className="hidden md:inline">업체추가</span>
-          </button>
-          <button
-            onClick={() => setApiManagerModalOpen(true)}
-            className="px-3 py-1.5 bg-gray-600 text-white rounded text-xs font-medium hover:bg-gray-700 transition-colors flex items-center gap-1"
-          >
-            <Key className="w-3 h-3" />
-            <span className="hidden md:inline">API 관리</span>
-          </button>
-        </ButtonGroup>
-      </ButtonGroup>
-
       {/* 테이블 */}
       <DataTable
         data={applications}
@@ -723,11 +738,6 @@ export default function Applications() {
           pageSize: pagination.pageSize,
           totalCount: pagination.totalCount,
           onPageChange: (page) => setPagination((prev) => ({ ...prev, currentPage: page })),
-          onPageSizeChange: (size) => {
-            setPagination((prev) => ({ ...prev, pageSize: size, currentPage: 1 }))
-            setFilters((prev) => ({ ...prev, pageSize: String(size) }))
-          },
-          pageSizeOptions: [20, 50, 100],
         }}
         mobileCard={mobileCard}
       />
