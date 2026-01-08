@@ -12,6 +12,39 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-07 (Phase 2 진행) - UI 표준 정의 및 필터/모달 개선
+
+#### 14) UI 표준 문서 작성 및 필터/모달 표준화
+- **UI 표준 문서 작성**: `docs/UI_STANDARDS.md` 생성
+  - 필터 영역 표준 (Select 40px, Input 42px, 통일된 스타일)
+  - 모달 표준 (헤더 그라데이션, X 버튼만, 푸터 닫기 버튼 제거)
+  - 작업 열 아이콘 표준 (Eye 아이콘 제거, Edit만 사용)
+  - 레이블 제거 및 플레이스홀더 사용 표준
+- **필터 영역 개선**:
+  - Select 요소: 높이 40px, `px-3 py-0`, 폰트 스타일 통일 (`text-sm leading-none font-normal`, `box-sizing: border-box`)
+  - Input 요소: 높이 42px (select보다 2px 높음), `pl-10 pr-3`, 폰트 스타일 통일
+  - 통계 정보: 오른쪽 끝 배치 (`ml-auto`), "직원 현황:" 라벨 제거
+  - 액션 버튼: 필터 영역 내부로 이동, 크기 축소 (80%), `px-3 py-1.5 text-xs`
+- **모달 개선**:
+  - 모달 헤더: 보라색 그라데이션 배경 (`from-[#667eea] to-[#764ba2]`), X 닫기 버튼 추가
+  - 푸터 닫기/취소 버튼 제거 (헤더 X 버튼만 사용)
+  - 본문 폰트: 모든 텍스트 `text-xs` 사용
+  - 부서 관리 모달: 레이블 제거, 플레이스홀더만 사용
+  - 섹션 제목 제거 ("새 부서 추가", "기존 부서 목록" 제거)
+- **작업 열 개선**:
+  - Eye 아이콘 제거 (상세보기 버튼 제거)
+  - Edit 아이콘만 사용 (수정/상세보기 통합)
+  - 데스크톱: `w-3.5 h-3.5`, 모바일: `w-4 h-4`
+- **적용 페이지**:
+  - ✅ `src/pages/staff/Employees.tsx` - 완료
+  - ⏳ `src/pages/staff/Holidays.tsx` - 표준 적용 필요
+  - ⏳ `src/pages/staff/HalfDayApproval.tsx` - 표준 적용 필요
+  - ⏳ `src/pages/staff/EmployeeSchedule.tsx` - 표준 적용 필요
+- **파일**: 
+  - `src/pages/staff/Employees.tsx`
+  - `docs/UI_STANDARDS.md` (신규)
+- **결과**: 일관된 UI/UX 제공을 위한 표준 정의 완료, Employees 페이지에 적용 완료, 다른 페이지 표준 적용 예정
+
 ### 2026-01-07 (Phase 2 진행) - 부서 관리 페이지 제거 및 UI/UX 개선
 
 #### 13) 부서 관리 페이지 제거
