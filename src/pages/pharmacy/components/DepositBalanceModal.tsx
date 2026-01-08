@@ -285,16 +285,22 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
   const renderSummaryCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
       <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg shadow-sm p-3 text-white">
-        <div className="text-xs opacity-75 mb-1">총 예치금액</div>
-        <div className="text-lg font-bold">{formatCurrency(summaryStats.totalDeposit)}원</div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="opacity-75">총 예치금액</span>
+          <span className="text-lg font-bold">{formatCurrency(summaryStats.totalDeposit)}원</span>
+        </div>
       </div>
       <div className="bg-gradient-to-br from-pink-400 to-red-500 rounded-lg shadow-sm p-3 text-white">
-        <div className="text-xs opacity-75 mb-1">총 사용금액</div>
-        <div className="text-lg font-bold">{formatCurrency(summaryStats.totalUsed)}원</div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="opacity-75">총 사용금액</span>
+          <span className="text-lg font-bold">{formatCurrency(summaryStats.totalUsed)}원</span>
+        </div>
       </div>
       <div className="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg shadow-sm p-3 text-white">
-        <div className="text-xs opacity-75 mb-1">총 잔액</div>
-        <div className="text-lg font-bold">{formatCurrency(summaryStats.totalBalance)}원</div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="opacity-75">총 잔액</span>
+          <span className="text-lg font-bold">{formatCurrency(summaryStats.totalBalance)}원</span>
+        </div>
       </div>
     </div>
   )
@@ -325,19 +331,7 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
         {renderSummaryCards()}
 
         {/* 필터 영역 */}
-        <FilterBar
-          actionButtons={
-            <>
-              <button
-                onClick={handleRefresh}
-                className="px-3 py-1.5 text-xs border border-border rounded hover:bg-muted transition-colors flex items-center gap-1"
-              >
-                <RefreshCw className="w-3 h-3" />
-                새로고침
-              </button>
-            </>
-          }
-        >
+        <FilterBar>
           <FilterBar.Input
             value={search}
             onChange={(value) => setSearch(value)}
@@ -345,6 +339,13 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
             onSearch={handleSearch}
           />
           <FilterBar.SearchButton onClick={handleSearch} />
+          <button
+            onClick={handleRefresh}
+            className="px-3 py-1.5 text-xs border border-border rounded hover:bg-muted transition-colors flex items-center gap-1"
+          >
+            <RefreshCw className="w-3 h-3" />
+            새로고침
+          </button>
         </FilterBar>
 
         {/* 테이블 */}
