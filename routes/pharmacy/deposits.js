@@ -457,4 +457,70 @@ router.delete('/deposit/:depositId', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/pharmacy-deposits/cleanup
+ * 예치금 잔고 레코드 정리 대상 조회 (dry run)
+ * 프록시 대상: pharmacy-deposit-cleanup.php
+ */
+router.get('/cleanup', async (req, res) => {
+  try {
+    console.log(`[GET /cleanup] 예치금 잔고 레코드 정리 대상 조회 요청`);
+
+    // PHP API 호출 (GET 요청은 조회만)
+    const response = await axios.get(
+      `${PHP_API_BASE_URL}/pharmacy-deposit-cleanup.php`,
+      {
+        timeout: DEFAULT_TIMEOUT,
+        headers: getDefaultHeaders()
+      }
+    );
+
+    console.log(`[GET /cleanup] 성공 - 정리 대상 조회 완료`);
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error(`[GET /cleanup] 오류:`, error.message);
+    handleApiError(error, res, '정리 대상 조회 중 오류가 발생했습니다.');
+  }
+});
+
+/**
+ * POST /api/pharmacy-deposits/cleanup
+ * 예치금 잔고 레코드 정리 실행
+ * 프록시 대상: pharmacy-deposit-cleanup.php
+ * 
+ * Body: { dry_run: false, force: true } - 실제 삭제 실행
+ * Body: { dry_run: true } - 조회만 (기본값)
+ */
+router.post('/cleanup', async (req, res) => {
+  try {
+    const { dry_run = true, force = false } = req.body;
+    
+    // force=true인 경우 실제 삭제 실행
+    const requestData = {
+      dry_run: force ? false : dry_run,
+      force: force
+    };
+
+    console.log(`[POST /cleanup] 예치금 잔고 레코드 정리 실행 요청 - dry_run: ${requestData.dry_run}, force: ${force}`);
+
+    // PHP API 호출
+    const response = await axios.post(
+      `${PHP_API_BASE_URL}/pharmacy-deposit-cleanup.php`,
+      requestData,
+      {
+        timeout: DEFAULT_TIMEOUT,
+        headers: getDefaultHeaders()
+      }
+    );
+
+    console.log(`[POST /cleanup] 성공 - 정리 실행 완료`);
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error(`[POST /cleanup] 오류:`, error.message);
+    handleApiError(error, res, '정리 실행 중 오류가 발생했습니다.');
+  }
+});
+
 module.exports = router;
