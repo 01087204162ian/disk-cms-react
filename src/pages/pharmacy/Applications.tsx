@@ -453,17 +453,18 @@ export default function Applications() {
       {
         key: 'id',
         header: '#',
-        className: 'w-12 text-center',
+        className: 'w-12 text-center align-middle',
         cell: (row) => {
           const index = applications.findIndex((item) => item.id === row.id)
           const rowNumber = (pagination.currentPage - 1) * pagination.pageSize + index + 1
           return (
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 setSelectedPharmacyId(row.id)
                 setDetailModalOpen(true)
               }}
-              className="px-2 py-1 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors"
+              className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors leading-tight h-fit"
             >
               {rowNumber}
             </button>
