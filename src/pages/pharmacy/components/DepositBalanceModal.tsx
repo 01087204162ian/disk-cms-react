@@ -3,6 +3,9 @@ import { Modal, FilterBar, DataTable, LoadingSpinner, useToastHelpers } from '..
 import { Wallet, Plus, List, History, RefreshCw } from 'lucide-react'
 import api from '../../../lib/api'
 import type { Column } from '../../../components/DataTable'
+import DepositChargeModal from './DepositChargeModal'
+import DepositListModal from './DepositListModal'
+import DepositUsageModal from './DepositUsageModal'
 
 interface DepositBalanceModalProps {
   isOpen: boolean
@@ -33,6 +36,23 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize] = useState(20)
+
+  // 서브 모달 상태
+  const [chargeModal, setChargeModal] = useState<{ isOpen: boolean; accountNum: number; accountName: string }>({
+    isOpen: false,
+    accountNum: 0,
+    accountName: '',
+  })
+  const [listModal, setListModal] = useState<{ isOpen: boolean; accountNum: number; accountName: string }>({
+    isOpen: false,
+    accountNum: 0,
+    accountName: '',
+  })
+  const [usageModal, setUsageModal] = useState<{ isOpen: boolean; accountNum: number; accountName: string }>({
+    isOpen: false,
+    accountNum: 0,
+    accountName: '',
+  })
 
   // 데이터 상태
   const [deposits, setDeposits] = useState<DepositSummary[]>([])
@@ -250,8 +270,11 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
         <div className="flex gap-1 justify-center" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => {
-              // TODO: 충전 모달 열기
-              console.log('충전 모달 열기:', row.account_num, row.account_name)
+              setChargeModal({
+                isOpen: true,
+                accountNum: row.account_num,
+                accountName: row.account_name,
+              })
             }}
             className="px-2 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors"
           >
@@ -260,8 +283,11 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
           </button>
           <button
             onClick={() => {
-              // TODO: 예치리스트 모달 열기
-              console.log('예치리스트 모달 열기:', row.account_num, row.account_name)
+              setListModal({
+                isOpen: true,
+                accountNum: row.account_num,
+                accountName: row.account_name,
+              })
             }}
             className="px-2 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors"
           >
@@ -270,8 +296,11 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
           </button>
           <button
             onClick={() => {
-              // TODO: 사용내역 모달 열기
-              console.log('사용내역 모달 열기:', row.account_num, row.account_name)
+              setUsageModal({
+                isOpen: true,
+                accountNum: row.account_num,
+                accountName: row.account_name,
+              })
             }}
             className="px-2 py-1 text-xs border border-blue-500 text-blue-600 rounded hover:bg-blue-500 hover:text-white transition-colors"
           >
@@ -370,8 +399,28 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
             emptyMessage="검색된 데이터가 없습니다."
           />
 
-        {/* TODO: 서브 모달 구현 */}
-        {/* 충전 모달, 예치리스트 모달, 사용내역 모달은 추후 구현 */}
+        {/* 서브 모달들 */}
+        <DepositChargeModal
+          isOpen={chargeModal.isOpen}
+          onClose={() => setChargeModal({ isOpen: false, accountNum: 0, accountName: '' })}
+          accountNum={chargeModal.accountNum}
+          accountName={chargeModal.accountName}
+          onSuccess={() => {
+            loadDepositSummary()
+          }}
+        />
+        <DepositListModal
+          isOpen={listModal.isOpen}
+          onClose={() => setListModal({ isOpen: false, accountNum: 0, accountName: '' })}
+          accountNum={listModal.accountNum}
+          accountName={listModal.accountName}
+        />
+        <DepositUsageModal
+          isOpen={usageModal.isOpen}
+          onClose={() => setUsageModal({ isOpen: false, accountNum: 0, accountName: '' })}
+          accountNum={usageModal.accountNum}
+          accountName={usageModal.accountName}
+        />
       </div>
     </Modal>
   )
