@@ -3,7 +3,7 @@ import api from '../../lib/api'
 import { dayNamesShort, formatYmd } from '../../lib/date'
 import { useAuthStore } from '../../store/authStore'
 import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
-import { Modal } from '../../components'
+import { Modal, Select, FormInput, DatePicker, LoadingSpinner, useToastHelpers } from '../../components'
 
 type WorkScheduleStatus = {
   has_work_days: boolean
@@ -103,6 +103,7 @@ function statusBadge(status: HalfDayListItem['status']) {
 
 export default function EmployeeSchedule() {
   const { user } = useAuthStore()
+  const toast = useToastHelpers()
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<WorkScheduleStatus | null>(null)
 
@@ -205,7 +206,7 @@ export default function EmployeeSchedule() {
       setSchedule(scheduleRes.data.data as ScheduleResponse)
     } catch (e: any) {
       console.error(e)
-      alert(e?.message || '스케줄을 불러오는 중 오류가 발생했습니다.')
+      toast.error(e?.message || '스케줄을 불러오는 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
@@ -280,7 +281,7 @@ export default function EmployeeSchedule() {
 
   const openHalfDay = () => {
     if (!canUseHalfDay) {
-      alert('수습 기간 중에는 반차를 사용할 수 없습니다.')
+      toast.warning('수습 기간 중에는 반차를 사용할 수 없습니다.')
       return
     }
     setHalfDayError(null)
@@ -685,17 +686,19 @@ export default function EmployeeSchedule() {
           </div>
 
           <div className="mt-4">
-            <select
-              value={baseOffDay}
+            <Select
+              value={String(baseOffDay)}
               onChange={(e) => setBaseOffDay(parseInt(e.target.value, 10))}
-              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value={1}>월요일</option>
-              <option value={2}>화요일</option>
-              <option value={3}>수요일</option>
-              <option value={4}>목요일</option>
-              <option value={5}>금요일</option>
-            </select>
+              options={[
+                { value: '1', label: '월요일' },
+                { value: '2', label: '화요일' },
+                { value: '3', label: '수요일' },
+                { value: '4', label: '목요일' },
+                { value: '5', label: '금요일' },
+              ]}
+              variant="modal"
+              className="w-full"
+            />
           </div>
 
           {setWorkDaysError ? <div className="mt-3 text-xs text-destructive">{setWorkDaysError}</div> : null}
@@ -724,27 +727,29 @@ export default function EmployeeSchedule() {
 
           <div className="mt-4 grid grid-cols-1 gap-3">
             <div>
-              <input
-                type="date"
+              <DatePicker
                 value={halfDayDate}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setHalfDayDate(v)
-                  loadNextOffDays(v)
+                onChange={(value) => {
+                  setHalfDayDate(value)
+                  loadNextOffDays(value)
                 }}
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="날짜 선택"
+                variant="modal"
+                className="w-full"
               />
             </div>
             <div>
-              <select
+              <Select
                 value={halfDayType}
                 onChange={(e) => setHalfDayType(e.target.value as any)}
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">반차 타입 선택</option>
-                <option value="HALF_AM">오전 반차</option>
-                <option value="HALF_PM">오후 반차</option>
-              </select>
+                options={[
+                  { value: '', label: '반차 타입 선택' },
+                  { value: 'HALF_AM', label: '오전 반차' },
+                  { value: 'HALF_PM', label: '오후 반차' },
+                ]}
+                variant="modal"
+                className="w-full"
+              />
             </div>
             <div>
               <textarea
@@ -758,18 +763,19 @@ export default function EmployeeSchedule() {
 
             {nextOffDays.length > 0 ? (
               <div>
-                <select
+                <Select
                   value={compensationDate}
                   onChange={(e) => setCompensationDate(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">보충 일정 선택 (선택사항)</option>
-                  {nextOffDays.map((o) => (
-                    <option key={o.date} value={o.date}>
-                      {o.date} ({o.dayName}) - {o.weekNumber}주 후
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: '', label: '보충 일정 선택 (선택사항)' },
+                    ...nextOffDays.map((o) => ({
+                      value: o.date,
+                      label: `${o.date} (${o.dayName}) - ${o.weekNumber}주 후`,
+                    })),
+                  ]}
+                  variant="modal"
+                  className="w-full"
+                />
               </div>
             ) : null}
 
@@ -802,33 +808,37 @@ export default function EmployeeSchedule() {
 
           <div className="mt-4 grid grid-cols-1 gap-3">
             <div>
-              <input
-                type="date"
+              <DatePicker
                 value={tempWeekStart}
-                onChange={(e) => setTempWeekStart(e.target.value)}
+                onChange={(value) => setTempWeekStart(value)}
                 placeholder="주 시작일 (월요일) 선택"
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variant="modal"
+                className="w-full"
               />
             </div>
             <div>
-              <select
-                value={tempOffDay}
+              <Select
+                value={String(tempOffDay)}
                 onChange={(e) => setTempOffDay(parseInt(e.target.value, 10))}
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={1}>월요일</option>
-                <option value={2}>화요일</option>
-                <option value={3}>수요일</option>
-                <option value={4}>목요일</option>
-                <option value={5}>금요일</option>
-              </select>
+                options={[
+                  { value: '1', label: '월요일' },
+                  { value: '2', label: '화요일' },
+                  { value: '3', label: '수요일' },
+                  { value: '4', label: '목요일' },
+                  { value: '5', label: '금요일' },
+                ]}
+                variant="modal"
+                className="w-full"
+              />
             </div>
             <div>
-              <input
+              <FormInput
+                type="email"
                 value={tempSubstituteEmployee}
                 onChange={(e) => setTempSubstituteEmployee(e.target.value)}
                 placeholder="대체 근무자 이메일 (선택사항)"
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variant="modal"
+                className="w-full"
               />
             </div>
             <div>
@@ -845,12 +855,8 @@ export default function EmployeeSchedule() {
         </Modal>
       ) : null}
 
-      {/* 로딩 오버레이(간단) */}
-      {loading ? (
-        <div className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[1px] flex items-center justify-center">
-          <div className="px-4 py-2 rounded-lg bg-background border border-border text-sm">불러오는 중...</div>
-        </div>
-      ) : null}
+      {/* 로딩 오버레이 */}
+      {loading && <LoadingSpinner fullScreen text="불러오는 중..." />}
     </div>
   )
 }

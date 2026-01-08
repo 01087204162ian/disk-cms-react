@@ -499,17 +499,195 @@ interface Column<T> {
 }
 ```
 
+### 4.4 FormInput 컴포넌트
+
+**Import**:
+```tsx
+import { FormInput } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+<FormInput
+  type="text"
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+  placeholder="입력 필드명 *"
+  variant="modal" // default | filter | modal
+  error={errorMessage} // 선택적
+  helperText="도움말 텍스트" // 선택적
+  className="w-full"
+/>
+```
+
+**Props**:
+- `type`: 입력 타입 (기본값: 'text')
+- `value`: 입력값
+- `onChange`: 변경 핸들러 (React input 이벤트)
+- `placeholder`: 플레이스홀더
+- `variant`: 스타일 variant ('default', 'filter', 'modal')
+- `label`: 레이블 (선택적, label이 있으면 표시)
+- `error`: 에러 메시지 (선택적)
+- `helperText`: 도움말 텍스트 (선택적)
+- `leftIcon`: 왼쪽 아이콘 (선택적)
+- `rightIcon`: 오른쪽 아이콘 (선택적)
+- `fullWidth`: 전체 너비 여부 (기본값: true)
+- `variant="filter"`일 때 자동으로 검색 아이콘 표시
+
+### 4.5 DatePicker 컴포넌트
+
+**Import**:
+```tsx
+import { DatePicker } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+<DatePicker
+  value={dateValue}
+  onChange={(value) => setDateValue(value)}
+  placeholder="날짜 선택"
+  variant="modal" // default | filter | modal
+  min="2024-01-01" // 선택적
+  max="2025-12-31" // 선택적
+  className="w-full"
+/>
+```
+
+**Props**:
+- `value`: 날짜 값 (string, 'YYYY-MM-DD' 형식)
+- `onChange`: 변경 핸들러 ((value: string) => void)
+- `placeholder`: 플레이스홀더
+- `variant`: 스타일 variant
+- `min`: 최소 날짜 (선택적)
+- `max`: 최대 날짜 (선택적)
+- Calendar 아이콘 자동 포함
+
+### 4.6 Select 컴포넌트
+
+**Import**:
+```tsx
+import { Select } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+<Select
+  value={selectedValue}
+  onChange={(e) => setSelectedValue(e.target.value)}
+  options={[
+    { value: '1', label: '옵션 1' },
+    { value: '2', label: '옵션 2' },
+  ]}
+  placeholder="선택하세요"
+  variant="modal" // default | filter | modal
+  className="w-full"
+/>
+```
+
+**Props**:
+- `value`: 선택된 값
+- `onChange`: 변경 핸들러 (React select 이벤트)
+- `options`: 옵션 배열 `Array<{ value: string | number, label: string, disabled?: boolean }>`
+- `placeholder`: 기본 옵션 라벨 (선택적)
+- `variant`: 스타일 variant
+- `label`: 레이블 (선택적)
+- `error`: 에러 메시지 (선택적)
+- `helperText`: 도움말 텍스트 (선택적)
+- ChevronDown 아이콘 자동 포함
+
+### 4.7 LoadingSpinner 컴포넌트
+
+**Import**:
+```tsx
+import { LoadingSpinner } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+{loading && <LoadingSpinner size="md" text="불러오는 중..." />}
+
+// 전체 화면 오버레이
+{loading && <LoadingSpinner fullScreen text="불러오는 중..." />}
+```
+
+**Props**:
+- `size`: 크기 ('sm', 'md', 'lg', 기본값: 'md')
+- `color`: 색상 ('primary', 'muted', 'white', 기본값: 'primary')
+- `text`: 로딩 메시지 (선택적)
+- `fullScreen`: 전체 화면 오버레이 모드 (기본값: false)
+
+### 4.8 Toast 컴포넌트
+
+**Import**:
+```tsx
+import { useToastHelpers } from '../../components'
+```
+
+**기본 사용법**:
+```tsx
+function MyComponent() {
+  const toast = useToastHelpers()
+
+  const handleSuccess = () => {
+    toast.success('작업이 완료되었습니다.')
+  }
+
+  const handleError = () => {
+    toast.error('오류가 발생했습니다.')
+  }
+
+  const handleWarning = () => {
+    toast.warning('경고 메시지')
+  }
+
+  const handleInfo = () => {
+    toast.info('정보 메시지')
+  }
+
+  return (
+    // ...
+  )
+}
+```
+
+**ToastProvider 설정**:
+```tsx
+// App.tsx에서 ToastProvider로 감싸기
+import { ToastProvider } from './components'
+
+function App() {
+  return (
+    <ToastProvider>
+      {/* 앱 컴포넌트 */}
+    </ToastProvider>
+  )
+}
+```
+
+**Toast 함수들**:
+- `toast.success(message, duration?)`: 성공 메시지
+- `toast.error(message, duration?)`: 에러 메시지
+- `toast.warning(message, duration?)`: 경고 메시지
+- `toast.info(message, duration?)`: 정보 메시지
+
+**특징**:
+- 우측 상단에 자동 배치 (top-20 right-4)
+- 자동 사라짐 (기본 3초, duration 설정 가능)
+- 수동 닫기 버튼 포함
+- 타입별 아이콘 자동 표시
+
 ---
 
 ## 5. 적용 대상 페이지
 
 다음 페이지에 이 표준을 적용해야 합니다:
 
-- ✅ `src/pages/staff/Employees.tsx` - 완료
-- ⏳ `src/pages/staff/Holidays.tsx` - 모달 적용 필요
-- ⏳ `src/pages/staff/HalfDayApproval.tsx` - 모달 적용 필요
-- ⏳ `src/pages/staff/EmployeeSchedule.tsx` - 모달 적용 필요
-- ⏳ `src/pages/staff/OrganizationChart.tsx` - 필터 적용 필요 (있는 경우)
+- ✅ `src/pages/staff/Employees.tsx` - 완료 (모달, 필터, 테이블, 공통 컴포넌트 적용)
+- ✅ `src/pages/staff/Holidays.tsx` - 완료 (모달, 공통 컴포넌트 적용)
+- ✅ `src/pages/staff/HalfDayApproval.tsx` - 완료 (모달, 공통 컴포넌트 적용)
+- ✅ `src/pages/staff/EmployeeSchedule.tsx` - 완료 (모달, 공통 컴포넌트 적용)
+- ✅ `src/pages/staff/OrganizationChart.tsx` - 완료 (필터 적용)
 - ⏳ `src/pages/Login.tsx` - 모달 적용 필요 (있는 경우)
 
 ---

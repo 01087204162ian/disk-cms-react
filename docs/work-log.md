@@ -110,6 +110,52 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
   - `src/pages/staff/Employees.tsx`: DataTable 컴포넌트 적용 완료
 - **결과**: Employees.tsx 코드가 간결해지고 재사용 가능한 구조로 개선됨
 
+### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 적용 및 문서화
+
+#### 21) 새로 개발한 공통 컴포넌트를 실제 페이지에 적용 완료
+- **Employees.tsx**:
+  - DatePicker: 퇴사일 지정 모달 적용
+  - FormInput: 부서 관리 모달의 부서코드, 부서명 입력 필드 적용
+  - Select: 부서 관리 모달의 부서장, 상태 select 적용
+  - LoadingSpinner: DataTable 내부에서 자동 사용
+- **EmployeeSchedule.tsx**:
+  - Select: 기본 휴무일 설정 모달 적용
+  - DatePicker: 반차 신청, 휴무일 변경 신청 모달 적용
+  - Select: 반차 타입, 보충 일정, 휴무일 select 적용
+  - FormInput: 대체 근무자 이메일 입력 필드 적용
+  - LoadingSpinner: 전체 화면 로딩 오버레이로 교체
+  - Toast: alert()를 toast로 교체 (스케줄 로드 오류, 수습 기간 경고)
+- **Holidays.tsx**:
+  - DatePicker: 공휴일 추가 모달 적용
+  - FormInput: 공휴일명 입력 필드 적용 (추가, 수정 모달)
+  - LoadingSpinner: 로딩 상태 표시 적용
+  - Toast: alert()를 toast로 교체 (삭제, 생성, 검증 성공/오류)
+- **HalfDayApproval.tsx**:
+  - LoadingSpinner: 로딩 상태 표시 적용
+- **DataTable.tsx**:
+  - LoadingSpinner: 로딩 인디케이터로 교체 (기존 animate-spin 제거)
+- **파일**:
+  - `src/pages/staff/Employees.tsx`
+  - `src/pages/staff/EmployeeSchedule.tsx`
+  - `src/pages/staff/Holidays.tsx`
+  - `src/pages/staff/HalfDayApproval.tsx`
+  - `src/components/DataTable.tsx`
+- **결과**: 새로 개발한 공통 컴포넌트가 실제로 작동하며, 코드 일관성 및 재사용성이 향상됨
+
+#### 22) UI_STANDARDS.md 업데이트 완료
+- **새 컴포넌트 사용 가이드 추가**:
+  - FormInput 컴포넌트 사용 가이드 (variant, label, error, helperText 등)
+  - DatePicker 컴포넌트 사용 가이드 (value, onChange, min, max 등)
+  - Select 컴포넌트 사용 가이드 (options, placeholder, variant 등)
+  - LoadingSpinner 컴포넌트 사용 가이드 (size, color, text, fullScreen 등)
+  - Toast 컴포넌트 사용 가이드 (useToastHelpers, ToastProvider 설정 등)
+- **적용 대상 페이지 업데이트**:
+  - 모든 staff 페이지가 완료 상태로 업데이트
+  - 각 컴포넌트별 예시 코드 포함
+- **파일**:
+  - `docs/UI_STANDARDS.md`: 새 컴포넌트 사용 가이드 추가
+- **결과**: 개발자들이 새 컴포넌트를 쉽게 사용할 수 있도록 문서화 완료
+
 ### 2026-01-07 (Phase 2 진행) - 공통 컴포넌트 추가 개발
 
 #### 20) 공통 컴포넌트 추가 개발 완료

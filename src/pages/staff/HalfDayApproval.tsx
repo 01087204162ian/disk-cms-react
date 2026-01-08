@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { RefreshCw, Check, X } from 'lucide-react'
-import { Modal } from '../../components'
+import { Modal, FormInput, LoadingSpinner } from '../../components'
 
 type PendingHalfDay = {
   id: number
@@ -163,7 +163,9 @@ export default function HalfDayApproval() {
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b border-border font-semibold">반차 승인 대기</div>
         {loading ? (
-          <div className="p-6 text-sm text-muted-foreground">불러오는 중...</div>
+          <div className="p-6 flex items-center justify-center">
+            <LoadingSpinner size="md" />
+          </div>
         ) : halfDays.length === 0 ? (
           <div className="p-6 text-sm text-muted-foreground">승인 대기 중인 반차 신청이 없습니다.</div>
         ) : (
@@ -217,7 +219,9 @@ export default function HalfDayApproval() {
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b border-border font-semibold">휴무일 변경 승인 대기</div>
         {loading ? (
-          <div className="p-6 text-sm text-muted-foreground">불러오는 중...</div>
+          <div className="p-6 flex items-center justify-center">
+            <LoadingSpinner size="md" />
+          </div>
         ) : changes.length === 0 ? (
           <div className="p-6 text-sm text-muted-foreground">승인 대기 중인 휴무일 변경 신청이 없습니다.</div>
         ) : (

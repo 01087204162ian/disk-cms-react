@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import LoadingSpinner from './LoadingSpinner'
 
 export interface Column<T> {
   key: string
@@ -155,7 +156,7 @@ export default function DataTable<T extends Record<string, any>>({
     <div className={`bg-card rounded-xl border border-border overflow-hidden ${className}`}>
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <LoadingSpinner size="md" />
         </div>
       ) : data.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-xs">{emptyMessage}</div>

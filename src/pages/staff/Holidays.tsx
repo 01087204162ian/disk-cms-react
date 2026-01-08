@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import api from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 import { RefreshCw, Plus, Wand2, BadgeCheck, Pencil, Trash2 } from 'lucide-react'
-import { Modal } from '../../components'
+import { Modal, FormInput, DatePicker, LoadingSpinner, useToastHelpers } from '../../components'
 
 type Holiday = {
   id: number
@@ -22,6 +22,7 @@ function toYmd(d: Date) {
 export default function Holidays() {
   const { user } = useAuthStore()
   const isAdmin = !!user?.role && ['SUPER_ADMIN', 'SYSTEM_ADMIN'].includes(user.role)
+  const toast = useToastHelpers()
 
   const baseYear = useMemo(() => new Date().getFullYear(), [])
   const years = useMemo(() => [baseYear - 1, baseYear, baseYear + 1], [baseYear])
@@ -126,9 +127,10 @@ export default function Holidays() {
     try {
       const res = await api.delete(`/api/staff/holidays/${id}`)
       if (!res.data?.success) throw new Error(res.data?.message || '삭제에 실패했습니다.')
+      toast.success('공휴일이 삭제되었습니다.')
       await loadAll()
     } catch (e: any) {
-      alert(e?.message || '삭제 중 오류가 발생했습니다.')
+      toast.error(e?.message || '삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -136,10 +138,12 @@ export default function Holidays() {
     try {
       const res = await api.post('/api/staff/holidays/generate-substitute', { year })
       if (!res.data?.success) throw new Error(res.data?.message || '생성에 실패했습니다.')
-      setMessage(res.data?.message || '대체 공휴일 생성 완료')
+      const message = res.data?.message || '대체 공휴일 생성 완료'
+      setMessage(message)
+      toast.success(message)
       await loadAll()
     } catch (e: any) {
-      alert(e?.message || '대체 공휴일 생성 중 오류가 발생했습니다.')
+      toast.error(e?.message || '대체 공휴일 생성 중 오류가 발생했습니다.')
     }
   }
 
@@ -148,7 +152,11 @@ export default function Holidays() {
       const res = await api.get('/api/staff/holidays/validate', { params: { year } })
       if (!res.data?.success) throw new Error(res.data?.message || '검증에 실패했습니다.')
       const summary = res.data?.data?.summary
-      setMessage(
+      const message = summary
+        ? `검증 완료: ${summary.total}개 공휴일 중 ${summary.valid}개 유효, ${summary.invalid}개 무효`
+        : res.data?.message || '검증 완료'
+      setMessage(message)
+      toast.success(message)
         summary
           ? `검증 완료: 오류 ${summary.errors} / 경고 ${summary.warnings}`
           : (res.data?.message || '검증 완료')
@@ -232,7 +240,9 @@ export default function Holidays() {
 
             <div className="max-h-[620px] overflow-y-auto">
               {loading ? (
-                <div className="p-6 text-sm text-muted-foreground">불러오는 중...</div>
+                <div className="p-6 flex items-center justify-center">
+                  <LoadingSpinner size="md" />
+                </div>
               ) : (holidaysByYear[y] || []).length === 0 ? (
                 <div className="p-6 text-sm text-muted-foreground">데이터가 없습니다.</div>
               ) : (
@@ -297,21 +307,23 @@ export default function Holidays() {
         >
           <div className="grid grid-cols-1 gap-3">
             <div>
-              <input
-                type="date"
+              <DatePicker
                 value={addDate}
-                onChange={(e) => setAddDate(e.target.value)}
+                onChange={(value) => setAddDate(value)}
                 max={toYmd(new Date(baseYear + 1, 11, 31))}
                 placeholder="날짜 선택"
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variant="modal"
+                className="w-full"
               />
             </div>
             <div>
-              <input
+              <FormInput
+                type="text"
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
                 placeholder="공휴일명 * (예: 신정)"
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variant="modal"
+                className="w-full"
               />
             </div>
             {addError ? <div className="text-xs text-destructive">{addError}</div> : null}
@@ -339,11 +351,13 @@ export default function Holidays() {
         >
           <div className="grid grid-cols-1 gap-3">
             <div>
-              <input
+              <FormInput
+                type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 placeholder="공휴일명 *"
-                className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                variant="modal"
+                className="w-full"
               />
             </div>
             <label className="flex items-center gap-2 text-xs">

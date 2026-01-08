@@ -10,7 +10,7 @@ import {
   Building,
   Calendar,
 } from 'lucide-react'
-import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay, DataTable, type Column } from '../../components'
+import { Modal, FilterBar, FilterSelect, FilterInput, FilterSearchButton, StatsDisplay, DataTable, type Column, FormInput, DatePicker, Select, LoadingSpinner } from '../../components'
 
 interface Employee {
   email: string
@@ -1098,13 +1098,11 @@ export default function Employees() {
           }
         >
           <div className="mb-4">
-            <input
-              type="date"
-              id="resignDateInput"
+            <DatePicker
               value={resignDate}
-              onChange={(e) => setResignDate(e.target.value)}
+              onChange={(value) => setResignDate(value)}
               placeholder="퇴사일 선택"
-              className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              variant="modal"
               required
             />
             <div className="mt-2 text-xs text-gray-500">
@@ -1144,48 +1142,53 @@ export default function Employees() {
               <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                   <div className="md:col-span-2">
-                    <input
+                    <FormInput
                       type="text"
                       value={newDeptCode}
                       onChange={(e) => setNewDeptCode(e.target.value.toUpperCase())}
                       placeholder="부서코드 * (예: DEV)"
                       maxLength={20}
-                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      variant="modal"
+                      className="w-full"
                     />
                   </div>
                   <div className="md:col-span-3">
-                    <input
+                    <FormInput
                       type="text"
                       value={newDeptName}
                       onChange={(e) => setNewDeptName(e.target.value)}
                       placeholder="부서명 * (예: 개발팀)"
                       maxLength={50}
-                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      variant="modal"
+                      className="w-full"
                     />
                   </div>
                   <div className="md:col-span-3">
-                    <select
+                    <Select
                       value={newDeptManager}
                       onChange={(e) => setNewDeptManager(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">부서장 선택 (선택사항)</option>
-                      {departmentEmployees.map((emp) => (
-                        <option key={emp.email} value={emp.email}>
-                          {emp.name} ({emp.department?.name || '미지정'})
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: '', label: '부서장 선택 (선택사항)' },
+                        ...departmentEmployees.map((emp) => ({
+                          value: emp.email,
+                          label: `${emp.name} (${emp.department?.name || '미지정'})`,
+                        })),
+                      ]}
+                      variant="modal"
+                      className="w-full"
+                    />
                   </div>
                   <div className="md:col-span-2">
-                    <select
+                    <Select
                       value={newDeptStatus}
                       onChange={(e) => setNewDeptStatus(e.target.value)}
-                      className="w-full px-3 py-1.5 text-xs border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="1">활성</option>
-                      <option value="0">비활성</option>
-                    </select>
+                      options={[
+                        { value: '1', label: '활성' },
+                        { value: '0', label: '비활성' },
+                      ]}
+                      variant="modal"
+                      className="w-full"
+                    />
                   </div>
                   <div className="md:col-span-2 flex items-end">
                     <button
