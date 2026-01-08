@@ -97,29 +97,43 @@ export default function Applications() {
       if (res.data?.success) {
         // API 응답 구조에 맞게 데이터 변환
         const data = res.data.data || []
-        const transformedData = data.map((item: any) => ({
-          id: item.num,
-          company_name: item.company || '',
-          business_number: item.business_number || item.school2 || '',
-          manager: item.damdangja || item.manager || '',
-          phone: item.hphone || item.mobile || '',
-          contact: item.hphone2 || item.tel || '',
-          design_number_professional: item.chemist_design_number || item.design_number_professional || '',
-          design_number_fire: item.area_design_number || item.design_number_fire || '',
-          request_date: item.request_date || item.created_at || '',
-          approval_date: item.approval_date || item.approved_at || '',
-          status: getStatusCode(item.status || item.status_id || 0),
-          status_name: getStatusText(item.status || item.status_id || 0),
-          memo: item.memo || item.remark || '',
-          premium: item.premium || item.insurance_premium || 0,
-          premium_raw: item.premium_raw || item.premium || 0,
-          account: item.account_directory || item.account_company || item.account || '',
-          chemist: item.chemist || 0,
-          area: item.area || 0,
-          chemist_design_number: item.chemist_design_number || '',
-          area_design_number: item.area_design_number || '',
-          original_status: getStatusCode(item.status || item.status_id || 0),
-        }))
+        
+        // 디버깅: 실제 응답 데이터 확인
+        if (data.length > 0) {
+          console.log('서버 응답 데이터 샘플 (첫 번째 항목):', data[0])
+        }
+        
+        const transformedData = data.map((item: any) => {
+          // 상태 처리: 코드 또는 텍스트 모두 처리
+          const statusValue = item.status
+          const statusCode = getStatusCode(statusValue)
+          
+          return {
+            id: item.num,
+            company_name: item.company || '',
+            business_number: item.school2 || item.business_number || '', // school2가 실제 필드명
+            manager: item.damdangja || item.manager || '', // damdangja가 실제 필드명
+            phone: item.hphone || item.phone || item.mobile || '', // hphone이 실제 필드명
+            contact: item.hphone2 || item.contact || item.tel || '', // hphone2가 실제 필드명
+            design_number_professional: item.chemist_design_number || item.design_number_professional || '',
+            design_number_fire: item.area_design_number || item.design_number_fire || '',
+            request_date: item.request_date || item.created_at || '',
+            approval_date: item.approval_date || item.approved_at || '',
+            status: statusCode,
+            status_name: getStatusText(statusValue),
+            memo: item.memo || item.remark || '',
+            premium: item.premium ? (typeof item.premium === 'string' ? parseInt(item.premium.replace(/[^0-9]/g, '')) : item.premium) : (item.premium_raw ? (typeof item.premium_raw === 'string' ? parseInt(item.premium_raw.replace(/[^0-9]/g, '')) : item.premium_raw) : 0),
+            premium_raw: item.premium_raw ? (typeof item.premium_raw === 'string' ? parseInt(item.premium_raw.replace(/[^0-9]/g, '')) : item.premium_raw) : (item.premium ? (typeof item.premium === 'string' ? parseInt(item.premium.replace(/[^0-9]/g, '')) : item.premium) : 0),
+            account: item.account_directory || item.account_company || item.account || '',
+            chemist: item.chemist || 0,
+            area: item.area || 0,
+            chemist_design_number: item.chemist_design_number || '',
+            area_design_number: item.area_design_number || '',
+            original_status: statusCode,
+          }
+        })
+        
+        console.log('변환된 데이터 샘플 (첫 번째 항목):', transformedData[0] || null)
         setApplications(transformedData)
         setPagination((prev) => ({
           ...prev,
@@ -411,23 +425,23 @@ export default function Applications() {
         className: 'w-12 text-center',
         cell: (row) => {
           const index = applications.findIndex((item) => item.id === row.id)
-          return (pagination.currentPage - 1) * pagination.pageSize + index + 1
+          const rowNumber = (pagination.currentPage - 1) * pagination.pageSize + index + 1
+          return (
+            <button
+              onClick={() => {
+                setSelectedPharmacyId(row.id)
+                setDetailModalOpen(true)
+              }}
+              className="px-2 py-1 bg-blue-500 text-white rounded text-xs font-medium hover:bg-blue-600 transition-colors"
+            >
+              {rowNumber}
+            </button>
+          )
         },
       },
       {
         key: 'company_name',
         header: '업체명',
-        cell: (row) => (
-          <button
-            onClick={() => {
-              setSelectedPharmacyId(row.id)
-              setDetailModalOpen(true)
-            }}
-            className="text-blue-600 hover:text-blue-800 hover:underline"
-          >
-            {row.company_name}
-          </button>
-        ),
       },
       {
         key: 'business_number',
