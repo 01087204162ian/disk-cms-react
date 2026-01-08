@@ -477,58 +477,58 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
 
     return (
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-border text-center align-middle text-xs">
-          <thead>
-            <tr className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
-              <th className="border border-border py-1.5 text-xs" rowSpan={2} style={{ minWidth: '80px', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+        <table className="w-full border-collapse border border-border text-center align-middle text-xs" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-muted">
+            <tr>
+              <th className="border border-border py-2 text-xs font-medium" rowSpan={2} style={{ width: '14.28%', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                 월
               </th>
-              <th className="border border-border py-1.5 text-xs" colSpan={3}>
+              <th className="border border-border py-2 text-xs font-medium" colSpan={3} style={{ width: '42.86%' }}>
                 {currentYear}년
               </th>
-              <th className="border border-border py-1.5 text-xs" colSpan={3}>
+              <th className="border border-border py-2 text-xs font-medium" colSpan={3} style={{ width: '42.86%' }}>
                 {lastYear}년
               </th>
             </tr>
-            <tr className="bg-gradient-to-r from-purple-600 to-purple-800 text-white">
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>승인</th>
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>해지</th>
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>계</th>
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>승인</th>
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>해지</th>
-              <th className="border border-border py-1.5 text-xs" style={{ width: '18%' }}>계</th>
+            <tr>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>승인</th>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>해지</th>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>계</th>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>승인</th>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>해지</th>
+              <th className="border border-border py-2 text-xs font-medium" style={{ width: '14.28%' }}>계</th>
             </tr>
           </thead>
           <tbody className="text-xs">
             {monthlyRows.map((row) => (
               <tr key={row.month} className="hover:bg-accent/50 transition-colors">
-                <th className="border border-border py-1.5 bg-muted/50 text-xs">{row.month}월</th>
-                <td className="border border-border py-1.5 text-end text-blue-600 text-xs">
+                <th className="border border-border py-2 bg-muted/50 text-xs" style={{ width: '14.28%' }}>{row.month}월</th>
+                <td className="border border-border py-2 px-3 text-end text-blue-600 text-xs" style={{ width: '14.28%' }}>
                   {row.thisYear.approval_amount > 0
                     ? `${formatCurrency(row.thisYear.approval_amount)} (${row.thisYear.approval_count})`
                     : ''}
                 </td>
-                <td className="border border-border py-1.5 text-end text-red-600 text-xs">
+                <td className="border border-border py-2 px-3 text-end text-red-600 text-xs" style={{ width: '14.28%' }}>
                   {row.thisYear.cancel_amount > 0
                     ? `${formatCurrency(row.thisYear.cancel_amount)} (${row.thisYear.cancel_count})`
                     : ''}
                 </td>
-                <td className="border border-border py-1.5 text-end font-bold text-xs">
+                <td className="border border-border py-2 px-3 text-end font-bold text-xs" style={{ width: '14.28%' }}>
                   {row.thisYear.net_amount !== 0
                     ? `${formatCurrency(row.thisYear.net_amount)} (${row.thisYear.net_count})`
                     : ''}
                 </td>
-                <td className="border border-border py-1.5 text-end text-blue-600 text-xs">
+                <td className="border border-border py-2 px-3 text-end text-blue-600 text-xs" style={{ width: '14.28%' }}>
                   {row.lastYear.approval_amount > 0
                     ? `${formatCurrency(row.lastYear.approval_amount)} (${row.lastYear.approval_count})`
                     : ''}
                 </td>
-                <td className="border border-border py-1.5 text-end text-red-600 text-xs">
+                <td className="border border-border py-2 px-3 text-end text-red-600 text-xs" style={{ width: '14.28%' }}>
                   {row.lastYear.cancel_amount > 0
                     ? `${formatCurrency(row.lastYear.cancel_amount)} (${row.lastYear.cancel_count})`
                     : ''}
                 </td>
-                <td className="border border-border py-1.5 text-end font-bold text-xs">
+                <td className="border border-border py-2 px-3 text-end font-bold text-xs" style={{ width: '14.28%' }}>
                   {row.lastYear.net_amount !== 0
                     ? `${formatCurrency(row.lastYear.net_amount)} (${row.lastYear.net_count})`
                     : ''}
@@ -538,23 +538,23 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           </tbody>
           <tfoot className="bg-muted">
             <tr className="font-bold text-xs">
-              <th className="border border-border py-1.5 text-xs">총합계</th>
-              <td className="border border-border py-1.5 text-end text-blue-600 text-xs">
+              <th className="border border-border py-2 text-xs" style={{ width: '14.28%' }}>총합계</th>
+              <td className="border border-border py-2 px-3 text-end text-blue-600 text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(totalThisYear.approval_amount)} ({totalThisYear.approval_count})
               </td>
-              <td className="border border-border py-1.5 text-end text-red-600 text-xs">
+              <td className="border border-border py-2 px-3 text-end text-red-600 text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(totalThisYear.cancel_amount)} ({totalThisYear.cancel_count})
               </td>
-              <td className="border border-border py-1.5 text-end font-bold text-xs">
+              <td className="border border-border py-2 px-3 text-end font-bold text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(thisYearNetAmount)} ({thisYearNetCount})
               </td>
-              <td className="border border-border py-1.5 text-end text-blue-600 text-xs">
+              <td className="border border-border py-2 px-3 text-end text-blue-600 text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(totalLastYear.approval_amount)} ({totalLastYear.approval_count})
               </td>
-              <td className="border border-border py-1.5 text-end text-red-600 text-xs">
+              <td className="border border-border py-2 px-3 text-end text-red-600 text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(totalLastYear.cancel_amount)} ({totalLastYear.cancel_count})
               </td>
-              <td className="border border-border py-1.5 text-end font-bold text-xs">
+              <td className="border border-border py-2 px-3 text-end font-bold text-xs" style={{ width: '14.28%' }}>
                 {formatCurrency(lastYearNetAmount)} ({lastYearNetCount})
               </td>
             </tr>
