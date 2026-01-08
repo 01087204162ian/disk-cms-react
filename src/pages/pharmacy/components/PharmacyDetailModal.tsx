@@ -475,7 +475,7 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             {/* 사업장면적 */}
             <label className="text-xs font-medium text-gray-700 py-1">
               사업장면적
-              {isLockedStatus && <span className="ml-1 text-[10px] text-gray-500">(변경불가)</span>}
+              {isLockedStatus && <span className="ml-1 text-[9px] text-gray-500">(변경불가)</span>}
             </label>
             <input
               type="text"
@@ -506,9 +506,9 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
               )}
             </div>
 
-            {/* 전문인설계번호 */}
+            {/* 전문인설계번호 / 전문인증권번호 (2행 2열) */}
             <label className="text-xs font-medium text-gray-700 py-1">전문인설계번호</label>
-            <div className="col-span-3 flex gap-1 items-center">
+            <div className="flex gap-1 items-center">
               <input
                 type="text"
                 value={detail.expert_design_number}
@@ -523,10 +523,8 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
                 설계번호입력
               </button>
             </div>
-
-            {/* 전문인증권번호 */}
             <label className="text-xs font-medium text-gray-700 py-1">전문인증권번호</label>
-            <div className="col-span-3 flex gap-1 items-center">
+            <div className="flex gap-1 items-center">
               <input
                 type="text"
                 value={detail.expert_certificate_number}
@@ -549,9 +547,9 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
               </button>
             </div>
 
-            {/* 화재설계번호 */}
+            {/* 화재설계번호 / 화재증권번호 (2행 2열) */}
             <label className="text-xs font-medium text-gray-700 py-1">화재설계번호</label>
-            <div className="col-span-3 flex gap-1 items-center">
+            <div className="flex gap-1 items-center">
               <input
                 type="text"
                 value={detail.fire_design_number}
@@ -566,10 +564,8 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
                 설계번호입력
               </button>
             </div>
-
-            {/* 화재증권번호 */}
             <label className="text-xs font-medium text-gray-700 py-1">화재증권번호</label>
-            <div className="col-span-3 flex gap-1 items-center">
+            <div className="flex gap-1 items-center">
               <input
                 type="text"
                 value={detail.fire_certificate_number}
