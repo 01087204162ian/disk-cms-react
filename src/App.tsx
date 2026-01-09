@@ -9,6 +9,7 @@ import Holidays from './pages/staff/Holidays'
 import HalfDayApproval from './pages/staff/HalfDayApproval'
 import OrganizationChart from './pages/staff/OrganizationChart'
 import PharmacyApplications from './pages/pharmacy/Applications'
+import PharmacyDocumentation from './pages/pharmacy/Documentation'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ToastProvider } from './components'
@@ -41,6 +42,7 @@ function App() {
                     <Route path="/staff/organization-chart" element={<OrganizationChart />} />
                     {/* 보험 상품 */}
                     <Route path="/pharmacy/applications" element={<PharmacyApplications />} />
+                    <Route path="/pharmacy/documentation" element={<PharmacyDocumentation />} />
                     {/* 이전 경로 호환 */}
                     <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
                     {/* 추가 라우트는 여기에 추가 */}
