@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Modal, Select, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 
@@ -45,15 +45,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
   const [resultData, setResultData] = useState<any[]>([])
   const [summary, setSummary] = useState<any>(null)
 
-  // 거래처 목록 로드 및 초기 조회
-  useEffect(() => {
-    if (isOpen) {
-      loadAccounts()
-      // 모달이 열릴 때 당월 실적 자동 조회
-      handleSearch()
-    }
-  }, [isOpen])
-
   const loadAccounts = async () => {
     try {
       const res = await api.get('/api/pharmacy/accounts')
@@ -65,7 +56,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     }
   }
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     setLoading(true)
     try {
       const params: any = {
@@ -79,7 +70,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         ? '/api/pharmacy-reports/daily' 
         : '/api/pharmacy-reports/monthly'
 
+      console.log('[실적 조회]', { endpoint, params })
       const res = await api.get(endpoint, { params })
+      console.log('[실적 조회 결과]', res.data)
+      
       if (res.data?.success) {
         setResultData(res.data.data || [])
         setSummary(res.data.summary || {})
@@ -94,7 +88,21 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters.account, filters.year, filters.month, filters.criteria, reportMode, toast])
+
+  // 거래처 목록 로드
+  useEffect(() => {
+    if (isOpen) {
+      loadAccounts()
+    }
+  }, [isOpen])
+
+  // 필터 변경 시 자동 조회 (초기 로드 포함)
+  useEffect(() => {
+    if (isOpen) {
+      handleSearch()
+    }
+  }, [isOpen, filters.account, filters.year, filters.month, filters.criteria, reportMode, handleSearch])
 
   // 년도 옵션 (최근 3년)
   const yearOptions = []
@@ -586,7 +594,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 checked={filters.criteria === 'approval'}
                 onChange={(e) => {
                   setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
-                  handleSearch()
                 }}
                 className="w-4 h-4 text-white"
               />
@@ -600,7 +607,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 checked={filters.criteria === 'certificate'}
                 onChange={(e) => {
                   setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
-                  handleSearch()
                 }}
                 className="w-4 h-4 text-white"
               />
@@ -641,7 +647,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
               value={filters.account}
               onChange={(e) => {
                 setFilters((prev) => ({ ...prev, account: e.target.value }))
-                handleSearch()
               }}
               options={[
                 { value: '', label: '전체 거래처' },
@@ -656,7 +661,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
               value={String(filters.year)}
               onChange={(e) => {
                 setFilters((prev) => ({ ...prev, year: parseInt(e.target.value) }))
-                handleSearch()
               }}
               options={yearOptions}
             />
@@ -669,7 +673,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 value={String(filters.month)}
                 onChange={(e) => {
                   setFilters((prev) => ({ ...prev, month: parseInt(e.target.value) }))
-                  handleSearch()
                 }}
                 options={monthOptions}
               />
