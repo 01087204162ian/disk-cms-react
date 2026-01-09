@@ -726,14 +726,14 @@ export default function Applications() {
             </button>
             <button
               onClick={() => setApiManagerModalOpen(true)}
-              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5 ml-auto"
             >
               <Key className="w-3 h-3" />
               <span className="hidden md:inline">API 관리</span>
             </button>
             <button
               onClick={() => setAddCompanyModalOpen(true)}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5 ml-auto"
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
             >
               <Plus className="w-3 h-3" />
               <span className="hidden md:inline">업체추가</span>
