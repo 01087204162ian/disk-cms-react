@@ -42,6 +42,7 @@ const STATUS_OPTIONS = [
   { value: '', label: '전체' },
   { value: '10', label: '메일보냄' },
   { value: '13', label: '승인' },
+  { value: '6', label: '계약' },
   { value: '7', label: '보류' },
   { value: '14', label: '증권발급' },
   { value: '15', label: '해지요청' },
