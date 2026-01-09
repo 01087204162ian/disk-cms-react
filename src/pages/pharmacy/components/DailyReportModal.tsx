@@ -574,7 +574,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         <div className="flex items-center gap-2">
           <span className="text-success">📊</span>
           일별 실적 {reportMode === 'monthly' ? '(월별)' : '(달력)'}
-          <span className="text-xs text-muted-foreground ml-2">
+          <span className="text-xs text-white ml-2">
             ({filters.criteria === 'approval' ? '승인 기준' : '증권발급 기준'})
           </span>
         </div>
@@ -636,9 +636,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* 거래처 선택 */}
           <div>
-            <label className="block text-xs font-medium mb-1">
-              <span className="text-primary">🏢</span> 거래처
-            </label>
             <Select
               value={filters.account}
               onChange={(e) => setFilters((prev) => ({ ...prev, account: e.target.value }))}
@@ -651,9 +648,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
 
           {/* 년도 선택 */}
           <div>
-            <label className="block text-xs font-medium mb-1">
-              <span className="text-primary">📅</span> 년도
-            </label>
             <Select
               value={String(filters.year)}
               onChange={(e) => setFilters((prev) => ({ ...prev, year: parseInt(e.target.value) }))}
@@ -664,9 +658,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           {/* 월 선택 (일별 모드일 때만) */}
           {reportMode === 'daily' && (
             <div>
-              <label className="block text-xs font-medium mb-1">
-                <span className="text-primary">📆</span> 월
-              </label>
               <Select
                 value={String(filters.month)}
                 onChange={(e) => setFilters((prev) => ({ ...prev, month: parseInt(e.target.value) }))}
@@ -677,7 +668,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
 
           {/* 조회 버튼 */}
           <div>
-            <label className="block text-xs font-medium mb-1 opacity-0">조회</label>
             <button
               onClick={handleSearch}
               disabled={loading}
