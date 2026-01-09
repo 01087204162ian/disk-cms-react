@@ -571,12 +571,36 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <div className="flex items-center gap-2">
-          <span className="text-success">📊</span>
-          일별 실적 {reportMode === 'monthly' ? '(월별)' : '(달력)'}
-          <span className="text-xs text-white ml-2">
-            ({filters.criteria === 'approval' ? '승인 기준' : '증권발급 기준'})
-          </span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <span className="text-success">📊</span>
+            일별 실적 {reportMode === 'monthly' ? '(월별)' : '(달력)'}
+          </div>
+          <div className="flex items-center gap-4 ml-4">
+            <span className="text-xs font-medium text-white/90">기준:</span>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="criteria"
+                value="approval"
+                checked={filters.criteria === 'approval'}
+                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                className="w-4 h-4 text-white"
+              />
+              <span className="text-xs text-white">승인 기준</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="criteria"
+                value="certificate"
+                checked={filters.criteria === 'certificate'}
+                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                className="w-4 h-4 text-white"
+              />
+              <span className="text-xs text-white">증권발급 기준</span>
+            </label>
+          </div>
         </div>
       }
       maxWidth="6xl"
@@ -603,35 +627,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       }
     >
       <div className="space-y-4">
-        {/* 기준 선택 */}
-        <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
-          <span className="text-xs font-medium text-muted-foreground">기준 선택:</span>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="criteria"
-                value="approval"
-                checked={filters.criteria === 'approval'}
-                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
-                className="w-4 h-4 text-primary"
-              />
-              <span className="text-xs">승인 기준</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="criteria"
-                value="certificate"
-                checked={filters.criteria === 'certificate'}
-                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
-                className="w-4 h-4 text-primary"
-              />
-              <span className="text-xs">증권발급 기준</span>
-            </label>
-          </div>
-        </div>
-
         {/* 필터 영역 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* 거래처 선택 */}
