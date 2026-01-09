@@ -47,7 +47,7 @@ const handleApiError = (error, res, defaultMessage) => {
  * - account: 거래처 번호 (선택, 전체는 빈값)
  * - year: 년도 (필수)
  * - month: 월 (선택, 빈값이면 최근 30일)
- * - criteria: 기준 선택 (선택, 'approval' 또는 'certificate', 기본값: 'approval')
+ * - criteria: 기준 선택 (선택, 'approval' 또는 'contract', 기본값: 'approval')
  */
 router.get('/daily', async (req, res) => {
   try {
@@ -96,7 +96,7 @@ router.get('/daily', async (req, res) => {
     }
 
     // 기준 검증
-    const validCriteria = (criteria === 'approval' || criteria === 'certificate') ? criteria : 'approval';
+    const validCriteria = (criteria === 'approval' || criteria === 'contract') ? criteria : 'approval';
 
     // 쿼리 파라미터 구성
     const params = new URLSearchParams({
@@ -142,7 +142,7 @@ router.get('/daily', async (req, res) => {
  * Query Params:
  * - account: 거래처 번호 (선택, 전체는 빈값)
  * - year: 년도 (필수)
- * - criteria: 기준 선택 (선택, 'approval' 또는 'certificate', 기본값: 'approval')
+ * - criteria: 기준 선택 (선택, 'approval' 또는 'contract', 기본값: 'approval')
  */
 router.get('/monthly', async (req, res) => {
   try {
@@ -178,7 +178,7 @@ router.get('/monthly', async (req, res) => {
     }
 
     // 기준 검증
-    const validCriteria = (criteria === 'approval' || criteria === 'certificate') ? criteria : 'approval';
+    const validCriteria = (criteria === 'approval' || criteria === 'contract') ? criteria : 'approval';
 
     const params = new URLSearchParams({ 
       year: validYear,
