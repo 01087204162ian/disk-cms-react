@@ -345,8 +345,9 @@ const signature = crypto
 - `ch`: 상태 코드 (1~17)
 - `preminum`: 보험료
 - `account`: 업체 번호 (pharmacy_idList와 연결)
-- `wdate`: 신청일
-- `wdate_2`: 승인일
+- `wdate`: 최초 입력 시간 (신청일)
+- `wdate_2`: 상태 변경일 (메일 보냄, 승인 등 상태 변경 시점)
+- `wdate_3`: 증권번호 입력일 (증권발급일)
 - `memo`: 메모
 
 **상태 코드 (ch)**:
@@ -616,6 +617,209 @@ pharmacy_idList (업체)
    - imet.kr/hi/api/monthly_stats_v2.php: 월별 실적 조회
 ```
 
+### 6. 승인 후 설계번호 및 증권번호 입력 프로세스
+
+#### 전체 워크플로우
+
+```
+[승인 완료 (ch=13)]
+    ↓
+[설계번호 입력]
+    ├─ 전문인설계번호 입력 (chemistDesignNumer)
+    ├─ 화재설계번호 입력 (areaDesignNumer)
+    └─ 상태 변경: ch=17 (설계중)
+    └─ wdate, wdate_2: 변동 없음
+    ↓
+[증권번호 입력]
+    ├─ 전문인증권번호 입력 (chemistCerti)
+    ├─ 화재증권번호 입력 (areaCerti)
+    ├─ 상태 변경: ch=14 (증권발급)
+    ├─ wdate_2: NOW() 업데이트 (상태 변경일)
+    └─ wdate_3: CURDATE() 설정 (증권발급일)
+    ↓
+[증권발급 완료]
+```
+
+#### 1단계: 설계번호 입력
+
+**위치**: `disk-cms-react/src/pages/pharmacy/components/PharmacyDetailModal.tsx`
+
+**프로세스**:
+1. 관리자가 약국 상세 모달에서 설계번호 입력
+2. 전문인설계번호 또는 화재설계번호 입력 후 "설계번호입력" 버튼 클릭
+3. API 호출: `POST /api/pharmacy2/design-number`
+   - 프록시: `disk-cms-react/routes/pharmacy/pharmacy2.js`
+   - 백엔드: `imet/api/pharmacy/pharmacy-design-update.php`
+
+**업데이트 내용**:
+```sql
+UPDATE pharmacyApply SET
+    chemistDesignNumer = '설계번호',  -- 또는 areaDesignNumer
+    ch = '17'                        -- 설계중 상태로 변경
+WHERE num = {pharmacyId}
+```
+
+**날짜 필드 변화**:
+- `wdate`: 변동 없음 (최초 입력 시간 유지)
+- `wdate_2`: 변동 없음 (상태 변경일 유지)
+- `wdate_3`: 변동 없음 (증권발급일은 아직 설정 안 됨)
+
+#### 2단계: 증권번호 입력
+
+**위치**: `disk-cms-react/src/pages/pharmacy/components/PharmacyDetailModal.tsx`
+
+**프로세스**:
+1. 관리자가 약국 상세 모달에서 증권번호 입력
+2. 전문인증권번호 또는 화재증권번호 입력 후 "입력" 버튼 클릭
+3. API 호출: `POST /api/pharmacy2/certificate-number`
+   - 프록시: `disk-cms-react/routes/pharmacy/pharmacy2.js`
+   - 백엔드: `imet/api/pharmacy/pharmacy-certificate-update.php`
+
+**업데이트 내용**:
+```sql
+UPDATE pharmacyApply SET
+    chemistCerti = '증권번호',        -- 또는 areaCerti
+    wdate_2 = NOW(),                 -- 상태 변경일 업데이트
+    wdate_3 = CURDATE(),             -- 증권발급일 설정
+    sigi = '보험시기',                -- 보험시기 자동 계산
+    jeonggi = '보험종기',             -- 보험종기 자동 계산 (시기+1년)
+    ch = '14',                       -- 증권발급 상태로 변경
+    certiCount = {증권발급횟수}       -- 증권발급 횟수 증가
+WHERE num = {pharmacyId}
+```
+
+**날짜 필드 변화**:
+- `wdate`: 변동 없음 (최초 입력 시간 유지)
+- `wdate_2`: `NOW()`로 업데이트 (상태 변경일)
+- `wdate_3`: `CURDATE()`로 설정 (증권발급일)
+
+### 7. 날짜 필드 (wdate, wdate_2, wdate_3) 의미
+
+#### 필드별 의미
+
+| 필드 | 의미 | 설정 시점 | 용도 |
+|------|------|-----------|------|
+| `wdate` | **최초 입력 시간** (신청일) | 약국 신청 최초 입력 시 | 신청일 기준 조회, 통계 |
+| `wdate_2` | **상태 변경일** | 상태(`ch`) 변경 시마다 업데이트 | 상태 변경 기준 조회, 실적 집계 |
+| `wdate_3` | **증권발급일** | 증권번호 입력 시 설정 | 증권발급 기준 조회, 실적 집계 |
+
+#### 설정 시점 상세
+
+**wdate (최초 입력 시간)**:
+- 약국 신청 최초 입력 시 `NOW()`로 설정
+- 이후 변경되지 않음
+- `INSERT INTO pharmacyApply` 시 자동 설정
+
+**wdate_2 (상태 변경일)**:
+- 메일 보냄(ch=10) 상태로 변경 시: `ch_Input()` 함수 호출 → `wdate_2` 설정
+- 승인(ch=13) 상태로 변경 시: `ch_Input()` 함수 호출 → `wdate_2` 설정
+- 증권번호 입력 시: `pharmacy-certificate-update.php`에서 `wdate_2 = NOW()` 업데이트
+- 기타 상태 변경 시에도 `ch_Input()` 함수에서 업데이트
+
+**wdate_3 (증권발급일)**:
+- 증권번호 입력 시에만 설정
+- `pharmacy-certificate-update.php`에서 `wdate_3 = CURDATE()` 설정
+- 설계번호 입력 시에는 설정되지 않음
+
+#### 날짜 필드 사용 예시
+
+```sql
+-- 신청일 기준 조회
+SELECT * FROM pharmacyApply WHERE DATE(wdate) = '2026-01-01';
+
+-- 상태 변경일 기준 조회 (계약 기준)
+SELECT * FROM pharmacyApply 
+WHERE DATE(wdate_2) = '2026-01-01' AND ch = '6';
+
+-- 증권발급일 기준 조회 (증권 기준)
+SELECT * FROM pharmacyApply 
+WHERE DATE(wdate_3) = '2026-01-01' AND ch = '14';
+```
+
+### 8. 실적 조회 기준 (승인 기준 vs 증권 기준)
+
+#### 승인 기준 실적
+
+**테이블**: `pharmacy_settlementList`  
+**조건**: `sort = 13` (승인) 또는 `sort = 16` (해지)  
+**날짜 필드**: `wdate` (정산일)
+
+**의미**:
+- 승인 처리 시점의 실적
+- 예치금 차감 및 정산 기록 생성 시점 기준
+- `pharmacy_settlementList` 테이블의 `wdate` 기준으로 집계
+
+**사용 쿼리**:
+```sql
+SELECT 
+    sort,
+    CAST(approvalPreminum AS DECIMAL(15,2)) as approvalPreminum
+FROM pharmacy_settlementList
+WHERE SUBSTRING(wdate, 1, 10) = '2026-01-09'
+  AND sort != 7
+  AND account = 8
+```
+
+**특징**:
+- 승인 처리 즉시 정산 기록 생성
+- 예치금 차감과 동시에 기록됨
+- 실제 보험 가입 처리 시점 반영
+
+#### 증권 기준 실적
+
+**테이블**: `pharmacyApply`  
+**조건**: `ch = '14'` (증권발급) 또는 `ch = '16'` (해지완료)  
+**날짜 필드**: `wdate_3` (증권발급일)
+
+**의미**:
+- 증권번호 입력 시점의 실적
+- 실제 증권 발급 완료 시점 기준
+- `pharmacyApply` 테이블의 `wdate_3` 기준으로 집계
+
+**사용 쿼리**:
+```sql
+SELECT 
+    ch,
+    CAST(preminum AS DECIMAL(15,2)) as preminum,
+    wdate_3,
+    account
+FROM pharmacyApply
+WHERE wdate_3 >= '2026-01-09 00:00:00'
+  AND wdate_3 <= '2026-01-09 23:59:59'
+  AND ch IN ('14', '16')
+  AND account = '8'
+```
+
+**특징**:
+- 증권번호 입력 완료 시점 기준
+- 실제 증권 발급 완료된 건만 집계
+- 승인 후 설계번호 입력 → 증권번호 입력까지 완료된 건만 포함
+
+#### 두 기준의 차이점
+
+| 구분 | 승인 기준 | 증권 기준 |
+|------|----------|-----------|
+| **테이블** | `pharmacy_settlementList` | `pharmacyApply` |
+| **조건** | `sort = 13` (승인) | `ch = '14'` (증권발급) |
+| **날짜 필드** | `wdate` (정산일) | `wdate_3` (증권발급일) |
+| **의미** | 승인 처리 시점 | 증권 발급 완료 시점 |
+| **포함 범위** | 승인 처리된 모든 건 | 증권번호 입력 완료된 건만 |
+| **시점 차이** | 승인 즉시 | 승인 → 설계번호 → 증권번호 입력 후 |
+
+#### 실적 조회 API
+
+**일별 실적 조회**:
+- **엔드포인트**: `/api/pharmacy-reports/daily`
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=contract` (증권 기준)
+- **파일**: `imet/api/pharmacy/pharmacy-daily-report.php`
+
+**월별 실적 조회**:
+- **엔드포인트**: `/api/pharmacy-reports/monthly`
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=contract` (증권 기준)
+- **파일**: `imet/api/pharmacy/pharmacy-monthly-report.php`
+
+**참고**: 프론트엔드에서는 `criteria=contract`로 표시되지만, 백엔드에서는 증권 기준으로 처리됩니다.
+
 ---
 
 ## 참고 자료
@@ -632,5 +836,15 @@ pharmacy_idList (업체)
 
 **작성일**: 2026-01-09  
 **작성자**: AI Assistant  
-**버전**: 1.0  
-**최종 업데이트**: 2026-01-09
+**버전**: 1.1  
+**최종 업데이트**: 2026-01-10
+
+---
+
+## 변경 이력
+
+### 2026-01-10
+- 승인 후 설계번호 및 증권번호 입력 프로세스 상세 문서화 추가
+- 날짜 필드 (wdate, wdate_2, wdate_3) 의미 정리
+- 승인 기준 실적 vs 증권 기준 실적 비교 정리
+- 증권 기준으로 변경 (기존 계약 기준에서 변경)
