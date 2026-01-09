@@ -45,10 +45,12 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
   const [resultData, setResultData] = useState<any[]>([])
   const [summary, setSummary] = useState<any>(null)
 
-  // 거래처 목록 로드
+  // 거래처 목록 로드 및 초기 조회
   useEffect(() => {
     if (isOpen) {
       loadAccounts()
+      // 모달이 열릴 때 당월 실적 자동 조회
+      handleSearch()
     }
   }, [isOpen])
 
@@ -199,24 +201,22 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         {/* 승인 */}
         <div className="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg shadow-sm p-3 text-white text-center">
           <div className="text-xs opacity-75 mb-1">승인</div>
-          <div className="text-lg font-bold">
-            {formatCurrency(summary.total_approval_amount || 0)}(
-            {formatCurrency(summary.total_approval_count || 0)})
+          <div className="text-lg font-bold whitespace-nowrap">
+            {formatCurrency(summary.total_approval_amount || 0)} ({formatCurrency(summary.total_approval_count || 0)})
           </div>
         </div>
         {/* 해지 */}
         <div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-lg shadow-sm p-3 text-white text-center">
           <div className="text-xs opacity-75 mb-1">해지</div>
-          <div className="text-lg font-bold">
-            {formatCurrency(summary.total_cancel_amount || 0)}(
-            {formatCurrency(summary.total_cancel_count || 0)})
+          <div className="text-lg font-bold whitespace-nowrap">
+            {formatCurrency(summary.total_cancel_amount || 0)} ({formatCurrency(summary.total_cancel_count || 0)})
           </div>
         </div>
         {/* 합계 */}
         <div className="bg-gradient-to-br from-green-400 to-teal-400 rounded-lg shadow-sm p-3 text-white text-center">
           <div className="text-xs opacity-75 mb-1">합계</div>
-          <div className="text-lg font-bold">
-            {formatCurrency(netAmount)}({formatCurrency(netCount)})
+          <div className="text-lg font-bold whitespace-nowrap">
+            {formatCurrency(netAmount)} ({formatCurrency(netCount)})
           </div>
         </div>
       </div>
@@ -584,7 +584,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 name="criteria"
                 value="approval"
                 checked={filters.criteria === 'approval'}
-                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                onChange={(e) => {
+                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
+                  handleSearch()
+                }}
                 className="w-4 h-4 text-white"
               />
               <span className="text-xs text-white">승인 기준</span>
@@ -595,7 +598,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 name="criteria"
                 value="certificate"
                 checked={filters.criteria === 'certificate'}
-                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                onChange={(e) => {
+                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
+                  handleSearch()
+                }}
                 className="w-4 h-4 text-white"
               />
               <span className="text-xs text-white">증권발급 기준</span>
@@ -633,7 +639,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           <div>
             <Select
               value={filters.account}
-              onChange={(e) => setFilters((prev) => ({ ...prev, account: e.target.value }))}
+              onChange={(e) => {
+                setFilters((prev) => ({ ...prev, account: e.target.value }))
+                handleSearch()
+              }}
               options={[
                 { value: '', label: '전체 거래처' },
                 ...accounts.map((acc) => ({ value: acc.num, label: acc.directory })),
@@ -645,7 +654,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           <div>
             <Select
               value={String(filters.year)}
-              onChange={(e) => setFilters((prev) => ({ ...prev, year: parseInt(e.target.value) }))}
+              onChange={(e) => {
+                setFilters((prev) => ({ ...prev, year: parseInt(e.target.value) }))
+                handleSearch()
+              }}
               options={yearOptions}
             />
           </div>
@@ -655,7 +667,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
             <div>
               <Select
                 value={String(filters.month)}
-                onChange={(e) => setFilters((prev) => ({ ...prev, month: parseInt(e.target.value) }))}
+                onChange={(e) => {
+                  setFilters((prev) => ({ ...prev, month: parseInt(e.target.value) }))
+                  handleSearch()
+                }}
                 options={monthOptions}
               />
             </div>
