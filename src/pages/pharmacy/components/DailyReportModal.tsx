@@ -102,7 +102,8 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     }
 
     handleSearch()
-  }, [isOpen, filters.account, filters.year, filters.month, filters.criteria, reportMode, toast])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, filters.account, filters.year, filters.month, filters.criteria, reportMode])
 
   // 수동 조회 버튼용 핸들러
   const handleSearch = useCallback(async () => {
