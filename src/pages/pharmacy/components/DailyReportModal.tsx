@@ -56,6 +56,55 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     }
   }
 
+  // 거래처 목록 로드
+  useEffect(() => {
+    if (isOpen) {
+      loadAccounts()
+    }
+  }, [isOpen])
+
+  // 필터 변경 시 자동 조회 (초기 로드 포함)
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleSearch = async () => {
+      setLoading(true)
+      try {
+        const params: any = {
+          account: filters.account,
+          year: filters.year,
+          month: filters.month,
+          criteria: filters.criteria,
+        }
+
+        const endpoint = reportMode === 'daily' 
+          ? '/api/pharmacy-reports/daily' 
+          : '/api/pharmacy-reports/monthly'
+
+        console.log('[실적 조회]', { endpoint, params })
+        const res = await api.get(endpoint, { params })
+        console.log('[실적 조회 결과]', res.data)
+        
+        if (res.data?.success) {
+          setResultData(res.data.data || [])
+          setSummary(res.data.summary || {})
+        } else {
+          throw new Error(res.data?.message || '데이터를 불러오는데 실패했습니다.')
+        }
+      } catch (error: any) {
+        console.error('실적 조회 오류:', error)
+        toast.error(error?.response?.data?.message || error?.message || '실적을 조회하는 중 오류가 발생했습니다.')
+        setResultData([])
+        setSummary(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    handleSearch()
+  }, [isOpen, filters.account, filters.year, filters.month, filters.criteria, reportMode, toast])
+
+  // 수동 조회 버튼용 핸들러
   const handleSearch = useCallback(async () => {
     setLoading(true)
     try {
@@ -89,20 +138,6 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       setLoading(false)
     }
   }, [filters.account, filters.year, filters.month, filters.criteria, reportMode, toast])
-
-  // 거래처 목록 로드
-  useEffect(() => {
-    if (isOpen) {
-      loadAccounts()
-    }
-  }, [isOpen])
-
-  // 필터 변경 시 자동 조회 (초기 로드 포함)
-  useEffect(() => {
-    if (isOpen) {
-      handleSearch()
-    }
-  }, [isOpen, filters.account, filters.year, filters.month, filters.criteria, reportMode, handleSearch])
 
   // 년도 옵션 (최근 3년)
   const yearOptions = []
