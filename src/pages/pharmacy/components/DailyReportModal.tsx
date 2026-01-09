@@ -82,8 +82,12 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
           : '/api/pharmacy-reports/monthly'
 
         console.log('[실적 조회]', { endpoint, params })
+        console.log('[실적 조회] criteria 파라미터:', params.criteria)
+        console.log('[실적 조회] 전체 params:', JSON.stringify(params, null, 2))
         const res = await api.get(endpoint, { params })
         console.log('[실적 조회 결과]', res.data)
+        console.log('[실적 조회 결과] filters.criteria:', res.data?.filters?.criteria)
+        console.log('[실적 조회 결과] 전체 filters:', JSON.stringify(res.data?.filters, null, 2))
         
         if (res.data?.success) {
           setResultData(res.data.data || [])
@@ -121,8 +125,12 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         : '/api/pharmacy-reports/monthly'
 
       console.log('[실적 조회]', { endpoint, params })
+      console.log('[실적 조회] criteria 파라미터:', params.criteria)
+      console.log('[실적 조회] 전체 params:', JSON.stringify(params, null, 2))
       const res = await api.get(endpoint, { params })
       console.log('[실적 조회 결과]', res.data)
+      console.log('[실적 조회 결과] filters.criteria:', res.data?.filters?.criteria)
+      console.log('[실적 조회 결과] 전체 filters:', JSON.stringify(res.data?.filters, null, 2))
       
       if (res.data?.success) {
         setResultData(res.data.data || [])
