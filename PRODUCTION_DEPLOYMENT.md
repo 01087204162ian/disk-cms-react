@@ -82,44 +82,52 @@ npm run start
 - **문서 페이지**: `https://react.disk-cms.simg.kr/pharmacy/documentation`
 - **문서 파일 직접 접근**: `https://react.disk-cms.simg.kr/docs/pharmacy/README.md`
 
-## 🔄 문서 업데이트 프로세스
+## 🔄 문서 업데이트 프로세스 (자동화됨)
 
-문서를 업데이트할 때마다:
+✅ **자동화 완료!** 이제 수동 복사가 필요 없습니다.
+
+문서를 업데이트할 때:
 
 1. **문서 수정**: `docs/pharmacy/README.md` 파일 수정
-2. **public 폴더로 복사**: 
-   ```bash
-   cp docs/pharmacy/README.md public/docs/pharmacy/README.md
-   ```
-3. **빌드 재실행**:
+2. **빌드 재실행** (자동으로 문서 복사됨):
    ```bash
    npm run build
    ```
-4. **서버 재시작** (필요시):
+   → 빌드 시 자동으로 `docs/pharmacy/README.md` → `public/docs/pharmacy/README.md` 복사
+3. **서버 재시작** (필요시):
    ```bash
    npm run start
    ```
 
-## 🚀 자동화 스크립트 (선택사항)
+**자동화 스크립트**: `scripts/copy-docs.js`가 빌드 전에 자동 실행됩니다.
 
-문서 업데이트를 자동화하려면 `package.json`에 스크립트를 추가할 수 있습니다:
+## 🚀 자동화 스크립트 (구현 완료)
+
+✅ **자동화 완료!** 빌드 시 자동으로 문서가 복사됩니다.
+
+`package.json`에 다음 스크립트가 설정되어 있습니다:
 
 ```json
 {
   "scripts": {
-    "build": "tsc && vite build",
-    "build:docs": "cp docs/pharmacy/README.md public/docs/pharmacy/README.md && npm run build",
-    "deploy": "npm run build:docs && npm run start"
+    "build": "node scripts/copy-docs.js && tsc && vite build",
+    "deploy": "npm run build && npm run start"
   }
 }
 ```
 
-그러면 다음 명령어로 한 번에 빌드와 배포가 가능합니다:
+**사용 방법**:
 
 ```bash
-npm run build:docs  # 문서 복사 + 빌드
-npm run deploy      # 문서 복사 + 빌드 + 서버 시작
+npm run build      # 문서 자동 복사 + 빌드
+npm run deploy     # 문서 자동 복사 + 빌드 + 서버 시작
 ```
+
+**자동화 스크립트**: `scripts/copy-docs.js`
+- 빌드 전에 자동 실행
+- `docs/pharmacy/README.md` → `public/docs/pharmacy/README.md` 자동 복사
+- 디렉토리 자동 생성 (없는 경우)
+- 복사 결과 로그 출력
 
 ## 📝 배포 체크리스트
 

@@ -133,10 +133,16 @@
               "order": 1
             },
             {
+              "id": "pharmacy-documentation",
+              "title": "문서",
+              "page": "pharmacy/documentation",
+              "order": 2
+            },
+            {
               "id": "pharmacy-claims",
               "title": "클레임",
               "page": "pharmacy/claims",
-              "order": 2
+              "order": 3
             }
           ]
         },
