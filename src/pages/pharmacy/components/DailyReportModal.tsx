@@ -244,23 +244,20 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
         {/* 승인 */}
         <div className="bg-gradient-to-br from-blue-400 to-cyan-400 rounded-lg shadow-sm p-3 text-white text-center">
-          <div className="text-xs opacity-75 mb-1">승인</div>
           <div className="text-lg font-bold whitespace-nowrap">
-            {formatCurrency(summary.total_approval_amount || 0)} ({formatCurrency(summary.total_approval_count || 0)})
+            승인 {formatCurrency(summary.total_approval_amount || 0)} ({formatCurrency(summary.total_approval_count || 0)})
           </div>
         </div>
         {/* 해지 */}
         <div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-lg shadow-sm p-3 text-white text-center">
-          <div className="text-xs opacity-75 mb-1">해지</div>
           <div className="text-lg font-bold whitespace-nowrap">
-            {formatCurrency(summary.total_cancel_amount || 0)} ({formatCurrency(summary.total_cancel_count || 0)})
+            해지 {formatCurrency(summary.total_cancel_amount || 0)} ({formatCurrency(summary.total_cancel_count || 0)})
           </div>
         </div>
         {/* 합계 */}
         <div className="bg-gradient-to-br from-green-400 to-teal-400 rounded-lg shadow-sm p-3 text-white text-center">
-          <div className="text-xs opacity-75 mb-1">합계</div>
           <div className="text-lg font-bold whitespace-nowrap">
-            {formatCurrency(netAmount)} ({formatCurrency(netCount)})
+            합계 {formatCurrency(netAmount)} ({formatCurrency(netCount)})
           </div>
         </div>
       </div>
