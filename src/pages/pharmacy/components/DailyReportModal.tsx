@@ -38,6 +38,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     account: '',
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
+    criteria: 'approval' as 'approval' | 'certificate', // 기준 선택: 승인 기준 / 증권발급 기준
   })
 
   // 결과 데이터
@@ -69,6 +70,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         account: filters.account,
         year: filters.year,
         month: filters.month,
+        criteria: filters.criteria,
       }
 
       const endpoint = reportMode === 'daily' 
@@ -572,6 +574,9 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
         <div className="flex items-center gap-2">
           <span className="text-success">📊</span>
           일별 실적 {reportMode === 'monthly' ? '(월별)' : '(달력)'}
+          <span className="text-xs text-muted-foreground ml-2">
+            ({filters.criteria === 'approval' ? '승인 기준' : '증권발급 기준'})
+          </span>
         </div>
       }
       maxWidth="6xl"
@@ -598,6 +603,35 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
       }
     >
       <div className="space-y-4">
+        {/* 기준 선택 */}
+        <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+          <span className="text-xs font-medium text-muted-foreground">기준 선택:</span>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="criteria"
+                value="approval"
+                checked={filters.criteria === 'approval'}
+                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                className="w-4 h-4 text-primary"
+              />
+              <span className="text-xs">승인 기준</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="criteria"
+                value="certificate"
+                checked={filters.criteria === 'certificate'}
+                onChange={(e) => setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))}
+                className="w-4 h-4 text-primary"
+              />
+              <span className="text-xs">증권발급 기준</span>
+            </label>
+          </div>
+        </div>
+
         {/* 필터 영역 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           {/* 거래처 선택 */}
