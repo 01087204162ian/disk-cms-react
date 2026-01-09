@@ -113,6 +113,8 @@ router.get('/daily', async (req, res) => {
     }
 
     console.log(`[GET /daily] 일별 실적 조회 요청 - 년도: ${validYear}, 월: ${validMonth || '전체(최근30일)'}, 거래처: ${validAccount || '전체'}, 기준: ${validCriteria}`);
+    console.log(`[GET /daily] 원본 criteria: ${criteria}, 검증 후 criteria: ${validCriteria}`);
+    console.log(`[GET /daily] PHP API URL: ${PHP_API_BASE_URL}/pharmacy-daily-report.php?${params}`);
 
     // PHP API 호출
     const response = await axios.get(
@@ -122,6 +124,8 @@ router.get('/daily', async (req, res) => {
         headers: getDefaultHeaders()
       }
     );
+    
+    console.log(`[GET /daily] PHP 응답 filters.criteria: ${response.data?.filters?.criteria || '없음'}`);
 
     console.log(`[GET /daily] 성공 - 일별 실적 조회 완료`);
     
