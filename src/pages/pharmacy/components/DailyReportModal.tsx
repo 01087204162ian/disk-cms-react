@@ -38,7 +38,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
     account: '',
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
-    criteria: 'approval' as 'approval' | 'contract', // 기준 선택: 승인 기준 / 증권 기준
+    criteria: 'approval' as 'approval' | 'certificate', // 기준 선택: 승인 기준 / 증권 기준
   })
 
   // 결과 데이터
@@ -634,7 +634,7 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
                 value="approval"
                 checked={filters.criteria === 'approval'}
                 onChange={(e) => {
-                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'contract' }))
+                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
                 }}
                 className="w-4 h-4 text-white"
               />
@@ -644,10 +644,10 @@ export default function DailyReportModal({ isOpen, onClose }: DailyReportModalPr
               <input
                 type="radio"
                 name="criteria"
-                value="contract"
-                checked={filters.criteria === 'contract'}
+                value="certificate"
+                checked={filters.criteria === 'certificate'}
                 onChange={(e) => {
-                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'contract' }))
+                  setFilters((prev) => ({ ...prev, criteria: e.target.value as 'approval' | 'certificate' }))
                 }}
                 className="w-4 h-4 text-white"
               />
