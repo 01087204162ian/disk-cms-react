@@ -12,6 +12,46 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-10 (프로젝트 전반) - 번들 크기 최적화 및 성능 개선
+
+#### 33) 번들 분석 및 최적화 작업 완료
+- **번들 분석 도구 설정**:
+  - `rollup-plugin-visualizer` 패키지 추가 및 설정
+  - 빌드 시 `dist/stats.html` 파일 자동 생성
+  - 번들 크기, 의존성 관계, 청크 분할 상태 시각화
+- **번들 분석 가이드 문서 작성**:
+  - `docs/BUNDLE_ANALYSIS_GUIDE.md`: 번들 분석 파일 확인 방법 가이드
+  - `docs/BUNDLE_ANALYSIS_HOW_TO_READ.md`: 번들 분석 파일 해석 방법 (초보자용)
+  - `docs/BUNDLE_OPTIMIZATION_RESULTS.md`: 최적화 작업 결과 및 개선 효과 문서
+- **ExcelJS 동적 Import 최적화**:
+  - `DepositUsageModal.tsx`: ExcelJS를 동적 import로 변경 (엑셀 다운로드 시에만 로드)
+  - `DepositListModal.tsx`: ExcelJS를 동적 import로 변경
+  - 초기 번들에서 약 500KB 제거
+- **Vite 청크 분할 설정 개선** (`vite.config.mjs`):
+  - React core 청크 분리 (react, react-dom, scheduler 포함)
+  - Router 청크 분리
+  - Icons 청크 분리 (lucide-react, react-icons)
+  - Dates 청크 분리 (moment, moment-timezone, date-fns)
+  - ExcelJS 별도 청크 분리 (동적 import로 로드됨)
+  - Markdown 관련 패키지는 vendor에 포함 (circular dependency 방지)
+- **최적화 결과**:
+  - **최적화 전**: vendor 1,337KB (398KB gzip)
+  - **최적화 후**: vendor 394KB (127KB gzip), exceljs 938KB (별도 청크)
+  - **개선 효과**: 초기 번들 크기 약 943KB 감소 (70% 감소), gzip 크기 약 271KB 감소 (68% 감소)
+  - 초기 페이지 로딩 속도 대폭 개선
+- **해결한 이슈**:
+  - React useState 에러: React 관련 패키지 매칭 개선 (scheduler 포함)
+  - Markdown circular dependency: markdown 청크 분할 제거, vendor에 포함
+- **파일**:
+  - `vite.config.mjs`: 청크 분할 설정 개선
+  - `src/pages/pharmacy/components/DepositUsageModal.tsx`: ExcelJS 동적 import
+  - `src/pages/pharmacy/components/DepositListModal.tsx`: ExcelJS 동적 import
+  - `package.json`: rollup-plugin-visualizer 추가
+  - `docs/BUNDLE_ANALYSIS_GUIDE.md`: 번들 분석 가이드 (신규)
+  - `docs/BUNDLE_ANALYSIS_HOW_TO_READ.md`: 번들 분석 해석 가이드 (신규)
+  - `docs/BUNDLE_OPTIMIZATION_RESULTS.md`: 최적화 결과 문서 (신규)
+- **결과**: 프로젝트 전반의 번들 크기 최적화 완료, 초기 로딩 속도 개선, 엑셀 다운로드 기능은 필요할 때만 로드되도록 개선
+
 ### 2026-01-09 (Phase 3 진행) - 일별/월별 실적 조회에 증권발급 기준 추가
 
 #### 32) 실적 조회 기능 개선 및 증권발급 기준 추가
@@ -969,7 +1009,7 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 9일 (실적 조회 증권발급 기준 추가 및 UI 개선 완료)  
+**최종 업데이트**: 2026년 1월 10일 (번들 크기 최적화 및 성능 개선 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
@@ -981,7 +1021,8 @@ work-log.md 파일 학습하자
 - **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
 - **Phase 3**: 진행 중 (보험 상품 모듈)
   - 약국배상책임보험: 10개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달, 정산 데이터 정리 모달, 실적 조회 증권발급 기준 추가)
-- **총 32개 작업 완료**
+- **프로젝트 전반**: 1개 작업 완료 (번들 크기 최적화 및 성능 개선)
+- **총 33개 작업 완료**
 
 ### 개발된 공통 컴포넌트
 - ✅ Modal (모달)
