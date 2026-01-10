@@ -68,7 +68,26 @@ npm run preview
 ```
 그 다음 브라우저에서 Vite가 제공하는 URL 접속 후 `/stats.html` 경로 추가
 
-#### 방법 3: VS Code Live Server 확장 사용
+#### 방법 3: Git을 통한 파일 전송 (원격 서버에서 로컬로)
+원격 서버에서 빌드한 파일을 로컬로 가져오는 경우:
+
+**원격 서버에서:**
+```bash
+cd ~/disk-cms-react
+cp dist/stats.html docs/stats.html  # docs 폴더로 복사 (.gitignore 영향 없음)
+git add docs/stats.html
+git commit -m "Add bundle analysis stats.html for review"
+git push
+```
+
+**로컬 macOS에서:**
+```bash
+cd /Users/simg/development/disk-cms-react
+git pull
+open docs/stats.html
+```
+
+#### 방법 4: VS Code Live Server 확장 사용
 VS Code를 사용하는 경우 "Live Server" 확장을 설치한 후:
 1. `dist/stats.html` 파일을 우클릭
 2. "Open with Live Server" 선택
