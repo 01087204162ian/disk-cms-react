@@ -40,16 +40,7 @@ export default defineConfig({
           // React 관련 패키지들
           if (id.includes('react-router')) return 'router'
           if (id.includes('react-hook-form')) return 'react-hook-form'
-          if (id.includes('react-markdown') || 
-              id.includes('remark-') || 
-              id.includes('rehype-') ||
-              id.includes('micromark-') ||
-              id.includes('mdast-') ||
-              id.includes('hast-') ||
-              id.includes('unified') ||
-              id.includes('parse5')) {
-            return 'markdown'
-          }
+          // markdown 관련 패키지들은 vendor에 포함 (circular dependency 방지)
 
           // 아이콘/유틸/날짜/차트류 분리
           if (id.includes('lucide-react') || id.includes('react-icons')) return 'icons'
