@@ -1,18 +1,34 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ResetPassword from './pages/ResetPassword'
-import Dashboard from './pages/Dashboard'
-import Employees from './pages/staff/Employees'
-import EmployeeSchedule from './pages/staff/EmployeeSchedule'
-import Holidays from './pages/staff/Holidays'
-import HalfDayApproval from './pages/staff/HalfDayApproval'
-import OrganizationChart from './pages/staff/OrganizationChart'
-import PharmacyApplications from './pages/pharmacy/Applications'
-import PharmacyDocumentation from './pages/pharmacy/Documentation'
+import { Suspense, lazy } from 'react'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ToastProvider } from './components'
+
+// 인증 관련 페이지 (즉시 로드)
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ResetPassword from './pages/ResetPassword'
+
+// 주요 페이지들은 동적 import로 지연 로딩 (코드 스플리팅)
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Employees = lazy(() => import('./pages/staff/Employees'))
+const EmployeeSchedule = lazy(() => import('./pages/staff/EmployeeSchedule'))
+const Holidays = lazy(() => import('./pages/staff/Holidays'))
+const HalfDayApproval = lazy(() => import('./pages/staff/HalfDayApproval'))
+const OrganizationChart = lazy(() => import('./pages/staff/OrganizationChart'))
+const PharmacyApplications = lazy(() => import('./pages/pharmacy/Applications'))
+// 문서 페이지는 마크다운 라이브러리가 커서 별도 청크로 분리
+const PharmacyDocumentation = lazy(() => import('./pages/pharmacy/Documentation'))
+
+// 로딩 컴포넌트
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600">페이지를 불러오는 중...</p>
+    </div>
+  </div>
+)
 
 function App() {
   return (
@@ -32,21 +48,23 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout>
-                  <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/staff/employees" element={<Employees />} />
-                    <Route path="/staff/employee-schedule" element={<EmployeeSchedule />} />
-                    <Route path="/staff/holidays" element={<Holidays />} />
-                    <Route path="/staff/half-day-approval" element={<HalfDayApproval />} />
-                    <Route path="/staff/organization-chart" element={<OrganizationChart />} />
-                    {/* 보험 상품 */}
-                    <Route path="/pharmacy/applications" element={<PharmacyApplications />} />
-                    <Route path="/pharmacy/documentation" element={<PharmacyDocumentation />} />
-                    {/* 이전 경로 호환 */}
-                    <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
-                    {/* 추가 라우트는 여기에 추가 */}
-                  </Routes>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/staff/employees" element={<Employees />} />
+                      <Route path="/staff/employee-schedule" element={<EmployeeSchedule />} />
+                      <Route path="/staff/holidays" element={<Holidays />} />
+                      <Route path="/staff/half-day-approval" element={<HalfDayApproval />} />
+                      <Route path="/staff/organization-chart" element={<OrganizationChart />} />
+                      {/* 보험 상품 */}
+                      <Route path="/pharmacy/applications" element={<PharmacyApplications />} />
+                      <Route path="/pharmacy/documentation" element={<PharmacyDocumentation />} />
+                      {/* 이전 경로 호환 */}
+                      <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
+                      {/* 추가 라우트는 여기에 추가 */}
+                    </Routes>
+                  </Suspense>
                 </Layout>
               </ProtectedRoute>
             }

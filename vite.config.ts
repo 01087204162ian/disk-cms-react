@@ -16,17 +16,46 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // 수동 청크 분할 설정
-        manualChunks: {
-          // React 관련 라이브러리
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          // UI 라이브러리
-          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
-          // 폼 및 검증 라이브러리
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // 유틸리티 라이브러리
-          'utils-vendor': ['axios', 'date-fns', 'moment', 'moment-timezone'],
-          // 문서 관련 라이브러리
-          'docs-vendor': ['react-markdown', 'remark-gfm', 'rehype-raw', 'rehype-sanitize'],
+        manualChunks: (id) => {
+          // node_modules 의존성 분리
+          if (id.includes('node_modules')) {
+            // React 관련 라이브러리
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            // 문서 관련 라이브러리 (PharmacyDocumentation에서만 사용, 동적 import로 자동 분리됨)
+            if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype')) {
+              return 'docs-vendor';
+            }
+            // UI 라이브러리
+            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'ui-vendor';
+            }
+            // 폼 및 검증 라이브러리
+            if (id.includes('react-hook-form') || id.includes('hookform') || id.includes('zod')) {
+              return 'form-vendor';
+            }
+            // 유틸리티 라이브러리
+            if (id.includes('axios') || id.includes('date-fns') || id.includes('moment')) {
+              return 'utils-vendor';
+            }
+            // 기타 vendor 라이브러리
+            return 'vendor';
+          }
+          
+          // 페이지별 청크 분리 (동적 import된 페이지들)
+          if (id.includes('/pages/pharmacy/Documentation')) {
+            return 'page-docs';
+          }
+          if (id.includes('/pages/pharmacy/Applications')) {
+            return 'page-pharmacy';
+          }
+          if (id.includes('/pages/staff/')) {
+            return 'page-staff';
+          }
+          if (id.includes('/pages/')) {
+            return 'page-common';
+          }
         },
       },
     },
