@@ -558,8 +558,14 @@ export default function Applications() {
         className: 'hidden xl:table-cell',
         hidden: true,
         cell: (row) => {
-          if (!row.request_date) return '-'
+          if (!row.request_date || row.request_date === '0000-00-00 00:00:00' || row.request_date.startsWith('0000-00-00')) {
+            return '-'
+          }
           const date = new Date(row.request_date)
+          // 유효하지 않은 날짜 체크 (NaN)
+          if (isNaN(date.getTime())) {
+            return '-'
+          }
           const year = date.getFullYear()
           const month = String(date.getMonth() + 1).padStart(2, '0')
           const day = String(date.getDate()).padStart(2, '0')
@@ -573,8 +579,14 @@ export default function Applications() {
         key: 'approval_date',
         header: '승인일',
         cell: (row) => {
-          if (!row.approval_date) return '-'
+          if (!row.approval_date || row.approval_date === '0000-00-00 00:00:00' || row.approval_date.startsWith('0000-00-00')) {
+            return '-'
+          }
           const date = new Date(row.approval_date)
+          // 유효하지 않은 날짜 체크 (NaN)
+          if (isNaN(date.getTime())) {
+            return '-'
+          }
           const year = date.getFullYear()
           const month = String(date.getMonth() + 1).padStart(2, '0')
           const day = String(date.getDate()).padStart(2, '0')
@@ -685,7 +697,19 @@ export default function Applications() {
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
-        <div>승인일: {application.approval_date ? new Date(application.approval_date).toLocaleDateString('ko-KR') : '-'}</div>
+        <div>
+          승인일:{' '}
+          {application.approval_date &&
+          application.approval_date !== '0000-00-00 00:00:00' &&
+          !application.approval_date.startsWith('0000-00-00') ? (
+            (() => {
+              const date = new Date(application.approval_date)
+              return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('ko-KR')
+            })()
+          ) : (
+            '-'
+          )}
+        </div>
         <div className="text-right">보험료: {application.premium ? application.premium.toLocaleString('ko-KR') + '원' : '-'}</div>
         {application.account && <div className="col-span-2">거래처: {application.account}</div>}
       </div>
