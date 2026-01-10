@@ -10,6 +10,27 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // 청크 크기 경고 임계값 조정 (선택사항)
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // 수동 청크 분할 설정
+        manualChunks: {
+          // React 관련 라이브러리
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // UI 라이브러리
+          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+          // 폼 및 검증 라이브러리
+          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // 유틸리티 라이브러리
+          'utils-vendor': ['axios', 'date-fns', 'moment', 'moment-timezone'],
+          // 문서 관련 라이브러리
+          'docs-vendor': ['react-markdown', 'remark-gfm', 'rehype-raw', 'rehype-sanitize'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // 개발 환경에서 로컬 서버로 프록시 (로컬 서버가 3000 포트에서 실행 중일 때)
