@@ -322,6 +322,63 @@ const signature = crypto
 
 - **URL**: https://imet.kr/hi/api/verification/
 - **기능**: 모든 API 엔드포인트를 통합 관리하고 테스트할 수 있는 중앙 허브
+- **인증 방식**: HMAC-SHA256 인증
+- **API 형태**: RESTful API
+- **특징**: 실시간 검증 및 테스트 가능
+
+**사용 방법**:
+1. 실무 담당자가 검증 포털에 접속
+2. 상단의 **API 인증 설정** 섹션에서 거래처의 **API Key**와 **Secret Key** 입력
+   - API Key: `pharmacy_idList` 테이블의 `api_key` 필드 값 (pk_로 시작)
+   - Secret Key: `pharmacy_idList` 테이블의 `api_secret` 필드 값 (SHA256 해시)
+3. 입력한 API Key와 Secret Key로 각 API 엔드포인트를 테스트
+4. 요청/응답 결과를 실시간으로 확인하여 API 동작 검증
+
+**제공 기능**:
+- 🔐 API 인증 설정 (API Key, Secret Key)
+- 📋 약국 리스트 조회 테스트 (`/hi/api/list_v2.php`)
+- 🔍 약국 상세 조회 테스트 (`/hi/api/detail_v2.php`)
+- 💰 잔고 조회 테스트 (`/hi/api/balance_v2.php`)
+- 🏦 예치금 내역 조회 테스트 (`/hi/api/deposit_balance_v2.php`)
+- 📊 일별 실적 조회 테스트 (`/hi/api/daily_stats_v2.php`)
+- 📈 월별 실적 조회 테스트 (`/hi/api/monthly_stats_v2.php`)
+- 🔄 상태 변경 테스트 (`/hi/api/pharmacy-status-update_v2.php`)
+- 🧮 보험료 계산 테스트 (`/hi/api/pharmacy-premium-calculate_v2.php`)
+- ✏️ 기본정보 수정 테스트 (`/hi/api/pharmacyApply-num-update_v2.php`)
+
+**사용 목적**:
+- API 개발 및 디버깅
+- API 동작 확인 및 검증
+- 요청/응답 형식 테스트
+- 인증 및 권한 확인
+- 거래처별 API 연동 테스트
+
+### 개발자 가이드
+
+- **URL**: https://imet.kr/hi/api/verification/api_guide.html
+- **기능**: API v2 개발을 위한 상세 문서 및 사용법
+- **내용**:
+  - 📚 **개요**: API v2의 주요 특징 및 인증 방식
+  - 🔐 **인증**: HMAC-SHA256 인증 방법 및 서명 생성 예제
+  - 📋 **API 엔드포인트**: 모든 API 상세 문서
+    - 리스트 조회, 상세 조회, 상태 변경, 기본정보 수정
+    - 보험료 계산, 잔고 조회, 예치금 내역, 일별/월별 실적
+  - 💻 **SDK 예제**: JavaScript, PHP 코드 예제
+  - 🔄 **업무 흐름 가이드**: 
+    - 신규 약국 등록 프로세스
+    - 약국 정보 수정 프로세스
+    - 해지 처리 프로세스
+    - 실적 분석 프로세스
+  - ⚠️ **제한사항**: Rate Limiting, 데이터 제한, 보안 정책
+  - ❓ **FAQ**: 자주 묻는 질문 및 문제 해결
+  - 📞 **지원**: 기술 지원 연락처
+
+**특징**:
+- 다크 모드 지원
+- 코드 복사 기능
+- 검색 기능
+- 반응형 디자인
+- 실무 예제 포함
 
 ---
 
@@ -338,10 +395,10 @@ const signature = crypto
 - `school2`: 약국명
 - `damdangja`: 담당자명
 - `hphone`, `hphone2`: 연락처
-- `chemist`: 약사 정보
-- `chemistDesignNumer`: 약사 설계 번호
+- `chemist`: 약사 인원
+- `chemistDesignNumer`: 전문인 설계번호
 - `area`: 지역
-- `areaDesignNumer`: 지역 설계 번호
+- `areaDesignNumer`: 화재보험 설계번호
 - `ch`: 상태 코드 (1~17)
 - `preminum`: 보험료
 - `account`: 업체 번호 (pharmacy_idList와 연결)
@@ -892,6 +949,7 @@ WHERE certificate_date = '2026-01-10'
 ### 관련 문서
 - [약국 가입신청 시스템 Readme](../../../imet/drugstore/Readme.md)
 - [API 검증 포털](https://imet.kr/hi/api/verification/)
+- [API 개발자 가이드](https://imet.kr/hi/api/verification/api_guide.html) - 상세한 API 문서 및 사용법
 
 ### 연락처
 - **기술 지원**: ih@simg.kr
