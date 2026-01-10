@@ -29,21 +29,37 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return
 
-          // React core
-          if (id.includes('/react/') || id.includes('/react-dom/')) return 'react-core'
+          // React core - React 관련 모든 것을 포함 (의존성 포함)
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react/jsx-runtime') ||
+              id.includes('node_modules/scheduler/')) {
+            return 'react-core'
+          }
 
-          // Router
+          // React 관련 패키지들
           if (id.includes('react-router')) return 'router'
+          if (id.includes('react-hook-form')) return 'react-hook-form'
+          if (id.includes('react-markdown') || 
+              id.includes('remark-') || 
+              id.includes('rehype-') ||
+              id.includes('micromark-') ||
+              id.includes('mdast-') ||
+              id.includes('hast-') ||
+              id.includes('unified') ||
+              id.includes('parse5')) {
+            return 'markdown'
+          }
 
-          // (있을 때만) 아이콘/유틸/날짜/차트류 분리
+          // 아이콘/유틸/날짜/차트류 분리
           if (id.includes('lucide-react') || id.includes('react-icons')) return 'icons'
           if (id.includes('lodash')) return 'lodash'
-          if (id.includes('moment') || id.includes('dayjs') || id.includes('date-fns')) return 'dates'
+          if (id.includes('moment') || id.includes('moment-timezone')) return 'dates'
+          if (id.includes('date-fns')) return 'dates'
           if (id.includes('chart') || id.includes('recharts')) return 'charts'
           
           // 큰 라이브러리 분리 (동적 import로 로드됨)
           if (id.includes('exceljs')) return 'exceljs'
-          if (id.includes('react-markdown')) return 'markdown'
 
           // 나머지 vendor
           return 'vendor'
