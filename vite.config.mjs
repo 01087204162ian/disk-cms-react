@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // ESM에서 __dirname 사용을 위한 polyfill
 const __filename = fileURLToPath(import.meta.url)
@@ -9,58 +10,39 @@ const __dirname = path.dirname(__filename)
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({ 
+      filename: 'dist/stats.html', 
+      gzipSize: true, 
+      brotliSize: true 
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   build: {
-    // 청크 크기 경고 임계값 조정 (선택사항)
-    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        // 수동 청크 분할 설정
-        manualChunks: (id) => {
-          // node_modules 의존성 분리
-          if (id.includes('node_modules')) {
-            // React 관련 라이브러리
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
-            }
-            // 문서 관련 라이브러리 (PharmacyDocumentation에서만 사용, 동적 import로 자동 분리됨)
-            if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype')) {
-              return 'docs-vendor';
-            }
-            // UI 라이브러리
-            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
-              return 'ui-vendor';
-            }
-            // 폼 및 검증 라이브러리
-            if (id.includes('react-hook-form') || id.includes('hookform') || id.includes('zod')) {
-              return 'form-vendor';
-            }
-            // 유틸리티 라이브러리
-            if (id.includes('axios') || id.includes('date-fns') || id.includes('moment')) {
-              return 'utils-vendor';
-            }
-            // 기타 vendor 라이브러리
-            return 'vendor';
-          }
-          
-          // 페이지별 청크 분리 (동적 import된 페이지들)
-          if (id.includes('/pages/pharmacy/Documentation')) {
-            return 'page-docs';
-          }
-          if (id.includes('/pages/pharmacy/Applications')) {
-            return 'page-pharmacy';
-          }
-          if (id.includes('/pages/staff/')) {
-            return 'page-staff';
-          }
-          if (id.includes('/pages/')) {
-            return 'page-common';
-          }
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+
+          // React core
+          if (id.includes('/react/') || id.includes('/react-dom/')) return 'react-core'
+
+          // Router
+          if (id.includes('react-router')) return 'router'
+
+          // (있을 때만) 아이콘/유틸/날짜/차트류 분리
+          if (id.includes('lucide-react') || id.includes('react-icons')) return 'icons'
+          if (id.includes('lodash')) return 'lodash'
+          if (id.includes('moment') || id.includes('dayjs') || id.includes('date-fns')) return 'dates'
+          if (id.includes('chart') || id.includes('recharts')) return 'charts'
+
+          // 나머지 vendor
+          return 'vendor'
         },
       },
     },
