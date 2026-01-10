@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Plus, Key, TrendingUp, Wallet, RefreshCw, CheckCircle, Download, AlertTriangle } from 'lucide-react'
 import api from '../../lib/api'
+import { useAuthStore } from '../../store/authStore'
 import {
   FilterBar,
   DataTable,
@@ -310,10 +311,17 @@ export default function Applications() {
     }
 
     try {
+      // 사용자 정보 가져오기
+      const { user } = useAuthStore.getState()
+      const registrar = user?.name || user?.email || null
+      const registrarId = user?.email || user?.id || null
+
       const res = await api.post('/api/pharmacy2/update-status', {
         pharmacy_id: pharmacyId,
         status: newStatus,
         old_status: String(oldStatus),
+        registrar: registrar,      // 사용자 이름
+        registrarId: registrarId,  // 사용자 ID (이메일)
       })
 
       if (res.data?.success) {
