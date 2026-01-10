@@ -114,7 +114,10 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
           expert_count: data.expert_count || data.chemist || -1,
           coverage_limit: data.expert_limit || data.coverage_limit || '1',
           business_area: data.business_area || data.area || '',
-          inventory_value: data.inventory_value || data.jaegojasan || -1,
+          // 이전 버전 참고: jaegojasan이 있으면 사용, 없으면 area가 있으면 '1', 없으면 '-1'
+          inventory_value: data.inventory_value || data.jaegojasan || 
+            ((data.business_area && parseFloat(String(data.business_area)) > 0) || 
+             (data.area && parseFloat(String(data.area)) > 0) ? '1' : '-1'),
           premium: data.premium || data.premium_raw || 0,
           expert_design_number: data.expert_design_number || data.chemist_design_number || data.chemistDesignNumer || '',
           expert_certificate_number: data.expert_certificate_number || data.chemistCerti || '',
