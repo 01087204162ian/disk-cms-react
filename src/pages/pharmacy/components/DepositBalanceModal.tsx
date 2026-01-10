@@ -80,59 +80,11 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
         search: search,
       })
 
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1f415213-8b51-4f1e-b83b-efc9ce2f84fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DepositBalanceModal.tsx:56',
-          message: 'API 요청 시작',
-          data: { url: `/api/pharmacy-deposits/summary?${params}`, page, pageSize, search },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'A'
-        })
-      }).catch(() => {})
-      // #endregion
-
       const response = await api.get(`/api/pharmacy-deposits/summary?${params}`)
-
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1f415213-8b51-4f1e-b83b-efc9ce2f84fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DepositBalanceModal.tsx:71',
-          message: 'API 응답 수신',
-          data: { status: response.status, dataKeys: Object.keys(response.data || {}), success: response.data?.success, hasData: !!response.data?.data, hasPagination: !!response.data?.pagination },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'A'
-        })
-      }).catch(() => {})
-      // #endregion
       
       if (response.data.success) {
         const data = response.data.data || []
         const paginationData = response.data.pagination || {}
-        
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/1f415213-8b51-4f1e-b83b-efc9ce2f84fa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'DepositBalanceModal.tsx:77',
-            message: '데이터 처리 성공',
-            data: { dataLength: data.length, pagination: paginationData },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'run1',
-            hypothesisId: 'A'
-          })
-        }).catch(() => {})
-        // #endregion
         
         setDeposits(data)
         setPagination(paginationData)
@@ -145,45 +97,9 @@ export default function DepositBalanceModal({ isOpen, onClose }: DepositBalanceM
 
         setSummaryStats({ totalDeposit, totalUsed, totalBalance })
       } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/1f415213-8b51-4f1e-b83b-efc9ce2f84fa', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            location: 'DepositBalanceModal.tsx:91',
-            message: 'API 응답 success=false',
-            data: { responseData: response.data },
-            timestamp: Date.now(),
-            sessionId: 'debug-session',
-            runId: 'run1',
-            hypothesisId: 'B'
-          })
-        }).catch(() => {})
-        // #endregion
         throw new Error(response.data.message || '데이터를 불러오는데 실패했습니다.')
       }
     } catch (error: any) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1f415213-8b51-4f1e-b83b-efc9ce2f84fa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          location: 'DepositBalanceModal.tsx:97',
-          message: 'API 오류 발생',
-          data: { 
-            message: error.message, 
-            responseStatus: error.response?.status, 
-            responseData: error.response?.data,
-            errorKeys: Object.keys(error || {})
-          },
-          timestamp: Date.now(),
-          sessionId: 'debug-session',
-          runId: 'run1',
-          hypothesisId: 'C'
-        })
-      }).catch(() => {})
-      // #endregion
-
       console.error('예치금 현황 로드 오류:', error)
       toast.error(error.response?.data?.message || error.message || '예치금 현황을 불러오는 중 오류가 발생했습니다.')
     } finally {
