@@ -12,6 +12,39 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-10 (약국배상책임보험) - UI/UX 개선 및 기능 보완
+
+#### 34) 약국배상책임보험 UI/UX 개선 및 기능 보완
+- **날짜 표시 오류 수정**:
+  - `approval_date`가 "0000-00-00 00:00:00"일 때 "NaN-NaN-NaN NaN:NaN:NaN"으로 표시되는 문제 수정
+  - `request_date`도 동일한 문제 수정
+  - 무효한 날짜는 "-"로 표시하도록 개선
+- **보험료 표시 개선**:
+  - 보험료 표시에서 "원" 텍스트 제거 (예: "94,720원" → "94,720")
+  - 테이블 컬럼과 모바일 카드 모두 적용
+- **상태 선택상자 스타일 개선**:
+  - 상태 선택상자가 일반 select처럼 보이도록 스타일 개선
+  - 테두리, 배경색, 드롭다운 화살표 아이콘 추가
+  - 포커스 스타일 추가
+- **상세보기 모달 화재보험 가입 여부 판단 로직 개선**:
+  - `business_area`(사업장면적)가 있으면 화재보험 가입 가능 상태로 표시
+  - `jaegojasan` 값을 우선 사용하도록 수정 (이전 버전과 동일)
+  - `business_area`가 있고 `jaegojasan`이 없으면 기본값 "1" (5천만 원) 설정
+- **보험료 자동 재계산 기능 추가**:
+  - 전문인수(`expert_count`) 변경 시 보험료 자동 재계산
+  - 보상한도(`coverage_limit`) 변경 시 보험료 자동 재계산
+  - 재고자산(`inventory_value`) 변경 시 보험료 자동 재계산
+  - 사업장면적(`business_area`) 변경 시 디바운스 처리 후 보험료 자동 재계산 (500ms)
+  - `/api/pharmacy2/calculate-premium` API 연동
+  - 이전 버전(disk-cms)과 동일한 동작 구현
+- **디버깅 코드 제거**:
+  - `DepositBalanceModal.tsx`에서 디버깅용 `127.0.0.1:7242/ingest` fetch 호출 제거
+  - 브라우저 콘솔 에러 해결
+- **파일**:
+  - `src/pages/pharmacy/Applications.tsx`: 날짜 표시, 보험료 표시, 상태 선택상자 스타일 개선
+  - `src/pages/pharmacy/components/PharmacyDetailModal.tsx`: 화재보험 가입 여부 판단 로직, 보험료 자동 재계산 기능 추가
+  - `src/pages/pharmacy/components/DepositBalanceModal.tsx`: 디버깅 코드 제거
+
 ### 2026-01-10 (프로젝트 전반) - 번들 크기 최적화 및 성능 개선
 
 #### 33) 번들 분석 및 최적화 작업 완료
