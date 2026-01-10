@@ -599,14 +599,20 @@ export default function Applications() {
       {
         key: 'status',
         header: '상태',
-        className: 'p-0',
         cell: (row) => {
           const statusOptions = getStatusOptions(row.status)
           return (
             <select
               value={String(row.status)}
               onChange={(e) => handleStatusChange(row.id, e.target.value, row.original_status || row.status)}
-              className="w-full text-xs border-0 bg-white px-2 py-1 focus:outline-none appearance-none cursor-pointer"
+              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem',
+              }}
             >
               {statusOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -650,7 +656,7 @@ export default function Applications() {
         className: 'text-right',
         cell: (row) => (
           <div className="flex items-center justify-end gap-1">
-            <span>{row.premium ? row.premium.toLocaleString('ko-KR') + '원' : '-'}</span>
+            <span>{row.premium ? row.premium.toLocaleString('ko-KR') : '-'}</span>
             {row.premium && (
               <button
                 onClick={() => verifyPremium(row.id)}
@@ -710,7 +716,7 @@ export default function Applications() {
             '-'
           )}
         </div>
-        <div className="text-right">보험료: {application.premium ? application.premium.toLocaleString('ko-KR') + '원' : '-'}</div>
+        <div className="text-right">보험료: {application.premium ? application.premium.toLocaleString('ko-KR') : '-'}</div>
         {application.account && <div className="col-span-2">거래처: {application.account}</div>}
       </div>
     </div>
