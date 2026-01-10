@@ -322,11 +322,18 @@ router.post('/certificate-number', async (req, res) => {
       });
     }
 
+    // 사용자 정보 가져오기 (세션에서)
+    const user = req.session?.user;
+    const registrar = user?.name || user?.username || null;
+    const registrarId = user?.id || user?.num || user?.email || null;
+
     const requestData = {
       pharmacy_id: validPharmacyId,
       certificate_number: cleanCertificateNumber,
       certificate_type: certificateType,  // 'expert' 또는 'fire'
-      action: 'update_certificate'
+      action: 'update_certificate',
+      registrar: registrar,              // 입력자 이름 (선택사항)
+      registrar_id: registrarId          // 입력자 ID (선택사항)
     };
 
 
