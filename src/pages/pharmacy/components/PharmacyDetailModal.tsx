@@ -114,10 +114,30 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
           expert_count: data.expert_count || data.chemist || -1,
           coverage_limit: data.expert_limit || data.coverage_limit || '1',
           business_area: data.business_area || data.area || '',
-          // 이전 버전 참고: jaegojasan이 있으면 사용, 없으면 area가 있으면 '1', 없으면 '-1'
-          inventory_value: data.inventory_value || data.jaegojasan || 
-            ((data.business_area && parseFloat(String(data.business_area)) > 0) || 
-             (data.area && parseFloat(String(data.area)) > 0) ? '1' : '-1'),
+          // 이전 버전 참고: inventory_value나 jaegojasan 값을 숫자로 추출하여 select value와 매칭
+          inventory_value: (() => {
+            // inventory_value가 "2억원" 같은 문자열이면 숫자 부분만 추출
+            if (data.inventory_value) {
+              const numStr = String(data.inventory_value).replace(/[^0-9]/g, '')
+              if (numStr && ['1', '2', '3', '4', '5'].includes(numStr)) {
+                return numStr
+              }
+              // 숫자가 아니거나 범위 밖이면 원래 값 사용 (문자열 비교용)
+            }
+            // jaegojasan이 있으면 사용 (이미 숫자 문자열)
+            if (data.jaegojasan) {
+              const jaegoNum = String(data.jaegojasan).replace(/[^0-9]/g, '')
+              if (jaegoNum && ['-1', '1', '2', '3', '4', '5'].includes(jaegoNum)) {
+                return jaegoNum
+              }
+            }
+            // area가 있으면 화재보험 가입 가능 상태
+            if ((data.business_area && parseFloat(String(data.business_area)) > 0) || 
+                (data.area && parseFloat(String(data.area)) > 0)) {
+              return '1'
+            }
+            return '-1'
+          })(),
           premium: data.premium || data.premium_raw || 0,
           expert_design_number: data.expert_design_number || data.chemist_design_number || data.chemistDesignNumer || '',
           expert_certificate_number: data.expert_certificate_number || data.chemistCerti || '',
