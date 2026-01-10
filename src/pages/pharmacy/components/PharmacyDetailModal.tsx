@@ -196,6 +196,57 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
     }
   }
 
+  // 보험료 계산 함수 (이전 버전 참고)
+  const calculatePremium = async (updatedDetail?: Partial<PharmacyDetail>) => {
+    if (!pharmacyId || !detail) return
+
+    // 업데이트된 값이 있으면 사용, 없으면 현재 detail 사용
+    const currentDetail = updatedDetail ? { ...detail, ...updatedDetail } : detail
+
+    try {
+      const requestData = {
+        pharmacy_id: pharmacyId,
+        expert_count: currentDetail.expert_count,
+        expert_limit: currentDetail.coverage_limit,
+        inventory_value: currentDetail.inventory_value,
+        business_area: currentDetail.business_area,
+        account: currentDetail.account || '1',
+      }
+
+      const res = await api.post('/api/pharmacy2/calculate-premium', requestData)
+      
+      if (res.data?.success && res.data.data) {
+        const calculatedPremium = res.data.data.premium_formatted || res.data.data.premium || res.data.data.preminum
+        const premiumNum = calculatedPremium 
+          ? (typeof calculatedPremium === 'string' 
+              ? parseInt(calculatedPremium.replace(/[^0-9]/g, '')) 
+              : calculatedPremium)
+          : currentDetail.premium
+        
+        // 보험료 화면 업데이트
+        setDetail((prev) => ({
+          ...prev!,
+          ...currentDetail,
+          premium: premiumNum,
+        }))
+      }
+    } catch (error: any) {
+      console.error('보험료 계산 오류:', error)
+      // 조용히 실패 (에러 메시지 표시 안 함, 변경 감지만)
+    }
+  }
+
+  // 디바운스된 보험료 계산 함수 (사업장면적 입력 시 사용)
+  const debouncedCalculatePremium = (() => {
+    let timeout: NodeJS.Timeout | null = null
+    return (updatedDetail?: Partial<PharmacyDetail>) => {
+      if (timeout) clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        calculatePremium(updatedDetail)
+      }, 500)
+    }
+  })()
+
   const handleVerifyPremium = async () => {
     if (!pharmacyId) return
 
@@ -448,7 +499,13 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             </label>
             <select
               value={detail.expert_count}
-              onChange={(e) => setDetail({ ...detail, expert_count: e.target.value })}
+              onChange={(e) => {
+                const newValue = e.target.value
+                const updatedDetail = { ...detail, expert_count: newValue }
+                setDetail(updatedDetail)
+                // 보험료 재계산
+                calculatePremium({ expert_count: newValue })
+              }}
               disabled={isLockedStatus}
               className={`px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left ${isLockedStatus ? 'bg-gray-100' : ''}`}
             >
@@ -469,7 +526,13 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             </label>
             <select
               value={detail.coverage_limit}
-              onChange={(e) => setDetail({ ...detail, coverage_limit: e.target.value })}
+              onChange={(e) => {
+                const newValue = e.target.value
+                const updatedDetail = { ...detail, coverage_limit: newValue }
+                setDetail(updatedDetail)
+                // 보험료 재계산
+                calculatePremium({ coverage_limit: newValue })
+              }}
               disabled={isLockedStatus || hasSingleLimit}
               className={`px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left ${isLockedStatus || hasSingleLimit ? 'bg-gray-100' : ''}`}
             >
@@ -484,7 +547,13 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             </label>
             <select
               value={detail.inventory_value}
-              onChange={(e) => setDetail({ ...detail, inventory_value: e.target.value })}
+              onChange={(e) => {
+                const newValue = e.target.value
+                const updatedDetail = { ...detail, inventory_value: newValue }
+                setDetail(updatedDetail)
+                // 보험료 재계산
+                calculatePremium({ inventory_value: newValue })
+              }}
               disabled={isLockedStatus}
               className={`px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left ${isLockedStatus ? 'bg-gray-100' : ''}`}
             >
@@ -504,7 +573,12 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
             <input
               type="text"
               value={detail.business_area}
-              onChange={(e) => setDetail({ ...detail, business_area: e.target.value })}
+              onChange={(e) => {
+                const newValue = e.target.value
+                setDetail({ ...detail, business_area: newValue })
+                // 보험료 재계산 (디바운스 처리)
+                debouncedCalculatePremium({ business_area: newValue })
+              }}
               disabled={isLockedStatus}
               placeholder="면적을 입력하세요"
               className={`px-3 py-1.5 text-xs border-0 border-b border-gray-300 bg-transparent focus:outline-none focus:border-blue-500 text-right focus:text-left ${isLockedStatus ? 'bg-gray-100' : ''}`}
