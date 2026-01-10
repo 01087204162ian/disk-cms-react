@@ -238,7 +238,7 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
 
   // 디바운스된 보험료 계산 함수 (사업장면적 입력 시 사용)
   const debouncedCalculatePremium = (() => {
-    let timeout: NodeJS.Timeout | null = null
+    let timeout: ReturnType<typeof setTimeout> | null = null
     return (updatedDetail?: Partial<PharmacyDetail>) => {
       if (timeout) clearTimeout(timeout)
       timeout = setTimeout(() => {
