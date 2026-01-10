@@ -40,6 +40,10 @@ export default defineConfig({
           if (id.includes('lodash')) return 'lodash'
           if (id.includes('moment') || id.includes('dayjs') || id.includes('date-fns')) return 'dates'
           if (id.includes('chart') || id.includes('recharts')) return 'charts'
+          
+          // 큰 라이브러리 분리 (동적 import로 로드됨)
+          if (id.includes('exceljs')) return 'exceljs'
+          if (id.includes('react-markdown')) return 'markdown'
 
           // 나머지 vendor
           return 'vendor'

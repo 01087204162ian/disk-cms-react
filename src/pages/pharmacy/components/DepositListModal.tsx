@@ -3,7 +3,6 @@ import { Modal, DataTable, useToastHelpers, ExportButton } from '../../../compon
 import { List } from 'lucide-react'
 import api from '../../../lib/api'
 import type { Column } from '../../../components/DataTable'
-import ExcelJS from 'exceljs'
 
 interface DepositListModalProps {
   isOpen: boolean
@@ -106,6 +105,9 @@ export default function DepositListModal({
       }
 
       const data = response.data.data
+
+      // ExcelJS를 동적으로 로드 (엑셀 다운로드 시에만 로드)
+      const ExcelJS = (await import('exceljs')).default
 
       // 워크북 생성
       const workbook = new ExcelJS.Workbook()
