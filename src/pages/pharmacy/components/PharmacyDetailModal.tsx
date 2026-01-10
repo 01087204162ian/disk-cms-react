@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { CheckCircle, Upload } from 'lucide-react'
 import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
+import { useAuthStore } from '../../../store/authStore'
 
 interface PharmacyDetailModalProps {
   isOpen: boolean
@@ -42,6 +43,7 @@ interface PharmacyDetail {
 
 export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpdate }: PharmacyDetailModalProps) {
   const toast = useToastHelpers()
+  const { user } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [detail, setDetail] = useState<PharmacyDetail | null>(null)
@@ -235,11 +237,17 @@ export default function PharmacyDetailModal({ isOpen, onClose, pharmacyId, onUpd
     }
 
     try {
+      // 사용자 정보 가져오기
+      const registrar = user?.name || user?.email || null
+      const registrarId = user?.email || user?.id || null
+
       // TODO: API 엔드포인트 확인 필요
       const res = await api.post('/api/pharmacy2/certificate-number', {
         pharmacyId,
         certificateNumber: certNumber.trim(),
         certificateType: certType,
+        registrar: registrar,      // 사용자 이름
+        registrarId: registrarId,  // 사용자 ID (이메일)
       })
 
       if (res.data?.success) {

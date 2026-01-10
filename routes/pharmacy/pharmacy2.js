@@ -322,10 +322,24 @@ router.post('/certificate-number', async (req, res) => {
       });
     }
 
-    // 사용자 정보 가져오기 (세션에서)
+    // 사용자 정보 가져오기 (세션 또는 요청 본문에서)
     const user = req.session?.user;
-    const registrar = user?.name || user?.username || null;
-    const registrarId = user?.id || user?.num || user?.email || null;
+    // 요청 본문에서 사용자 정보를 받거나, 세션에서 가져오기
+    const registrar = req.body.registrar || user?.name || user?.username || user?.email || null;
+    const registrarId = req.body.registrarId || user?.email || user?.id || user?.num || null;
+
+    // 디버깅 로그 추가
+    console.log(`[POST /certificate-number] 사용자 정보 확인:`, {
+      hasSession: !!req.session,
+      hasUser: !!user,
+      userEmail: user?.email,
+      userName: user?.name || user?.username,
+      userId: user?.id || user?.num,
+      bodyRegistrar: req.body.registrar,
+      bodyRegistrarId: req.body.registrarId,
+      finalRegistrar: registrar,
+      finalRegistrarId: registrarId
+    });
 
     const requestData = {
       pharmacy_id: validPharmacyId,
