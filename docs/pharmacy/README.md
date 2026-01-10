@@ -428,6 +428,46 @@ const signature = crypto
 - `7`: 보류
 - `16`: 해지완료
 
+#### 5. pharmacy_certificate_history (2026-01-10 추가)
+증권발급 및 해지 이력을 저장하는 전용 테이블입니다.
+
+**주요 필드**:
+- `num`: 기록 번호 (PK)
+- `applyNum`: 약국 신청 번호 (pharmacyApply.num)
+- `account`: 업체 번호 (pharmacy_idList.num)
+- `action_type`: 액션 타입 (ENUM: 'certificate', 'termination')
+- `certificate_type`: 증권 유형 (ENUM: 'expert', 'fire', 'both', NULL)
+- `status`: 상태 코드 (VARCHAR: '14'=증권발급, '16'=해지완료)
+- `proPreminum`: 전문인보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `areaPreminum`: 화재보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `preminum`: 총 보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `certificate_date`: 증권발급일 또는 해지일 (DATE, 통계 집계 기준일)
+- `registrar`: 입력자 이름 (관리자 이름)
+- `registrar_id`: 입력자 ID (세션 사용자 ID)
+- `wdate`: 기록 생성 시간 (DATETIME)
+- `memo`: 메모 (일할 계산 정보 등)
+
+**액션 타입 (action_type)**:
+- `certificate`: 증권발급 (status='14')
+- `termination`: 해지완료 (status='16')
+
+**증권 유형 (certificate_type)**:
+- `expert`: 전문인 증권만
+- `fire`: 화재 증권만
+- `both`: 전문인 + 화재 둘 다
+- `NULL`: 해지완료 시 (발급 이력이 아니므로)
+
+**특징**:
+- 한 약국당 증권발급(action_type='certificate') 레코드는 최대 1개 (UNIQUE 제약)
+- 증권번호 입력 시 INSERT 또는 UPDATE (전문인/화재 각각 입력 시 UPDATE)
+- 해지완료 시 일할 계산된 환급 보험료 기록
+- 통계 집계 시 중복 제거 불필요
+
+**인덱스**:
+- `idx_applyNum_action_unique`: (applyNum, action_type) UNIQUE - 중복 방지
+- `idx_certificate_date`: certificate_date - 날짜별 통계 조회 최적화
+- `idx_account_date`: (account, certificate_date) - 업체별 날짜별 통계 조회 최적화
+
 ### 테이블 간 관계
 
 ```
@@ -437,12 +477,14 @@ pharmacy_idList (업체)
     │
     ├─── pharmacyApply (신청) ────┐
     │         │                    │
-    │         │ 1:N                │ 1:N
-    │         │                    │
-    │         │                    │
-    └─── pharmacy_deposit (예치금) │
-                                   │
-                         pharmacy_settlementList (정산)
+    │         │ 1:N                │ 1:N                │ 1:1 (최대)
+    │         │                    │                    │
+    │         │                    │                    │
+    └─── pharmacy_deposit (예치금) │                    │
+                                   │                    │
+                         pharmacy_settlementList (정산) │
+                                                         │
+                                   pharmacy_certificate_history (증권 이력)
 ```
 
 ---
@@ -467,6 +509,12 @@ pharmacy_idList (업체)
 - API 키 관리 (`ApiManagerModal.tsx`)
 - 업체 추가 (`AddCompanyModal.tsx`)
 - 잔고 부족 시에도 정산 기록 생성 및 예치금 차감 처리 (2026-01-09 개선)
+- **증권발급 기준 통계 개선** (2026-01-10 완료)
+  - `pharmacy_certificate_history` 테이블 생성
+  - 증권번호 입력 시 이력 자동 기록 (`pharmacy-certificate-update.php`)
+  - 해지완료 시 환급 보험료 기록 (`pharmacy-status-update.php`)
+  - 일별/월별 실적 조회 API 개선 (증권 기준: `pharmacy_certificate_history` 테이블 사용)
+  - 프론트엔드/프록시 `criteria` 파라미터 수정 (`contract` → `certificate`)
 
 #### ⚠️ 개선 필요 사항
 - 상태 변경 시 확인 모달 개선
@@ -765,60 +813,77 @@ WHERE SUBSTRING(wdate, 1, 10) = '2026-01-09'
 - 예치금 차감과 동시에 기록됨
 - 실제 보험 가입 처리 시점 반영
 
-#### 증권 기준 실적
+#### 증권 기준 실적 (2026-01-10 개선)
 
-**테이블**: `pharmacyApply`  
-**조건**: `ch = '14'` (증권발급) 또는 `ch = '16'` (해지완료)  
-**날짜 필드**: `wdate_3` (증권발급일)
+**테이블**: `pharmacy_certificate_history` (전용 테이블)  
+**조건**: `action_type='certificate'` (증권발급, status='14') 또는 `action_type='termination'` (해지완료, status='16')  
+**날짜 필드**: `certificate_date` (증권발급일/해지일)
 
 **의미**:
-- 증권번호 입력 시점의 실적
+- 증권번호 입력 시점의 실적 (전용 테이블 사용)
 - 실제 증권 발급 완료 시점 기준
-- `pharmacyApply` 테이블의 `wdate_3` 기준으로 집계
+- 해지완료 시 환급 보험료 반영
+- `pharmacy_certificate_history` 테이블의 `certificate_date` 기준으로 집계
 
 **사용 쿼리**:
 ```sql
 SELECT 
-    ch,
+    action_type,
+    status,
     CAST(preminum AS DECIMAL(15,2)) as preminum,
-    wdate_3,
+    certificate_date,
     account
-FROM pharmacyApply
-WHERE wdate_3 >= '2026-01-09 00:00:00'
-  AND wdate_3 <= '2026-01-09 23:59:59'
-  AND ch IN ('14', '16')
-  AND account = '8'
+FROM pharmacy_certificate_history
+WHERE certificate_date = '2026-01-10'
+  AND account = 8
 ```
 
 **특징**:
 - 증권번호 입력 완료 시점 기준
 - 실제 증권 발급 완료된 건만 집계
-- 승인 후 설계번호 입력 → 증권번호 입력까지 완료된 건만 포함
+- 한 약국당 최대 1개 레코드 유지 (중복 제거 불필요)
+- 해지완료 시 일할 계산된 환급 보험료 반영
+- 입력자 정보 기록 (감사 추적 가능)
+- 전문인/화재 보험료 각각 집계 가능
+
+**기존 방식 (2026-01-10 이전)**:
+- 테이블: `pharmacyApply`
+- 조건: `ch = '14'` (증권발급) 또는 `ch = '16'` (해지완료)
+- 날짜 필드: `wdate_3` (증권발급일)
+- 문제점: 전문인/화재 증권번호 입력 시점 불일치, 해지 환급 보험료 미반영
 
 #### 두 기준의 차이점
 
 | 구분 | 승인 기준 | 증권 기준 |
 |------|----------|-----------|
-| **테이블** | `pharmacy_settlementList` | `pharmacyApply` |
-| **조건** | `sort = 13` (승인) | `ch = '14'` (증권발급) |
-| **날짜 필드** | `wdate` (정산일) | `wdate_3` (증권발급일) |
+| **테이블** | `pharmacy_settlementList` | `pharmacy_certificate_history` (2026-01-10 개선) |
+| **조건** | `sort = 13` (승인) | `action_type='certificate'` (증권발급, status='14') |
+| **날짜 필드** | `wdate` (정산일) | `certificate_date` (증권발급일/해지일) |
 | **의미** | 승인 처리 시점 | 증권 발급 완료 시점 |
 | **포함 범위** | 승인 처리된 모든 건 | 증권번호 입력 완료된 건만 |
 | **시점 차이** | 승인 즉시 | 승인 → 설계번호 → 증권번호 입력 후 |
+| **특징** | 예치금 차감 시점 반영 | 환급 보험료 반영 (해지 시 일할 계산) |
 
 #### 실적 조회 API
 
 **일별 실적 조회**:
 - **엔드포인트**: `/api/pharmacy-reports/daily`
-- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=contract` (증권 기준)
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=certificate` (증권 기준)
 - **파일**: `imet/api/pharmacy/pharmacy-daily-report.php`
+- **프론트엔드**: `disk-cms-react/src/pages/pharmacy/components/DailyReportModal.tsx`
+- **프록시**: `disk-cms-react/routes/pharmacy/reports.js`
 
 **월별 실적 조회**:
 - **엔드포인트**: `/api/pharmacy-reports/monthly`
-- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=contract` (증권 기준)
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=certificate` (증권 기준)
 - **파일**: `imet/api/pharmacy/pharmacy-monthly-report.php`
+- **프론트엔드**: `disk-cms-react/src/pages/pharmacy/components/DailyReportModal.tsx`
+- **프록시**: `disk-cms-react/routes/pharmacy/reports.js`
 
-**참고**: 프론트엔드에서는 `criteria=contract`로 표시되지만, 백엔드에서는 증권 기준으로 처리됩니다.
+**증권 기준 조회 시**:
+- 테이블: `pharmacy_certificate_history`
+- 조건: `action_type='certificate'` (증권발급) 또는 `action_type='termination'` (해지완료)
+- 날짜 기준: `certificate_date`
 
 ---
 
@@ -848,3 +913,10 @@ WHERE wdate_3 >= '2026-01-09 00:00:00'
 - 날짜 필드 (wdate, wdate_2, wdate_3) 의미 정리
 - 승인 기준 실적 vs 증권 기준 실적 비교 정리
 - 증권 기준으로 변경 (기존 계약 기준에서 변경)
+- **증권발급 기준 통계 개선 작업 완료**
+  - `pharmacy_certificate_history` 테이블 설계 및 생성
+  - 증권번호 입력 시 이력 자동 기록 기능 구현
+  - 해지완료 시 환급 보험료(일할 계산) 기록 기능 구현
+  - 일별/월별 실적 조회 API 개선 (증권 기준: 새 테이블 사용)
+  - 프론트엔드/프록시 `criteria` 파라미터 수정 (`contract` → `certificate`)
+  - 통계 조회 정확도 향상 (환급 보험료 반영, 중복 제거 불필요)
