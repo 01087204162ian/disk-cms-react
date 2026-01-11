@@ -89,7 +89,7 @@ export default function DataTable<T extends Record<string, any>>({
   const renderPagination = () => {
     if (!pagination) return null
 
-    const { currentPage, pageSize, totalCount, onPageChange, onPageSizeChange, pageSizeOptions } = pagination
+    const { currentPage, pageSize, totalCount, onPageChange } = pagination
     const totalPages = Math.ceil(totalCount / pageSize)
     const startIndex = (currentPage - 1) * pageSize + 1
     const endIndex = Math.min(currentPage * pageSize, totalCount)
