@@ -83,7 +83,7 @@
             {
               "id": "kj-proxy",
               "title": "KJ대리운전",
-              "page": "insurance/kj-driver",
+              "page": "insurance/kj-driver-search",
               "order": 1
             },
             {
