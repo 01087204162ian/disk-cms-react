@@ -350,18 +350,7 @@ export default function CompanyManagement() {
 
   return (
     <div className="space-y-6">
-      <FilterBar
-        actionButtons={
-          <button
-            onClick={handleAddCompany}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden md:inline">대리운전회사 신규</span>
-            <span className="md:hidden">신규</span>
-          </button>
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.status}
           onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
@@ -397,6 +386,14 @@ export default function CompanyManagement() {
           options={dateOptions}
           className="w-24"
         />
+        <button
+          onClick={handleAddCompany}
+          className="h-10 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden md:inline">대리운전회사 신규</span>
+          <span className="md:hidden">신규</span>
+        </button>
       </FilterBar>
 
       <DataTable
