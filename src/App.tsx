@@ -21,6 +21,7 @@ const PharmacyApplications = lazy(() => import('./pages/pharmacy/Applications'))
 const PharmacyDocumentation = lazy(() => import('./pages/pharmacy/Documentation'))
 const DriverSearch = lazy(() => import('./pages/insurance/DriverSearch'))
 const PolicySearch = lazy(() => import('./pages/insurance/PolicySearch'))
+const CompanyManagement = lazy(() => import('./pages/insurance/CompanyManagement'))
 
 // 로딩 컴포넌트
 const PageLoader = () => (
@@ -65,6 +66,7 @@ function App() {
                       {/* KJ 대리운전 */}
                       <Route path="/insurance/kj-driver-search" element={<DriverSearch />} />
                       <Route path="/insurance/kj-driver-policy-search" element={<PolicySearch />} />
+                      <Route path="/insurance/kj-driver-company" element={<CompanyManagement />} />
                       {/* 이전 경로 호환 */}
                       <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
                       {/* 추가 라우트는 여기에 추가 */}
