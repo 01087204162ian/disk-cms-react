@@ -133,36 +133,29 @@ export default function DriverSearch() {
   //   loadDrivers()
   // }, [])
 
-  // 검색 실행 (입력 시 자동 검색)
+  // 검색 실행 (검색어 입력 후 Enter 키 또는 검색 버튼으로 호출)
   const handleSearch = () => {
+    if (!filters.search || filters.search.trim() === '') {
+      toast.error('검색어를 입력해주세요.')
+      return
+    }
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
     loadDrivers(1, pagination.pageSize)
   }
-  
-  // 검색어 변경 시 자동 검색
-  useEffect(() => {
-    if (filters.search) {
-      const timer = setTimeout(() => {
-        handleSearch()
-      }, 500) // 500ms 디바운스
-      return () => clearTimeout(timer)
-    }
-  }, [filters.search, filters.searchType])
-  
-  // 상태 필터 변경 시 자동 검색
-  useEffect(() => {
-    if (filters.status !== undefined) {
-      handleSearch()
-    }
-  }, [filters.status])
 
   // 페이지 변경
   const handlePageChange = (page: number) => {
+    if (!filters.search || filters.search.trim() === '') {
+      return
+    }
     loadDrivers(page, pagination.pageSize)
   }
 
   // 페이지 크기 변경
   const handlePageSizeChange = (newPageSize: number) => {
+    if (!filters.search || filters.search.trim() === '') {
+      return
+    }
     setFilters((prev) => ({ ...prev, pageSize: String(newPageSize) }))
     setPagination((prev) => ({ ...prev, currentPage: 1, pageSize: newPageSize }))
     loadDrivers(1, newPageSize)
@@ -392,6 +385,12 @@ export default function DriverSearch() {
           onChange={(value) => setFilters((prev) => ({ ...prev, searchType: value }))}
           options={SEARCH_TYPE_OPTIONS}
         />
+        <FilterBar.Input
+          value={filters.search}
+          onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
+          placeholder="예: 홍길동 / 010-1234-5678"
+          onSearch={handleSearch}
+        />
         <FilterBar.Select
           value={filters.status}
           onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
@@ -409,12 +408,6 @@ export default function DriverSearch() {
           value={filters.terminationDate}
           onChange={(value) => setFilters((prev) => ({ ...prev, terminationDate: value }))}
           className="w-40"
-        />
-        <FilterBar.Input
-          value={filters.search}
-          onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
-          placeholder="예: 홍길동 / 010-1234-5678"
-          onSearch={handleSearch}
         />
       </FilterBar>
 
