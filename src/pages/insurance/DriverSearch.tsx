@@ -8,7 +8,7 @@ import {
   useToastHelpers,
   DatePicker,
 } from '../../components'
-import { GITA_OPTIONS, mapPushLabel, mapSagoLabel, getGitaName, addPhoneHyphen, removePhoneHyphen } from './constants'
+import { GITA_OPTIONS, mapPushLabel, removePhoneHyphen } from './constants'
 
 interface Driver {
   num: number
@@ -134,11 +134,6 @@ export default function DriverSearch() {
   //   loadDrivers()
   // }, [])
 
-  // 필터 변경 핸들러
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
   // 검색 실행
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
@@ -219,7 +214,9 @@ export default function DriverSearch() {
           const sangtae = row.sangtae != null ? String(row.sangtae) : ''
 
           // push=4이고 cancel=42이고 sangtae=1이면 "해지중" 표시
-          if (push === 4 && (cancel === '42' || cancel === 42) && (sangtae === '1' || sangtae === 1)) {
+          const cancelNum = typeof cancel === 'string' ? Number(cancel) : cancel
+          const sangtaeNum = typeof sangtae === 'string' ? Number(sangtae) : sangtae
+          if (push === 4 && cancelNum === 42 && sangtaeNum === 1) {
             return <span>해지중</span>
           }
 

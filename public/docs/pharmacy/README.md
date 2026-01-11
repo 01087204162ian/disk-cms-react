@@ -322,6 +322,63 @@ const signature = crypto
 
 - **URL**: https://imet.kr/hi/api/verification/
 - **기능**: 모든 API 엔드포인트를 통합 관리하고 테스트할 수 있는 중앙 허브
+- **인증 방식**: HMAC-SHA256 인증
+- **API 형태**: RESTful API
+- **특징**: 실시간 검증 및 테스트 가능
+
+**사용 방법**:
+1. 실무 담당자가 검증 포털에 접속
+2. 상단의 **API 인증 설정** 섹션에서 거래처의 **API Key**와 **Secret Key** 입력
+   - API Key: `pharmacy_idList` 테이블의 `api_key` 필드 값 (pk_로 시작)
+   - Secret Key: `pharmacy_idList` 테이블의 `api_secret` 필드 값 (SHA256 해시)
+3. 입력한 API Key와 Secret Key로 각 API 엔드포인트를 테스트
+4. 요청/응답 결과를 실시간으로 확인하여 API 동작 검증
+
+**제공 기능**:
+- 🔐 API 인증 설정 (API Key, Secret Key)
+- 📋 약국 리스트 조회 테스트 (`/hi/api/list_v2.php`)
+- 🔍 약국 상세 조회 테스트 (`/hi/api/detail_v2.php`)
+- 💰 잔고 조회 테스트 (`/hi/api/balance_v2.php`)
+- 🏦 예치금 내역 조회 테스트 (`/hi/api/deposit_balance_v2.php`)
+- 📊 일별 실적 조회 테스트 (`/hi/api/daily_stats_v2.php`)
+- 📈 월별 실적 조회 테스트 (`/hi/api/monthly_stats_v2.php`)
+- 🔄 상태 변경 테스트 (`/hi/api/pharmacy-status-update_v2.php`)
+- 🧮 보험료 계산 테스트 (`/hi/api/pharmacy-premium-calculate_v2.php`)
+- ✏️ 기본정보 수정 테스트 (`/hi/api/pharmacyApply-num-update_v2.php`)
+
+**사용 목적**:
+- API 개발 및 디버깅
+- API 동작 확인 및 검증
+- 요청/응답 형식 테스트
+- 인증 및 권한 확인
+- 거래처별 API 연동 테스트
+
+### 개발자 가이드
+
+- **URL**: https://imet.kr/hi/api/verification/api_guide.html
+- **기능**: API v2 개발을 위한 상세 문서 및 사용법
+- **내용**:
+  - 📚 **개요**: API v2의 주요 특징 및 인증 방식
+  - 🔐 **인증**: HMAC-SHA256 인증 방법 및 서명 생성 예제
+  - 📋 **API 엔드포인트**: 모든 API 상세 문서
+    - 리스트 조회, 상세 조회, 상태 변경, 기본정보 수정
+    - 보험료 계산, 잔고 조회, 예치금 내역, 일별/월별 실적
+  - 💻 **SDK 예제**: JavaScript, PHP 코드 예제
+  - 🔄 **업무 흐름 가이드**: 
+    - 신규 약국 등록 프로세스
+    - 약국 정보 수정 프로세스
+    - 해지 처리 프로세스
+    - 실적 분석 프로세스
+  - ⚠️ **제한사항**: Rate Limiting, 데이터 제한, 보안 정책
+  - ❓ **FAQ**: 자주 묻는 질문 및 문제 해결
+  - 📞 **지원**: 기술 지원 연락처
+
+**특징**:
+- 다크 모드 지원
+- 코드 복사 기능
+- 검색 기능
+- 반응형 디자인
+- 실무 예제 포함
 
 ---
 
@@ -338,15 +395,16 @@ const signature = crypto
 - `school2`: 약국명
 - `damdangja`: 담당자명
 - `hphone`, `hphone2`: 연락처
-- `chemist`: 약사 정보
-- `chemistDesignNumer`: 약사 설계 번호
+- `chemist`: 약사 인원
+- `chemistDesignNumer`: 전문인 설계번호
 - `area`: 지역
-- `areaDesignNumer`: 지역 설계 번호
+- `areaDesignNumer`: 화재보험 설계번호
 - `ch`: 상태 코드 (1~17)
 - `preminum`: 보험료
 - `account`: 업체 번호 (pharmacy_idList와 연결)
-- `wdate`: 신청일
-- `wdate_2`: 승인일
+- `wdate`: 최초 입력 시간 (신청일)
+- `wdate_2`: 상태 변경일 (메일 보냄, 승인 등 상태 변경 시점)
+- `wdate_3`: 증권번호 입력일 (증권발급일)
 - `memo`: 메모
 
 **상태 코드 (ch)**:
@@ -427,6 +485,46 @@ const signature = crypto
 - `7`: 보류
 - `16`: 해지완료
 
+#### 5. pharmacy_certificate_history (2026-01-10 추가)
+증권발급 및 해지 이력을 저장하는 전용 테이블입니다.
+
+**주요 필드**:
+- `num`: 기록 번호 (PK)
+- `applyNum`: 약국 신청 번호 (pharmacyApply.num)
+- `account`: 업체 번호 (pharmacy_idList.num)
+- `action_type`: 액션 타입 (ENUM: 'certificate', 'termination')
+- `certificate_type`: 증권 유형 (ENUM: 'expert', 'fire', 'both', NULL)
+- `status`: 상태 코드 (VARCHAR: '14'=증권발급, '16'=해지완료)
+- `proPreminum`: 전문인보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `areaPreminum`: 화재보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `preminum`: 총 보험료 (증권발급: 원래 보험료, 해지: 환급 보험료)
+- `certificate_date`: 증권발급일 또는 해지일 (DATE, 통계 집계 기준일)
+- `registrar`: 입력자 이름 (관리자 이름)
+- `registrar_id`: 입력자 ID (세션 사용자 ID)
+- `wdate`: 기록 생성 시간 (DATETIME)
+- `memo`: 메모 (일할 계산 정보 등)
+
+**액션 타입 (action_type)**:
+- `certificate`: 증권발급 (status='14')
+- `termination`: 해지완료 (status='16')
+
+**증권 유형 (certificate_type)**:
+- `expert`: 전문인 증권만
+- `fire`: 화재 증권만
+- `both`: 전문인 + 화재 둘 다
+- `NULL`: 해지완료 시 (발급 이력이 아니므로)
+
+**특징**:
+- 한 약국당 증권발급(action_type='certificate') 레코드는 최대 1개 (UNIQUE 제약)
+- 증권번호 입력 시 INSERT 또는 UPDATE (전문인/화재 각각 입력 시 UPDATE)
+- 해지완료 시 일할 계산된 환급 보험료 기록
+- 통계 집계 시 중복 제거 불필요
+
+**인덱스**:
+- `idx_applyNum_action_unique`: (applyNum, action_type) UNIQUE - 중복 방지
+- `idx_certificate_date`: certificate_date - 날짜별 통계 조회 최적화
+- `idx_account_date`: (account, certificate_date) - 업체별 날짜별 통계 조회 최적화
+
 ### 테이블 간 관계
 
 ```
@@ -436,12 +534,14 @@ pharmacy_idList (업체)
     │
     ├─── pharmacyApply (신청) ────┐
     │         │                    │
-    │         │ 1:N                │ 1:N
-    │         │                    │
-    │         │                    │
-    └─── pharmacy_deposit (예치금) │
-                                   │
-                         pharmacy_settlementList (정산)
+    │         │ 1:N                │ 1:N                │ 1:1 (최대)
+    │         │                    │                    │
+    │         │                    │                    │
+    └─── pharmacy_deposit (예치금) │                    │
+                                   │                    │
+                         pharmacy_settlementList (정산) │
+                                                         │
+                                   pharmacy_certificate_history (증권 이력)
 ```
 
 ---
@@ -466,6 +566,12 @@ pharmacy_idList (업체)
 - API 키 관리 (`ApiManagerModal.tsx`)
 - 업체 추가 (`AddCompanyModal.tsx`)
 - 잔고 부족 시에도 정산 기록 생성 및 예치금 차감 처리 (2026-01-09 개선)
+- **증권발급 기준 통계 개선** (2026-01-10 완료)
+  - `pharmacy_certificate_history` 테이블 생성
+  - 증권번호 입력 시 이력 자동 기록 (`pharmacy-certificate-update.php`)
+  - 해지완료 시 환급 보험료 기록 (`pharmacy-status-update.php`)
+  - 일별/월별 실적 조회 API 개선 (증권 기준: `pharmacy_certificate_history` 테이블 사용)
+  - 프론트엔드/프록시 `criteria` 파라미터 수정 (`contract` → `certificate`)
 
 #### ⚠️ 개선 필요 사항
 - 상태 변경 시 확인 모달 개선
@@ -616,6 +722,226 @@ pharmacy_idList (업체)
    - imet.kr/hi/api/monthly_stats_v2.php: 월별 실적 조회
 ```
 
+### 6. 승인 후 설계번호 및 증권번호 입력 프로세스
+
+#### 전체 워크플로우
+
+```
+[승인 완료 (ch=13)]
+    ↓
+[설계번호 입력]
+    ├─ 전문인설계번호 입력 (chemistDesignNumer)
+    ├─ 화재설계번호 입력 (areaDesignNumer)
+    └─ 상태 변경: ch=17 (설계중)
+    └─ wdate, wdate_2: 변동 없음
+    ↓
+[증권번호 입력]
+    ├─ 전문인증권번호 입력 (chemistCerti)
+    ├─ 화재증권번호 입력 (areaCerti)
+    ├─ 상태 변경: ch=14 (증권발급)
+    ├─ wdate_2: NOW() 업데이트 (상태 변경일)
+    └─ wdate_3: CURDATE() 설정 (증권발급일)
+    ↓
+[증권발급 완료]
+```
+
+#### 1단계: 설계번호 입력
+
+**위치**: `disk-cms-react/src/pages/pharmacy/components/PharmacyDetailModal.tsx`
+
+**프로세스**:
+1. 관리자가 약국 상세 모달에서 설계번호 입력
+2. 전문인설계번호 또는 화재설계번호 입력 후 "설계번호입력" 버튼 클릭
+3. API 호출: `POST /api/pharmacy2/design-number`
+   - 프록시: `disk-cms-react/routes/pharmacy/pharmacy2.js`
+   - 백엔드: `imet/api/pharmacy/pharmacy-design-update.php`
+
+**업데이트 내용**:
+```sql
+UPDATE pharmacyApply SET
+    chemistDesignNumer = '설계번호',  -- 또는 areaDesignNumer
+    ch = '17'                        -- 설계중 상태로 변경
+WHERE num = {pharmacyId}
+```
+
+**날짜 필드 변화**:
+- `wdate`: 변동 없음 (최초 입력 시간 유지)
+- `wdate_2`: 변동 없음 (상태 변경일 유지)
+- `wdate_3`: 변동 없음 (증권발급일은 아직 설정 안 됨)
+
+#### 2단계: 증권번호 입력
+
+**위치**: `disk-cms-react/src/pages/pharmacy/components/PharmacyDetailModal.tsx`
+
+**프로세스**:
+1. 관리자가 약국 상세 모달에서 증권번호 입력
+2. 전문인증권번호 또는 화재증권번호 입력 후 "입력" 버튼 클릭
+3. API 호출: `POST /api/pharmacy2/certificate-number`
+   - 프록시: `disk-cms-react/routes/pharmacy/pharmacy2.js`
+   - 백엔드: `imet/api/pharmacy/pharmacy-certificate-update.php`
+
+**업데이트 내용**:
+```sql
+UPDATE pharmacyApply SET
+    chemistCerti = '증권번호',        -- 또는 areaCerti
+    wdate_2 = NOW(),                 -- 상태 변경일 업데이트
+    wdate_3 = CURDATE(),             -- 증권발급일 설정
+    sigi = '보험시기',                -- 보험시기 자동 계산
+    jeonggi = '보험종기',             -- 보험종기 자동 계산 (시기+1년)
+    ch = '14',                       -- 증권발급 상태로 변경
+    certiCount = {증권발급횟수}       -- 증권발급 횟수 증가
+WHERE num = {pharmacyId}
+```
+
+**날짜 필드 변화**:
+- `wdate`: 변동 없음 (최초 입력 시간 유지)
+- `wdate_2`: `NOW()`로 업데이트 (상태 변경일)
+- `wdate_3`: `CURDATE()`로 설정 (증권발급일)
+
+### 7. 날짜 필드 (wdate, wdate_2, wdate_3) 의미
+
+#### 필드별 의미
+
+| 필드 | 의미 | 설정 시점 | 용도 |
+|------|------|-----------|------|
+| `wdate` | **최초 입력 시간** (신청일) | 약국 신청 최초 입력 시 | 신청일 기준 조회, 통계 |
+| `wdate_2` | **상태 변경일** | 상태(`ch`) 변경 시마다 업데이트 | 상태 변경 기준 조회, 실적 집계 |
+| `wdate_3` | **증권발급일** | 증권번호 입력 시 설정 | 증권발급 기준 조회, 실적 집계 |
+
+#### 설정 시점 상세
+
+**wdate (최초 입력 시간)**:
+- 약국 신청 최초 입력 시 `NOW()`로 설정
+- 이후 변경되지 않음
+- `INSERT INTO pharmacyApply` 시 자동 설정
+
+**wdate_2 (상태 변경일)**:
+- 메일 보냄(ch=10) 상태로 변경 시: `ch_Input()` 함수 호출 → `wdate_2` 설정
+- 승인(ch=13) 상태로 변경 시: `ch_Input()` 함수 호출 → `wdate_2` 설정
+- 증권번호 입력 시: `pharmacy-certificate-update.php`에서 `wdate_2 = NOW()` 업데이트
+- 기타 상태 변경 시에도 `ch_Input()` 함수에서 업데이트
+
+**wdate_3 (증권발급일)**:
+- 증권번호 입력 시에만 설정
+- `pharmacy-certificate-update.php`에서 `wdate_3 = CURDATE()` 설정
+- 설계번호 입력 시에는 설정되지 않음
+
+#### 날짜 필드 사용 예시
+
+```sql
+-- 신청일 기준 조회
+SELECT * FROM pharmacyApply WHERE DATE(wdate) = '2026-01-01';
+
+-- 상태 변경일 기준 조회 (계약 기준)
+SELECT * FROM pharmacyApply 
+WHERE DATE(wdate_2) = '2026-01-01' AND ch = '6';
+
+-- 증권발급일 기준 조회 (증권 기준)
+SELECT * FROM pharmacyApply 
+WHERE DATE(wdate_3) = '2026-01-01' AND ch = '14';
+```
+
+### 8. 실적 조회 기준 (승인 기준 vs 증권 기준)
+
+#### 승인 기준 실적
+
+**테이블**: `pharmacy_settlementList`  
+**조건**: `sort = 13` (승인) 또는 `sort = 16` (해지)  
+**날짜 필드**: `wdate` (정산일)
+
+**의미**:
+- 승인 처리 시점의 실적
+- 예치금 차감 및 정산 기록 생성 시점 기준
+- `pharmacy_settlementList` 테이블의 `wdate` 기준으로 집계
+
+**사용 쿼리**:
+```sql
+SELECT 
+    sort,
+    CAST(approvalPreminum AS DECIMAL(15,2)) as approvalPreminum
+FROM pharmacy_settlementList
+WHERE SUBSTRING(wdate, 1, 10) = '2026-01-09'
+  AND sort != 7
+  AND account = 8
+```
+
+**특징**:
+- 승인 처리 즉시 정산 기록 생성
+- 예치금 차감과 동시에 기록됨
+- 실제 보험 가입 처리 시점 반영
+
+#### 증권 기준 실적 (2026-01-10 개선)
+
+**테이블**: `pharmacy_certificate_history` (전용 테이블)  
+**조건**: `action_type='certificate'` (증권발급, status='14') 또는 `action_type='termination'` (해지완료, status='16')  
+**날짜 필드**: `certificate_date` (증권발급일/해지일)
+
+**의미**:
+- 증권번호 입력 시점의 실적 (전용 테이블 사용)
+- 실제 증권 발급 완료 시점 기준
+- 해지완료 시 환급 보험료 반영
+- `pharmacy_certificate_history` 테이블의 `certificate_date` 기준으로 집계
+
+**사용 쿼리**:
+```sql
+SELECT 
+    action_type,
+    status,
+    CAST(preminum AS DECIMAL(15,2)) as preminum,
+    certificate_date,
+    account
+FROM pharmacy_certificate_history
+WHERE certificate_date = '2026-01-10'
+  AND account = 8
+```
+
+**특징**:
+- 증권번호 입력 완료 시점 기준
+- 실제 증권 발급 완료된 건만 집계
+- 한 약국당 최대 1개 레코드 유지 (중복 제거 불필요)
+- 해지완료 시 일할 계산된 환급 보험료 반영
+- 입력자 정보 기록 (감사 추적 가능)
+- 전문인/화재 보험료 각각 집계 가능
+
+**기존 방식 (2026-01-10 이전)**:
+- 테이블: `pharmacyApply`
+- 조건: `ch = '14'` (증권발급) 또는 `ch = '16'` (해지완료)
+- 날짜 필드: `wdate_3` (증권발급일)
+- 문제점: 전문인/화재 증권번호 입력 시점 불일치, 해지 환급 보험료 미반영
+
+#### 두 기준의 차이점
+
+| 구분 | 승인 기준 | 증권 기준 |
+|------|----------|-----------|
+| **테이블** | `pharmacy_settlementList` | `pharmacy_certificate_history` (2026-01-10 개선) |
+| **조건** | `sort = 13` (승인) | `action_type='certificate'` (증권발급, status='14') |
+| **날짜 필드** | `wdate` (정산일) | `certificate_date` (증권발급일/해지일) |
+| **의미** | 승인 처리 시점 | 증권 발급 완료 시점 |
+| **포함 범위** | 승인 처리된 모든 건 | 증권번호 입력 완료된 건만 |
+| **시점 차이** | 승인 즉시 | 승인 → 설계번호 → 증권번호 입력 후 |
+| **특징** | 예치금 차감 시점 반영 | 환급 보험료 반영 (해지 시 일할 계산) |
+
+#### 실적 조회 API
+
+**일별 실적 조회**:
+- **엔드포인트**: `/api/pharmacy-reports/daily`
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=certificate` (증권 기준)
+- **파일**: `imet/api/pharmacy/pharmacy-daily-report.php`
+- **프론트엔드**: `disk-cms-react/src/pages/pharmacy/components/DailyReportModal.tsx`
+- **프록시**: `disk-cms-react/routes/pharmacy/reports.js`
+
+**월별 실적 조회**:
+- **엔드포인트**: `/api/pharmacy-reports/monthly`
+- **파라미터**: `criteria=approval` (승인 기준) 또는 `criteria=certificate` (증권 기준)
+- **파일**: `imet/api/pharmacy/pharmacy-monthly-report.php`
+- **프론트엔드**: `disk-cms-react/src/pages/pharmacy/components/DailyReportModal.tsx`
+- **프록시**: `disk-cms-react/routes/pharmacy/reports.js`
+
+**증권 기준 조회 시**:
+- 테이블: `pharmacy_certificate_history`
+- 조건: `action_type='certificate'` (증권발급) 또는 `action_type='termination'` (해지완료)
+- 날짜 기준: `certificate_date`
+
 ---
 
 ## 참고 자료
@@ -623,6 +949,7 @@ pharmacy_idList (업체)
 ### 관련 문서
 - [약국 가입신청 시스템 Readme](../../../imet/drugstore/Readme.md)
 - [API 검증 포털](https://imet.kr/hi/api/verification/)
+- [API 개발자 가이드](https://imet.kr/hi/api/verification/api_guide.html) - 상세한 API 문서 및 사용법
 
 ### 연락처
 - **기술 지원**: ih@simg.kr
@@ -632,5 +959,22 @@ pharmacy_idList (업체)
 
 **작성일**: 2026-01-09  
 **작성자**: AI Assistant  
-**버전**: 1.0  
-**최종 업데이트**: 2026-01-09
+**버전**: 1.1  
+**최종 업데이트**: 2026-01-10
+
+---
+
+## 변경 이력
+
+### 2026-01-10
+- 승인 후 설계번호 및 증권번호 입력 프로세스 상세 문서화 추가
+- 날짜 필드 (wdate, wdate_2, wdate_3) 의미 정리
+- 승인 기준 실적 vs 증권 기준 실적 비교 정리
+- 증권 기준으로 변경 (기존 계약 기준에서 변경)
+- **증권발급 기준 통계 개선 작업 완료**
+  - `pharmacy_certificate_history` 테이블 설계 및 생성
+  - 증권번호 입력 시 이력 자동 기록 기능 구현
+  - 해지완료 시 환급 보험료(일할 계산) 기록 기능 구현
+  - 일별/월별 실적 조회 API 개선 (증권 기준: 새 테이블 사용)
+  - 프론트엔드/프록시 `criteria` 파라미터 수정 (`contract` → `certificate`)
+  - 통계 조회 정확도 향상 (환급 보험료 반영, 중복 제거 불필요)
