@@ -7,7 +7,7 @@ import {
   useToastHelpers,
   DatePicker,
 } from '../../components'
-import { GITA_OPTIONS, mapPushLabel, removePhoneHyphen } from './constants'
+import { GITA_OPTIONS, mapPushLabel, removePhoneHyphen, addPhoneHyphen } from './constants'
 
 interface Driver {
   num: number
@@ -333,10 +333,25 @@ export default function DriverSearch() {
               type="text"
               className="w-[70%] text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
               defaultValue={phone}
+              onInput={(e) => {
+                const target = e.target as HTMLInputElement
+                const cursorPos = target.selectionStart || 0
+                const value = target.value
+                const cleaned = removePhoneHyphen(value)
+                const formatted = addPhoneHyphen(cleaned)
+                if (formatted !== value) {
+                  target.value = formatted
+                  // 커서 위치 조정
+                  const diff = formatted.length - value.length
+                  const newCursorPos = Math.min(cursorPos + diff, formatted.length)
+                  target.setSelectionRange(newCursorPos, newCursorPos)
+                }
+              }}
               onBlur={(e) => {
-                const cleaned = removePhoneHyphen(e.target.value.trim())
-                if (cleaned !== removePhoneHyphen(phone)) {
-                  handlePhoneChange(row.num, cleaned)
+                const value = e.target.value.trim()
+                const formatted = addPhoneHyphen(value)
+                if (formatted !== phone) {
+                  handlePhoneChange(row.num, formatted)
                 } else {
                   e.target.value = phone
                 }
