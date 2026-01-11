@@ -12,6 +12,44 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-11 (KJ 대리운전) - React 마이그레이션 Phase 2: 대리업체 관리 페이지 구현 완료
+
+#### 38) KJ 대리운전 "대리업체 관리" 페이지 React 마이그레이션 완료
+- **페이지 구현**:
+  - `src/pages/insurance/CompanyManagement.tsx` 컴포넌트 생성
+  - 기존 `kj-driver-company.html` 및 `kj-driver-company.js` 분석 및 마이그레이션
+  - 공통 컴포넌트 활용 (FilterBar, DataTable)
+- **FilterBar 구현**:
+  - 상태 필터 (정상/전체)
+  - 검색 입력 (대리운전회사명)
+  - 검색 버튼
+  - 담당자 선택 (API에서 동적 로드)
+  - 페이지 크기 선택 (20/25/50/100개)
+  - 날짜 선택 (1-31일, 오늘 날짜 기본값)
+  - 대리운전회사 신규 버튼 (FilterBar 내부)
+- **데이터 로드 및 필터링**:
+  - 업체 목록 조회 API 연동 (`/api/insurance/kj-company/list`)
+  - 담당자 목록 조회 API 연동 (`/api/insurance/kj-company/managers`)
+  - 날짜 필터 변경 시 자동 검색 (오늘 날짜 기본값)
+  - 검색어는 검색 버튼 클릭 시 검색
+  - 페이지네이션 구현
+- **데이터 테이블 구현**:
+  - 컬럼: #, 업체명, 담당자, 연락처, 날짜, 인원, 정산
+  - 업체명 클릭 시 상세 모달 (TODO)
+  - 정산 버튼 (TODO)
+  - 페이지네이션 (페이지 크기 선택 포함)
+- **초기 로드 개선**:
+  - 오늘 날짜를 기본값으로 설정
+  - 날짜 필터 변경 시 자동 검색 (useEffect 사용)
+  - useRef를 사용하여 최신 필터 상태 참조
+- **라우팅 및 메뉴**:
+  - `src/App.tsx`에 `/insurance/kj-driver-company` 라우트 추가
+  - `menu-config.json`에 이미 메뉴 항목 존재 (order: 2)
+- **파일**:
+  - `src/pages/insurance/CompanyManagement.tsx`: 대리업체 관리 페이지 (신규)
+  - `src/App.tsx`: 라우트 추가
+- **결과**: KJ 대리운전 "대리업체 관리" 페이지 React 마이그레이션 완료. 업체 목록 조회, 필터링, 페이지네이션 기능 동작. 날짜 필터 기본값(오늘 날짜) 설정 및 자동 검색 구현. 다음 단계: 업체 상세 모달, 정산 모달, 신규 업체 추가 모달 구현.
+
 ### 2026-01-11 (KJ 대리운전) - React 마이그레이션 Phase 2: 증권번호 찾기 페이지 구현 완료
 
 #### 37) KJ 대리운전 "증권번호 찾기" 페이지 React 마이그레이션 완료
