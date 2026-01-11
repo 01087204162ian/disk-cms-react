@@ -384,12 +384,6 @@ export default function DriverSearch() {
     }
   }, [])
 
-  // 검색 실행
-  const handleSearch = () => {
-    setPagination((prev) => ({ ...prev, currentPage: 1 }))
-    loadDrivers(1, pagination.pageSize)
-  }
-
   return (
     <div className="space-y-6">
       <FilterBar>
