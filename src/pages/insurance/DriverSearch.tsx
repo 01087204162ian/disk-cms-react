@@ -35,6 +35,12 @@ interface Driver {
 interface DriverSearchResponse {
   success: boolean
   data: Driver[]
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
   total?: number
   total_count?: number
   page?: number
@@ -109,11 +115,12 @@ export default function DriverSearch() {
 
       if (res.data.success) {
         setDrivers(res.data.data || [])
+        const paginationData = res.data.pagination
         setPagination({
-          currentPage: res.data.page || currentPage,
-          pageSize: res.data.limit || currentPageSize,
-          totalCount: res.data.total || res.data.total_count || 0,
-          totalPages: res.data.totalPages || Math.ceil((res.data.total || res.data.total_count || 0) / (res.data.limit || currentPageSize)),
+          currentPage: paginationData?.page || res.data.page || currentPage,
+          pageSize: paginationData?.limit || res.data.limit || currentPageSize,
+          totalCount: paginationData?.total || res.data.total || res.data.total_count || 0,
+          totalPages: paginationData?.totalPages || res.data.totalPages || Math.ceil((paginationData?.total || res.data.total || res.data.total_count || 0) / (paginationData?.limit || res.data.limit || currentPageSize)),
         })
       } else {
         toast.error('데이터를 불러오는 중 오류가 발생했습니다.')
