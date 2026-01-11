@@ -103,15 +103,51 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     )
   }
 
-  const renderIcon = (iconName?: string) => {
-    if (!iconName) return <DefaultIcon className="w-5 h-5" />
+  const renderIcon = (iconName?: string, size: string = 'w-5 h-5') => {
+    if (!iconName) return <DefaultIcon className={size} />
     const IconComponent = iconMap[iconName] || DefaultIcon
-    return <IconComponent className="w-5 h-5" />
+    return <IconComponent className={size} />
   }
 
   const renderMenuItem = (item: MenuItem, level: number = 0): JSX.Element | null => {
     // 권한 체크
     if (!hasPermission(item.roles)) return null
+
+    // 레벨별 스타일
+    const getLevelStyle = (lvl: number) => {
+      switch (lvl) {
+        case 0: // 1차 메뉴
+          return {
+            padding: 'px-4 py-3',
+            margin: '',
+            fontSize: 'text-sm font-medium',
+            iconSize: 'w-5 h-5',
+          }
+        case 1: // 2차 메뉴
+          return {
+            padding: 'px-4 py-2.5',
+            margin: 'ml-4',
+            fontSize: 'text-sm',
+            iconSize: 'w-4 h-4',
+          }
+        case 2: // 3차 메뉴
+          return {
+            padding: 'px-4 py-2',
+            margin: 'ml-8',
+            fontSize: 'text-sm',
+            iconSize: 'w-4 h-4',
+          }
+        default: // 4차 메뉴 이상
+          return {
+            padding: 'px-4 py-2',
+            margin: 'ml-12',
+            fontSize: 'text-xs',
+            iconSize: 'w-3.5 h-3.5',
+          }
+      }
+    }
+
+    const levelStyle = getLevelStyle(level)
 
     // 자식 메뉴가 있는 경우
     if (item.children && item.children.length > 0) {
@@ -123,13 +159,19 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <button
             onClick={() => toggleExpand(item.id)}
             className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-              'hover:bg-accent text-foreground',
-              level > 0 && 'ml-4',
-              hasActiveChild && 'bg-primary/10 text-primary'
+              'w-full flex items-center gap-3 rounded-lg transition-colors',
+              levelStyle.padding,
+              levelStyle.margin,
+              levelStyle.fontSize,
+              level === 0 && 'hover:bg-accent/50',
+              level === 1 && 'hover:bg-accent/40',
+              level >= 2 && 'hover:bg-accent/30',
+              'text-foreground',
+              hasActiveChild && 'bg-primary/10 text-primary',
+              level >= 2 && 'border-l-2 border-border/50'
             )}
           >
-            {renderIcon(item.icon)}
+            {renderIcon(item.icon, levelStyle.iconSize)}
             <span className="flex-1 text-left">{item.title}</span>
             <ChevronRight
               className={cn(
@@ -139,7 +181,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             />
           </button>
           {isExpanded && (
-            <div className="mt-1 space-y-1">
+            <div className={cn('mt-1 space-y-1', level >= 2 && 'border-l border-border/30 ml-4')}>
               {item.children.map((child) => renderMenuItem(child, level + 1))}
             </div>
           )}
@@ -162,14 +204,20 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             }
           }}
           className={cn(
-            'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-            level > 0 && 'ml-4',
+            'flex items-center gap-3 rounded-lg transition-colors',
+            levelStyle.padding,
+            levelStyle.margin,
+            levelStyle.fontSize,
+            level === 0 && 'hover:bg-accent/50',
+            level === 1 && 'hover:bg-accent/40',
+            level >= 2 && 'hover:bg-accent/30',
             isActive
               ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-accent text-foreground'
+              : 'hover:bg-accent text-foreground',
+            level >= 2 && 'border-l-2 border-border/50'
           )}
         >
-          {renderIcon(item.icon)}
+          {renderIcon(item.icon, levelStyle.iconSize)}
           <span>{item.title}</span>
         </Link>
       )
@@ -181,7 +229,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         key={item.id}
         className={cn(
           'px-4 py-2 text-sm font-semibold text-muted-foreground',
-          level > 0 && 'ml-4'
+          levelStyle.margin
         )}
       >
         {item.title}
