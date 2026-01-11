@@ -315,9 +315,12 @@ export default function PolicySearch() {
   // 컬럼 정의
   const columns: Column<PolicySearchResult>[] = [
     {
-      key: 'num',
+      key: 'index',
       header: '#',
-      cell: (row, index) => <div className="whitespace-nowrap">{index + 1}</div>,
+      cell: (row) => {
+        const index = searchResults.indexOf(row)
+        return <div className="whitespace-nowrap">{index + 1}</div>
+      },
       className: 'w-12 whitespace-nowrap',
     },
     {
@@ -500,7 +503,7 @@ export default function PolicySearch() {
                 <label className="block text-sm font-medium mb-1">새 보험회사</label>
                 <Select
                   value={changeForm.newInsuranceCompany}
-                  onChange={(value) => setChangeForm((prev) => ({ ...prev, newInsuranceCompany: value }))}
+                  onChange={(e) => setChangeForm((prev) => ({ ...prev, newInsuranceCompany: e.target.value }))}
                   options={INSURER_OPTIONS}
                   className="w-full"
                 />
