@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
+import { Plus } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -341,9 +342,26 @@ export default function CompanyManagement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.date])
 
+  // 대리운전회사 신규 버튼 클릭
+  const handleAddCompany = () => {
+    console.log('대리운전회사 신규 추가')
+    // TODO: 신규 업체 추가 모달 구현
+  }
+
   return (
     <div className="space-y-6">
-      <FilterBar>
+      <FilterBar
+        actionButtons={
+          <button
+            onClick={handleAddCompany}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden md:inline">대리운전회사 신규</span>
+            <span className="md:hidden">신규</span>
+          </button>
+        }
+      >
         <FilterBar.Select
           value={filters.status}
           onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
