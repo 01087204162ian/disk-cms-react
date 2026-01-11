@@ -44,14 +44,20 @@ export default function DataTable<T extends Record<string, any>>({
   const renderTableHeader = () => (
     <thead className="bg-accent">
       <tr>
-        {columns.map((column) => (
-          <th
-            key={column.key}
-            className={`px-4 py-3 text-left text-sm font-medium text-foreground ${column.className || ''}`}
-          >
-            {column.header}
-          </th>
-        ))}
+        {columns.map((column) => {
+          // 짧은 헤더(1-2글자)는 text-xs 사용
+          const headerLength = column.header.length
+          const isShortHeader = headerLength <= 2
+          const headerFontSize = isShortHeader ? 'text-xs' : 'text-sm'
+          return (
+            <th
+              key={column.key}
+              className={`px-4 py-3 text-left ${headerFontSize} font-medium text-foreground ${column.className || ''}`}
+            >
+              {column.header}
+            </th>
+          )
+        })}
       </tr>
     </thead>
   )
@@ -98,22 +104,6 @@ export default function DataTable<T extends Record<string, any>>({
           <span className="font-medium text-foreground">전체 {totalCount.toLocaleString('ko-KR')}개</span>
         </div>
         <div className="flex items-center gap-2">
-          {onPageSizeChange && pageSizeOptions && (
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                onPageSizeChange(Number(e.target.value))
-                onPageChange(1)
-              }}
-              className="px-3 py-1.5 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs"
-            >
-              {pageSizeOptions.map((size) => (
-                <option key={size} value={size}>
-                  {size}개
-                </option>
-              ))}
-            </select>
-          )}
           <button
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}

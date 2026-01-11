@@ -188,26 +188,27 @@ export default function DriverSearch() {
   // 테이블 컬럼 정의
   const columns: Column<Driver>[] = useMemo(
     () => [
+      // 짧은 헤더는 작은 폰트 사용 (#, 이름, 상태, 사고 등)
       {
         key: 'index',
         header: '#',
         cell: (row) => {
           const index = drivers.indexOf(row)
           const startIndex = (pagination.currentPage - 1) * pagination.pageSize
-          return <div className="text-center">{startIndex + index + 1}</div>
+          return <div className="text-center whitespace-nowrap">{startIndex + index + 1}</div>
         },
-        className: 'w-16 text-center',
+        className: 'w-12 text-center',
       },
       {
         key: 'Name',
         header: '이름',
-        cell: (row) => <div>{row.Name || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap">{row.Name || ''}</div>,
       },
       {
         key: 'Jumin',
         header: '주민번호',
         cell: (row) => (
-          <div className="hidden lg:table-cell">
+          <div className="hidden lg:table-cell whitespace-nowrap">
             {row.Jumin || ''}
             {row.age ? ` (${row.age}세)` : ''}
           </div>
@@ -217,6 +218,7 @@ export default function DriverSearch() {
       {
         key: 'status',
         header: '상태',
+        className: 'whitespace-nowrap',
         cell: (row) => {
           const push = Number(row.push)
           const cancel = row.cancel != null ? String(row.cancel) : ''
@@ -243,7 +245,7 @@ export default function DriverSearch() {
             )
           }
 
-          return <span>{mapPushLabel(push)}</span>
+          return <span className="whitespace-nowrap">{mapPushLabel(push)}</span>
         },
       },
       {
@@ -275,7 +277,7 @@ export default function DriverSearch() {
           return (
             <a
               href="#"
-              className="text-primary hover:underline"
+              className="text-primary hover:underline whitespace-nowrap"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -291,12 +293,12 @@ export default function DriverSearch() {
       {
         key: 'InsuranceCompany',
         header: '보험회사',
-        cell: (row) => <div>{row.insuranceCompanyName || row.InsuranceCompany || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap">{row.insuranceCompanyName || row.InsuranceCompany || ''}</div>,
       },
       {
         key: 'policyNum',
         header: '증권번호',
-        cell: (row) => <div>{row.policyNum || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap">{row.policyNum || ''}</div>,
       },
       {
         key: 'discount',
@@ -304,7 +306,7 @@ export default function DriverSearch() {
         cell: (row) => {
           const rateText = row.personRateFactor != null ? String(row.personRateFactor) : ''
           const nameText = row.personRateName ? ` (${row.personRateName})` : ''
-          return <div>{rateText + nameText}</div>
+          return <div className="whitespace-nowrap">{rateText + nameText}</div>
         },
       },
       {
@@ -337,18 +339,19 @@ export default function DriverSearch() {
       {
         key: 'InputDay',
         header: '등록일',
-        cell: (row) => <div className="hidden lg:table-cell">{row.InputDay || ''}</div>,
+        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap">{row.InputDay || ''}</div>,
         className: 'hidden lg:table-cell',
       },
       {
         key: 'OutPutDay',
         header: '해지일',
-        cell: (row) => <div className="hidden lg:table-cell">{row.OutPutDay || '-'}</div>,
+        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap">{row.OutPutDay || '-'}</div>,
         className: 'hidden lg:table-cell',
       },
       {
         key: 'sago',
         header: '사고',
+        className: 'whitespace-nowrap',
         cell: (row) => {
           const sago = Number(row.sago || 0)
           return (
@@ -390,6 +393,7 @@ export default function DriverSearch() {
           onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
           placeholder="예: 홍길동 / 010-1234-5678"
           onSearch={handleSearch}
+          className="w-48"
         />
         <FilterBar.Select
           value={filters.status}
