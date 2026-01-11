@@ -1081,58 +1081,6 @@ router.get('/premium-verify', async (req, res) => {
   }
 });
 
-// 정산 데이터 정리 (거래처 불일치 데이터 조회)
-router.get('/cleanup', async (req, res) => {
-  try {
-    const apiUrl = 'https://imet.kr/api/pharmacy/pharmacy-settlement-cleanup.php';
-    
-    console.log('정산 데이터 정리 API 호출:', apiUrl);
-    
-    const response = await axios.get(apiUrl, {
-      timeout: 30000,
-      headers: {
-        'User-Agent': 'disk-cms-proxy/1.0',
-        'Accept': 'application/json',
-        'Accept-Language': 'ko-KR,ko;q=0.9'
-      }
-    });
-    
-    // 응답 데이터 검증 및 로깅
-    if (response.data && response.data.success) {
-      const dataCount = response.data.data ? response.data.data.length : 0;
-      console.log(`정산 데이터 정리 조회 성공: ${dataCount}건`);
-    }
-    
-    res.json(response.data);
-    
-  } catch (error) {
-    console.error('정산 데이터 정리 API 프록시 오류:', error.message);
-    
-    if (error.response) {
-      console.error('API 서버 오류 응답:', error.response.status, error.response.data);
-      res.status(error.response.status).json({
-        success: false,
-        error: 'API 서버 오류',
-        details: error.response.data || error.message
-      });
-    } else if (error.request) {
-      console.error('API 서버 연결 실패:', error.request);
-      res.status(503).json({
-        success: false,
-        error: 'API 서버에 연결할 수 없습니다',
-        details: error.message
-      });
-    } else {
-      console.error('프록시 내부 오류:', error);
-      res.status(500).json({
-        success: false,
-        error: '프록시 서버 내부 오류',
-        details: error.message
-      });
-    }
-  }
-});
-
 // package.json dependencies에 추가 필요:
 // npm install multer
 module.exports = router;

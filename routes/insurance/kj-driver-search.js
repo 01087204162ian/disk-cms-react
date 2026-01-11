@@ -46,5 +46,35 @@ router.get('/kj-driver/list', async (req, res) => {
   }
 });
 
+// 핸드폰 번호 수정
+router.post('/kj-driver/phone', async (req, res) => {
+  try {
+    const { num, phone } = req.body;
+
+    if (!num || phone === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: '필수 파라미터가 누락되었습니다. (num, phone)',
+      });
+    }
+
+    const apiUrl = `${PHP_API_BASE_URL}/kj-driver-phone-update.php`;
+
+    const response = await axios.post(apiUrl, { num, phone }, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: getDefaultHeaders(),
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Insurance KJ-driver phone update proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '핸드폰 번호 수정 API 호출 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
 module.exports = router;
 

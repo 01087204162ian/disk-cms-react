@@ -47,11 +47,10 @@ const handleApiError = (error, res, defaultMessage) => {
  * - account: 거래처 번호 (선택, 전체는 빈값)
  * - year: 년도 (필수)
  * - month: 월 (선택, 빈값이면 최근 30일)
- * - criteria: 기준 선택 (선택, 'approval' 또는 'certificate', 기본값: 'approval')
  */
 router.get('/daily', async (req, res) => {
   try {
-    const { account = '', year = '', month = '', criteria = 'approval' } = req.query;
+    const { account = '', year = '', month = '' } = req.query;
     
     // 년도 검증 (필수)
     if (!year || !year.trim()) {
@@ -95,13 +94,9 @@ router.get('/daily', async (req, res) => {
       validAccount = accountNum;
     }
 
-    // 기준 검증
-    const validCriteria = (criteria === 'approval' || criteria === 'certificate') ? criteria : 'approval';
-
     // 쿼리 파라미터 구성
     const params = new URLSearchParams({
-      year: validYear,
-      criteria: validCriteria
+      year: validYear
     });
 
     if (validMonth) {
@@ -112,9 +107,7 @@ router.get('/daily', async (req, res) => {
       params.append('account', validAccount);
     }
 
-    console.log(`[GET /daily] 일별 실적 조회 요청 - 년도: ${validYear}, 월: ${validMonth || '전체(최근30일)'}, 거래처: ${validAccount || '전체'}, 기준: ${validCriteria}`);
-    console.log(`[GET /daily] 원본 criteria: ${criteria}, 검증 후 criteria: ${validCriteria}`);
-    console.log(`[GET /daily] PHP API URL: ${PHP_API_BASE_URL}/pharmacy-daily-report.php?${params}`);
+    console.log(`[GET /daily] 일별 실적 조회 요청 - 년도: ${validYear}, 월: ${validMonth || '전체(최근30일)'}, 거래처: ${validAccount || '전체'}`);
 
     // PHP API 호출
     const response = await axios.get(
@@ -124,13 +117,23 @@ router.get('/daily', async (req, res) => {
         headers: getDefaultHeaders()
       }
     );
-    
-    console.log(`[GET /daily] PHP 응답 filters.criteria: ${response.data?.filters?.criteria || '없음'}`);
 
     console.log(`[GET /daily] 성공 - 일별 실적 조회 완료`);
     
-    // 응답 데이터 정리 (PHP API 응답을 그대로 전달)
-    res.json(response.data);
+    // 응답 데이터 정리
+    const responseData = {
+      success: true,
+      data: response.data.data || response.data.list || [],
+      summary: response.data.summary || {
+        total_approval_count: 0,
+        total_approval_amount: 0,
+        total_cancel_count: 0,
+        total_cancel_amount: 0
+      },
+      message: response.data.message || '일별 실적 조회가 완료되었습니다.'
+    };
+    
+    res.json(responseData);
     
   } catch (error) {
     console.error(`[GET /daily] 오류:`, error.message);
@@ -140,17 +143,12 @@ router.get('/daily', async (req, res) => {
 
 /**
  * GET /api/pharmacy-reports/monthly
- * 월별 실적 조회
+ * 월별 실적 조회 (선택적 구현)
  * 프록시 대상: pharmacy-monthly-report.php
- * 
- * Query Params:
- * - account: 거래처 번호 (선택, 전체는 빈값)
- * - year: 년도 (필수)
- * - criteria: 기준 선택 (선택, 'approval' 또는 'certificate', 기본값: 'approval')
  */
 router.get('/monthly', async (req, res) => {
   try {
-    const { account = '', year = '', criteria = 'approval' } = req.query;
+    const { account = '', year = '' } = req.query;
     
     // 년도 검증
     if (!year || !year.trim()) {
@@ -181,18 +179,12 @@ router.get('/monthly', async (req, res) => {
       validAccount = accountNum;
     }
 
-    // 기준 검증
-    const validCriteria = (criteria === 'approval' || criteria === 'certificate') ? criteria : 'approval';
-
-    const params = new URLSearchParams({ 
-      year: validYear,
-      criteria: validCriteria
-    });
+    const params = new URLSearchParams({ year: validYear });
     if (validAccount) {
       params.append('account', validAccount);
     }
 
-    console.log(`[GET /monthly] 월별 실적 조회 요청 - 년도: ${validYear}, 거래처: ${validAccount || '전체'}, 기준: ${validCriteria}`);
+    console.log(`[GET /monthly] 월별 실적 조회 요청 - 년도: ${validYear}, 거래처: ${validAccount || '전체'}`);
 
     // PHP API 호출
     const response = await axios.get(

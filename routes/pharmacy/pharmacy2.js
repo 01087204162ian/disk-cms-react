@@ -322,32 +322,11 @@ router.post('/certificate-number', async (req, res) => {
       });
     }
 
-    // 사용자 정보 가져오기 (세션 또는 요청 본문에서)
-    const user = req.session?.user;
-    // 요청 본문에서 사용자 정보를 받거나, 세션에서 가져오기
-    const registrar = req.body.registrar || user?.name || user?.username || user?.email || null;
-    const registrarId = req.body.registrarId || user?.email || user?.id || user?.num || null;
-
-    // 디버깅 로그 추가
-    console.log(`[POST /certificate-number] 사용자 정보 확인:`, {
-      hasSession: !!req.session,
-      hasUser: !!user,
-      userEmail: user?.email,
-      userName: user?.name || user?.username,
-      userId: user?.id || user?.num,
-      bodyRegistrar: req.body.registrar,
-      bodyRegistrarId: req.body.registrarId,
-      finalRegistrar: registrar,
-      finalRegistrarId: registrarId
-    });
-
     const requestData = {
       pharmacy_id: validPharmacyId,
       certificate_number: cleanCertificateNumber,
       certificate_type: certificateType,  // 'expert' 또는 'fire'
-      action: 'update_certificate',
-      registrar: registrar,              // 입력자 이름 (선택사항)
-      registrar_id: registrarId          // 입력자 ID (선택사항)
+      action: 'update_certificate'
     };
 
 
@@ -561,32 +540,15 @@ router.post('/update-status', async (req, res) => {
     const trimmedStatus = status.trim();
     const oldStatus = req.body.old_status; // 프론트엔드에서 전달된 old_status
 
-    // 사용자 정보 가져오기 (세션 또는 요청 본문에서)
-    const user = req.session?.user;
-    const registrar = req.body.registrar || user?.name || user?.username || user?.email || null;
-    const registrarId = req.body.registrarId || user?.email || user?.id || user?.num || null;
-
     const requestData = {
       pharmacy_id: validPharmacyId,
-      status: trimmedStatus,
-      registrar: registrar,              // 입력자 이름 (선택사항)
-      registrar_id: registrarId          // 입력자 ID (선택사항)
+      status: trimmedStatus
     };
 
     // old_status가 있으면 전달 (PHP API에서 필요할 수 있음)
     if (oldStatus) {
       requestData.old_status = oldStatus;
     }
-
-    // 디버깅 로그 추가
-    console.log(`[POST /update-status] 사용자 정보 확인:`, {
-      hasSession: !!req.session,
-      hasUser: !!user,
-      bodyRegistrar: req.body.registrar,
-      bodyRegistrarId: req.body.registrarId,
-      finalRegistrar: registrar,
-      finalRegistrarId: registrarId
-    });
 
     console.log(`[POST /update-status] 상태 변경 요청 - 약국ID: ${validPharmacyId}, 상태: "${trimmedStatus}", 이전 상태: "${oldStatus || 'N/A'}"`);
 
