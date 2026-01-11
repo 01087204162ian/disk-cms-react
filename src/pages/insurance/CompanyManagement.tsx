@@ -79,10 +79,8 @@ export default function CompanyManagement() {
     totalPages: 1,
   })
 
-  // 날짜 옵션 생성 (1-31일, 오늘 날짜 기본값)
+  // 날짜 옵션 생성 (1-31일)
   const dateOptions = useMemo(() => {
-    const today = new Date()
-    const todayDay = today.getDate()
     const options = []
     for (let i = 1; i <= 31; i++) {
       const day = String(i).padStart(2, '0')
