@@ -85,8 +85,8 @@ export default function DataTable<T extends Record<string, any>>({
 
     const { currentPage, pageSize, totalCount, onPageChange } = pagination
     const totalPages = Math.ceil(totalCount / pageSize)
-    const startIndex = (currentPage - 1) * pageSize + 1
-    const endIndex = Math.min(currentPage * pageSize, totalCount)
+    const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
+    const endIndex = totalCount === 0 ? 0 : Math.min(currentPage * pageSize, totalCount)
 
     return (
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-border">
