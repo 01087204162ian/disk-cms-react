@@ -175,8 +175,22 @@ export default function DriverSearch() {
 
   // 핸드폰 변경 (인라인 편집)
   const handlePhoneChange = async (num: number, phone: string) => {
-    // TODO: 핸드폰 변경 로직 구현
-    console.log('핸드폰 변경:', { num, phone })
+    try {
+      const response = await api.post('/api/insurance/kj-driver/phone', {
+        num,
+        phone,
+      })
+      if (response.data.success) {
+        // 성공 시 데이터 다시 로드
+        await loadDrivers()
+        toast.success('핸드폰 번호가 수정되었습니다.')
+      } else {
+        toast.error(response.data.message || '핸드폰 번호 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('핸드폰 번호 수정 오류:', error)
+      toast.error('핸드폰 번호 수정 중 오류가 발생했습니다.')
+    }
   }
 
   // 사고 변경 (인라인 편집)
@@ -317,7 +331,7 @@ export default function DriverSearch() {
           return (
             <input
               type="text"
-              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              className="w-[70%] text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
               defaultValue={phone}
               onBlur={(e) => {
                 const cleaned = removePhoneHyphen(e.target.value.trim())
