@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Search, RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -134,11 +133,28 @@ export default function DriverSearch() {
   //   loadDrivers()
   // }, [])
 
-  // 검색 실행
+  // 검색 실행 (입력 시 자동 검색)
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
     loadDrivers(1, pagination.pageSize)
   }
+  
+  // 검색어 변경 시 자동 검색
+  useEffect(() => {
+    if (filters.search) {
+      const timer = setTimeout(() => {
+        handleSearch()
+      }, 500) // 500ms 디바운스
+      return () => clearTimeout(timer)
+    }
+  }, [filters.search, filters.searchType])
+  
+  // 상태 필터 변경 시 자동 검색
+  useEffect(() => {
+    if (filters.status !== undefined) {
+      handleSearch()
+    }
+  }, [filters.status])
 
   // 페이지 변경
   const handlePageChange = (page: number) => {
@@ -368,32 +384,15 @@ export default function DriverSearch() {
     }
   }, [])
 
+  // 검색 실행
+  const handleSearch = () => {
+    setPagination((prev) => ({ ...prev, currentPage: 1 }))
+    loadDrivers(1, pagination.pageSize)
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">KJ 대리운전 - 기사 찾기</h1>
-      </div>
-
-      <FilterBar
-        actionButtons={
-          <>
-            <button
-              onClick={handleSearch}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
-            >
-              <Search className="w-3 h-3" />
-              <span className="hidden md:inline">검색</span>
-            </button>
-            <button
-              onClick={() => loadDrivers()}
-              className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-xs font-medium hover:bg-secondary/90 transition-colors flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span className="hidden md:inline">새로고침</span>
-            </button>
-          </>
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.searchType}
           onChange={(value) => setFilters((prev) => ({ ...prev, searchType: value }))}
@@ -412,21 +411,17 @@ export default function DriverSearch() {
           }}
           options={PAGE_SIZE_OPTIONS}
         />
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground whitespace-nowrap">해지기준일</label>
-          <DatePicker
-            value={filters.terminationDate}
-            onChange={(value) => setFilters((prev) => ({ ...prev, terminationDate: value }))}
-            className="w-40"
-          />
-        </div>
+        <DatePicker
+          value={filters.terminationDate}
+          onChange={(value) => setFilters((prev) => ({ ...prev, terminationDate: value }))}
+          className="w-40"
+        />
         <FilterBar.Input
           value={filters.search}
           onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
           placeholder="예: 홍길동 / 010-1234-5678"
           onSearch={handleSearch}
         />
-        <FilterBar.SearchButton onClick={handleSearch} />
       </FilterBar>
 
       <DataTable
