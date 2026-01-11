@@ -44,20 +44,14 @@ export default function DataTable<T extends Record<string, any>>({
   const renderTableHeader = () => (
     <thead className="bg-accent">
       <tr>
-        {columns.map((column) => {
-          // 짧은 헤더(1-2글자)는 text-xs 사용
-          const headerLength = column.header.length
-          const isShortHeader = headerLength <= 2
-          const headerFontSize = isShortHeader ? 'text-xs' : 'text-sm'
-          return (
-            <th
-              key={column.key}
-              className={`px-4 py-3 text-left ${headerFontSize} font-medium text-foreground ${column.className || ''}`}
-            >
-              {column.header}
-            </th>
-          )
-        })}
+        {columns.map((column) => (
+          <th
+            key={column.key}
+            className={`px-4 py-3 text-left text-sm font-medium text-foreground ${column.className || ''}`}
+          >
+            {column.header}
+          </th>
+        ))}
       </tr>
     </thead>
   )

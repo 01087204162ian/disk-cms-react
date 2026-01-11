@@ -400,19 +400,21 @@ export default function DriverSearch() {
           onChange={(value) => setFilters((prev) => ({ ...prev, status: value }))}
           options={STATUS_OPTIONS}
         />
-        <FilterBar.Select
-          value={filters.pageSize}
-          onChange={(value) => {
-            setFilters((prev) => ({ ...prev, pageSize: value }))
-            handlePageSizeChange(Number(value))
-          }}
-          options={PAGE_SIZE_OPTIONS}
-        />
-        <DatePicker
-          value={filters.terminationDate}
-          onChange={(value) => setFilters((prev) => ({ ...prev, terminationDate: value }))}
-          className="w-40"
-        />
+        <div className="flex items-center gap-2">
+          <FilterBar.Select
+            value={filters.pageSize}
+            onChange={(value) => {
+              setFilters((prev) => ({ ...prev, pageSize: value }))
+              handlePageSizeChange(Number(value))
+            }}
+            options={PAGE_SIZE_OPTIONS}
+          />
+          <DatePicker
+            value={filters.terminationDate}
+            onChange={(value) => setFilters((prev) => ({ ...prev, terminationDate: value }))}
+            className="w-40"
+          />
+        </div>
       </FilterBar>
 
       <DataTable
