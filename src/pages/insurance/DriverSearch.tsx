@@ -341,6 +341,12 @@ export default function DriverSearch() {
                   e.target.value = phone
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  e.currentTarget.blur() // blur 이벤트를 발생시켜 수정 처리
+                }
+              }}
               onFocus={(e) => {
                 e.target.value = removePhoneHyphen(e.target.value)
               }}
