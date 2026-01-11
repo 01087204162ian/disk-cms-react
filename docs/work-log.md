@@ -12,6 +12,99 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-11 (KJ 대리운전) - React 마이그레이션 Phase 2: 증권번호 찾기 페이지 구현 완료
+
+#### 37) KJ 대리운전 "증권번호 찾기" 페이지 React 마이그레이션 완료
+- **페이지 구현**:
+  - `src/pages/insurance/PolicySearch.tsx` 컴포넌트 생성
+  - 기존 `kj-driver-policy-search.html` 및 `kj-driver-policy-search.js` 분석 및 마이그레이션
+  - 공통 컴포넌트 활용 (FilterBar, DataTable, DatePicker, Modal, ExportButton)
+- **필터바 구현**:
+  - 증권번호 선택 (select 또는 직접 입력)
+  - 시작일 날짜 선택 (DatePicker)
+  - 검색 버튼 (FilterBar.SearchButton)
+  - 증권번호 선택 시 시작일 자동 설정 (sigi 값 사용)
+- **현황 표시 영역**:
+  - 전체 증권 수
+  - 인원 1명 이상 증권 수
+  - 전체 인원 수
+  - 인원 1명 이상 합계
+  - 변경 버튼
+  - 엑셀 다운로드 버튼
+- **데이터 테이블 구현**:
+  - 컬럼: #, 대리운전회사, 증권번호, 현재 인원, 시작일
+  - 페이지네이션 없음 (검색 결과만 표시)
+  - 컬럼 너비 및 스타일 조정
+- **증권번호 변경 모달**:
+  - 변경 전 정보 표시 (증권번호, 시작일)
+  - 변경 후 정보 입력 (새 증권번호, 새 시작일, 새 보험회사)
+  - 변경 실행 API 연동 (`/kj-certi/change-policy-execute`)
+- **엑셀 다운로드 기능**:
+  - ExcelJS 동적 import 사용
+  - 회원 리스트 데이터 조회 API (`/kj-certi/change-policy-excel`)
+  - 엑셀 파일 생성 및 다운로드
+- **API 연동**:
+  - `/api/insurance/kj-certi/list` - 증권번호 목록 조회
+  - `/api/insurance/kj-certi/change-policy-search` - 검색
+  - `/api/insurance/kj-certi/change-policy-execute` - 변경 실행
+  - `/api/insurance/kj-certi/change-policy-excel` - 엑셀 다운로드
+- **라우팅 및 메뉴**:
+  - `src/App.tsx`에 `/insurance/kj-driver-policy-search` 라우트 추가
+  - `menu-config.json`에 이미 메뉴 항목 존재 (order: 5)
+- **파일**:
+  - `src/pages/insurance/PolicySearch.tsx`: 증권번호 찾기 페이지 (신규)
+  - `src/App.tsx`: 라우트 추가
+- **결과**: KJ 대리운전 "증권번호 찾기" 페이지 React 마이그레이션 완료. 검색, 현황 표시, 증권번호 변경, 엑셀 다운로드 기능 모두 동작. Phase 1 패턴을 따라 FilterBar, DataTable 등 공통 컴포넌트 활용.
+
+### 2026-01-11 (KJ 대리운전) - React 마이그레이션 Phase 2: 기사 찾기 페이지 구현 완료
+
+#### 36) KJ 대리운전 "기사 찾기" 페이지 React 마이그레이션 완료
+- **페이지 구현**:
+  - `src/pages/insurance/DriverSearch.tsx` 컴포넌트 생성
+  - 기존 `kj-driver-search.html` 및 `kj-driver-search.js` 분석 및 마이그레이션
+  - 공통 컴포넌트 활용 (FilterBar, DataTable, DatePicker)
+- **메뉴 구조 개선**:
+  - `menu-config.json`에서 KJ대리운전 메뉴를 다단계 구조로 변경
+  - 하위 메뉴: 기사 찾기, 대리업체 관리, 배서 리스트, 증권별 코드, 증권번호 찾기
+  - `Sidebar.tsx`에서 다단계 메뉴 시각적 구분 (padding, font-size, border)
+- **필터바 구현**:
+  - 검색 타입 선택 (이름/주민번호)
+  - 검색어 입력 (Enter 키 또는 검색 버튼으로 검색)
+  - 상태 필터 (전체/정상)
+  - 페이지 크기 선택
+  - 해지기준일 날짜 선택
+  - 단일 행 레이아웃으로 통합
+- **데이터 테이블 구현**:
+  - 컬럼: #, 이름, 주민번호, 나이, 상태, 증권성격, 보험회사, 증권번호, 요율, 핸드폰, 등록일, 해지일, 사고
+  - 인라인 편집: 상태, 증권성격, 핸드폰, 사고 (핸드폰 번호 수정 완료)
+  - 페이지네이션 (페이지 크기 선택 제거)
+  - 테이블 헤더 폰트 크기 통일 (`text-sm`)
+  - 컬럼 너비 조정 (# 컬럼 `w-12`)
+  - 셀 내용 한 줄 표시 (`whitespace-nowrap`)
+- **핸드폰 번호 수정 기능**:
+  - 입력 시 하이픈 자동 추가 (010-1234-5678 형식)
+  - 서버에 하이픈 포함 형식으로 저장
+  - Enter 키 또는 포커스 해제 시 수정
+  - `pci0327/api/insurance/kj-driver-phone-update.php` PHP API 생성
+  - `disk-cms/routes/insurance/kj-driver-search.js`에 `/kj-driver/phone` POST 엔드포인트 추가
+- **페이지네이션 개선**:
+  - 전체 개수 0일 때 "0 ~ 0 / 전체 0개"로 표시
+  - API 응답 구조 확인 (`pagination.total`)
+- **라우터 파일 동기화**:
+  - `disk-cms`와 `disk-cms-react`의 서버 라우터 파일 동기화
+  - `routes/`, `middleware/`, `services/`, `config/`, `utils/` 폴더 비교 및 복사
+- **파일**:
+  - `src/pages/insurance/DriverSearch.tsx`: 기사 찾기 페이지 (신규)
+  - `src/pages/insurance/constants.ts`: 공통 상수 (INSURER_OPTIONS, GITA_OPTIONS, DIVI_OPTIONS, RATE_OPTIONS, addPhoneHyphen, removePhoneHyphen)
+  - `src/App.tsx`: `/insurance/kj-driver-search` 라우트 추가
+  - `public/config/menu-config.json`: KJ대리운전 메뉴 구조 수정
+  - `src/components/Sidebar.tsx`: 다단계 메뉴 렌더링 개선
+  - `src/components/DataTable.tsx`: 페이지네이션 전체 개수 0일 때 표시 개선
+  - `pci0327/api/insurance/kj-driver-phone-update.php`: 핸드폰 번호 업데이트 API (신규)
+  - `disk-cms/routes/insurance/kj-driver-search.js`: `/kj-driver/phone` POST 엔드포인트 추가
+  - `disk-cms-react/routes/insurance/kj-driver-search.js`: 동일 엔드포인트 추가
+- **결과**: KJ 대리운전 "기사 찾기" 페이지 React 마이그레이션 완료. 검색, 필터링, 페이지네이션, 핸드폰 번호 수정 기능 모두 동작. 다음 단계: 나머지 페이지 마이그레이션 (대리업체 관리, 배서 리스트, 증권별 코드, 증권번호 찾기)
+
 ### 2026-01-11 (KJ 대리운전) - React 마이그레이션 Phase 1: 준비 작업 완료
 
 #### 35) KJ 대리운전 React 마이그레이션 계획 수립 및 Phase 1 준비 작업 완료
@@ -1065,7 +1158,7 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 10일 (번들 크기 최적화 및 성능 개선 완료)  
+**최종 업데이트**: 2026년 1월 11일 (KJ 대리운전 기사 찾기 페이지 마이그레이션 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
@@ -1077,8 +1170,9 @@ work-log.md 파일 학습하자
 - **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
 - **Phase 3**: 진행 중 (보험 상품 모듈)
   - 약국배상책임보험: 10개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달, 정산 데이터 정리 모달, 실적 조회 증권발급 기준 추가)
+  - KJ 대리운전: 2개 작업 완료 (마이그레이션 계획 수립, 기사 찾기 페이지)
 - **프로젝트 전반**: 1개 작업 완료 (번들 크기 최적화 및 성능 개선)
-- **총 33개 작업 완료**
+- **총 35개 작업 완료**
 
 ### 개발된 공통 컴포넌트
 - ✅ Modal (모달)

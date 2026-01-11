@@ -20,6 +20,7 @@ const PharmacyApplications = lazy(() => import('./pages/pharmacy/Applications'))
 // 문서 페이지는 마크다운 라이브러리가 커서 별도 청크로 분리
 const PharmacyDocumentation = lazy(() => import('./pages/pharmacy/Documentation'))
 const DriverSearch = lazy(() => import('./pages/insurance/DriverSearch'))
+const PolicySearch = lazy(() => import('./pages/insurance/PolicySearch'))
 
 // 로딩 컴포넌트
 const PageLoader = () => (
@@ -63,6 +64,7 @@ function App() {
                       <Route path="/pharmacy/documentation" element={<PharmacyDocumentation />} />
                       {/* KJ 대리운전 */}
                       <Route path="/insurance/kj-driver-search" element={<DriverSearch />} />
+                      <Route path="/insurance/kj-driver-policy-search" element={<PolicySearch />} />
                       {/* 이전 경로 호환 */}
                       <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
                       {/* 추가 라우트는 여기에 추가 */}
