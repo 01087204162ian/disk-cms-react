@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -70,6 +70,12 @@ export default function CompanyManagement() {
     date: '', // 날짜 (1-31일)
     pageSize: '25',
   })
+
+  // 최신 filters 상태를 참조하기 위한 ref
+  const filtersRef = useRef(filters)
+  useEffect(() => {
+    filtersRef.current = filters
+  }, [filters])
 
   // 페이지네이션
   const [pagination, setPagination] = useState({
@@ -283,11 +289,57 @@ export default function CompanyManagement() {
     const today = new Date()
     const todayDay = String(today.getDate()).padStart(2, '0')
     setFilters((prev) => ({ ...prev, date: todayDay }))
-    // 초기 로드
-    setTimeout(() => {
-      loadCompanies(1, 25)
-    }, 100)
   }, [])
+
+  // 날짜 필터가 설정되면 자동으로 로드 (날짜만 변경 시)
+  useEffect(() => {
+    if (!filters.date) return
+
+    const loadWithDate = async () => {
+      try {
+        setLoading(true)
+        const currentFilters = filtersRef.current
+        const params: any = {
+          page: 1,
+          limit: Number(currentFilters.pageSize),
+          currentInwon: currentFilters.status,
+          getDay: currentFilters.date,
+        }
+
+        if (currentFilters.manager) {
+          params.damdanja = currentFilters.manager
+        }
+        if (currentFilters.search) {
+          params.s_contents = currentFilters.search
+        }
+
+        const response = await api.get<CompanyListResponse>('/api/insurance/kj-company/list', { params })
+
+        if (response.data.success) {
+          setCompanies(response.data.data || [])
+          const paginationData = response.data.pagination
+          setPagination({
+            currentPage: paginationData?.page || 1,
+            pageSize: paginationData?.limit || Number(currentFilters.pageSize),
+            totalCount: paginationData?.total || 0,
+            totalPages: paginationData?.totalPages || 1,
+          })
+        } else {
+          toast.error(response.data.error || '데이터를 불러오는 중 오류가 발생했습니다.')
+          setCompanies([])
+        }
+      } catch (error: any) {
+        console.error('업체 목록 로드 오류:', error)
+        toast.error(error.response?.data?.error || '데이터를 불러오는 중 오류가 발생했습니다.')
+        setCompanies([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadWithDate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.date])
 
   return (
     <div className="space-y-6">
@@ -323,16 +375,7 @@ export default function CompanyManagement() {
         />
         <FilterBar.Select
           value={filters.date}
-          onChange={(value) => {
-            setFilters((prev) => {
-              const newFilters = { ...prev, date: value }
-              // 날짜 변경 시 자동 검색
-              setTimeout(() => {
-                loadCompanies(1, Number(newFilters.pageSize))
-              }, 0)
-              return newFilters
-            })
-          }}
+          onChange={(value) => setFilters((prev) => ({ ...prev, date: value }))}
           options={dateOptions}
           className="w-24"
         />
