@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react'
 import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
 import { INSURER_OPTIONS, GITA_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
+import MemberListModal from './MemberListModal'
+import EndorseModal from './EndorseModal'
+import PremiumModal from './PremiumModal'
 
 interface CompanyDetailModalProps {
   isOpen: boolean
@@ -80,6 +83,18 @@ export default function CompanyDetailModal({
   const [detail, setDetail] = useState<CompanyDetail | null>(null)
   const [editingPolicies, setEditingPolicies] = useState<EditingPolicyInfo[]>([])
   const [savingPolicyIndex, setSavingPolicyIndex] = useState<number | null>(null)
+  const [memberListModalOpen, setMemberListModalOpen] = useState(false)
+  const [selectedCertiTableNum, setSelectedCertiTableNum] = useState<number | null>(null)
+  const [endorseModalOpen, setEndorseModalOpen] = useState(false)
+  const [endorseModalData, setEndorseModalData] = useState<{
+    certiTableNum: number
+    insurerCode?: number
+    policyNum?: string
+    gita?: number
+    companyNum?: number
+  } | null>(null)
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false)
+  const [selectedPremiumCertiNum, setSelectedPremiumCertiNum] = useState<number | null>(null)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -493,13 +508,41 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && `${policy.inwon?.toLocaleString('ko-KR') || 0}명`}
+                            {!isNew && policy.num ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedCertiTableNum(policy.num!)
+                                  setMemberListModalOpen(true)
+                                }}
+                                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+                              >
+                                {policy.inwon?.toLocaleString('ko-KR') || 0}명
+                              </button>
+                            ) : (
+                              !isNew && `${policy.inwon?.toLocaleString('ko-KR') || 0}명`
+                            )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {/* Phase 2: 신규 입력 버튼 구현 예정 */}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {/* Phase 2: 운전자 추가 버튼 구현 예정 */}
+                            {!isNew && policy.num ? (
+                              <button
+                                onClick={() => {
+                                  setEndorseModalData({
+                                    certiTableNum: policy.num!,
+                                    insurerCode: policy.InsuraneCompany,
+                                    policyNum: policy.certi || policy.policyNum,
+                                    gita: policy.gita,
+                                    companyNum: companyNum || undefined,
+                                  })
+                                  setEndorseModalOpen(true)
+                                }}
+                                className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 border border-yellow-300"
+                              >
+                                배서
+                              </button>
+                            ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {!isNew && policy.num ? (
@@ -536,7 +579,17 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {/* Phase 2: 월보험료 버튼 구현 예정 */}
+                            {!isNew && policy.num ? (
+                              <button
+                                onClick={() => {
+                                  setSelectedPremiumCertiNum(policy.num!)
+                                  setPremiumModalOpen(true)
+                                }}
+                                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+                              >
+                                {policy.divi === 2 ? '보험료' : '입력'}
+                              </button>
+                            ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {!isNew && policy.num ? (
@@ -605,6 +658,54 @@ export default function CompanyDetailModal({
           </div>
         </div>
       )}
+
+      {/* 대리기사 리스트 모달 */}
+      <MemberListModal
+        isOpen={memberListModalOpen}
+        onClose={() => {
+          setMemberListModalOpen(false)
+          setSelectedCertiTableNum(null)
+        }}
+        certiTableNum={selectedCertiTableNum}
+      />
+
+      {/* 배서 모달 */}
+      {endorseModalData && (
+        <EndorseModal
+          isOpen={endorseModalOpen}
+          onClose={() => {
+            setEndorseModalOpen(false)
+            setEndorseModalData(null)
+          }}
+          certiTableNum={endorseModalData.certiTableNum}
+          insurerCode={endorseModalData.insurerCode}
+          policyNum={endorseModalData.policyNum}
+          gita={endorseModalData.gita}
+          companyNum={endorseModalData.companyNum}
+          onSuccess={() => {
+            // 배서 저장 후 업체 상세 정보 재조회
+            if (companyNum) {
+              loadDetail()
+            }
+          }}
+        />
+      )}
+
+      {/* 월보험료 모달 */}
+      <PremiumModal
+        isOpen={premiumModalOpen}
+        onClose={() => {
+          setPremiumModalOpen(false)
+          setSelectedPremiumCertiNum(null)
+        }}
+        certiNum={selectedPremiumCertiNum}
+        onSuccess={() => {
+          // 월보험료 저장 후 업체 상세 정보 재조회
+          if (companyNum) {
+            loadDetail()
+          }
+        }}
+      />
     </Modal>
   )
 }
