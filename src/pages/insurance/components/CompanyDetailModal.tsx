@@ -409,7 +409,7 @@ export default function CompanyDetailModal({
                       
                       return (
                         <tr key={policy.num || `new-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
-                          <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                          <td className="px-2 py-2 border border-border">{idx + 1}</td>
                           <td className="px-2 py-2 border border-border">
                             {isNew ? (
                               <Select
@@ -683,16 +683,16 @@ export default function CompanyDetailModal({
               <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+                    <th className="px-2 py-2 font-medium border border-border" style={{ width: '5%' }}>
                       순번
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '10%' }}>
+                    <th className="px-2 py-2 font-medium border border-border" style={{ width: '10%' }}>
                       날자
                     </th>
-                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+                    <th className="px-2 py-2 font-medium border border-border" style={{ width: '5%' }}>
                       종류
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '40%' }}>
+                    <th className="px-2 py-2 font-medium border border-border" style={{ width: '40%' }}>
                       내용
                     </th>
                   </tr>
@@ -702,9 +702,9 @@ export default function CompanyDetailModal({
                     const bgClass = idx % 2 === 0 ? 'bg-gray-50' : ''
                     return (
                       <tr key={idx} className={bgClass}>
-                        <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                        <td className="px-2 py-2 border border-border">{idx + 1}</td>
                         <td className="px-2 py-2 border border-border">{memo.wdate || ''}</td>
-                        <td className="px-2 py-2 text-center border border-border">{memo.memokindName || '일반'}</td>
+                        <td className="px-2 py-2 border border-border">{memo.memokindName || '일반'}</td>
                         <td className="px-2 py-2 border border-border">{memo.memo || ''}</td>
                       </tr>
                     )
