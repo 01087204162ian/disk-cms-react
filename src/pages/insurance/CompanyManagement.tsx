@@ -128,7 +128,7 @@ export default function CompanyManagement() {
   }
 
   // 업체 목록 로드
-  const loadCompanies = async (page?: number, pageSize?: number) => {
+  const loadCompanies = async (page?: number, pageSize?: number, skipDateFilter?: boolean) => {
     try {
       setLoading(true)
       const currentPage = page !== undefined ? page : pagination.currentPage
@@ -140,7 +140,8 @@ export default function CompanyManagement() {
         currentInwon: filters.status,
       }
 
-      if (filters.date) {
+      // 검색 시에는 날짜 필터를 무시
+      if (filters.date && !skipDateFilter) {
         params.getDay = filters.date
       }
       if (filters.manager) {
@@ -174,10 +175,10 @@ export default function CompanyManagement() {
     }
   }
 
-  // 검색 실행
+  // 검색 실행 (검색 시에는 날짜 필터 무시)
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
-    loadCompanies(1, pagination.pageSize)
+    loadCompanies(1, pagination.pageSize, true) // skipDateFilter = true
   }
 
   // 페이지 변경
