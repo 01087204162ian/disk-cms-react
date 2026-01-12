@@ -7,6 +7,7 @@ import {
   type Column,
   useToastHelpers,
 } from '../../components'
+import CompanyDetailModal from './components/CompanyDetailModal'
 
 interface Manager {
   num: number
@@ -62,6 +63,9 @@ export default function CompanyManagement() {
   const [loading, setLoading] = useState(false)
   const [companies, setCompanies] = useState<Company[]>([])
   const [managers, setManagers] = useState<Manager[]>([])
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -188,10 +192,11 @@ export default function CompanyManagement() {
     loadCompanies(1, newPageSize)
   }
 
-  // 업체 상세 모달 열기 (나중에 구현)
+  // 업체 상세 모달 열기
   const handleOpenCompanyModal = (companyNum: number, companyName: string) => {
-    console.log('업체 상세 모달 열기:', { companyNum, companyName })
-    // TODO: 모달 구현
+    setSelectedCompanyNum(companyNum)
+    setSelectedCompanyName(companyName)
+    setDetailModalOpen(true)
   }
 
   // 컬럼 정의
@@ -409,6 +414,17 @@ export default function CompanyManagement() {
           pageSizeOptions: [20, 25, 50, 100],
         }}
         emptyMessage="날짜를 선택하면 업체 목록이 표시됩니다."
+      />
+
+      {/* 업체 상세 모달 */}
+      <CompanyDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        companyNum={selectedCompanyNum}
+        companyName={selectedCompanyName}
+        onUpdate={() => {
+          loadCompanies()
+        }}
       />
     </div>
   )

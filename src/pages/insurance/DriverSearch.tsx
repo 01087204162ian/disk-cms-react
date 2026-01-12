@@ -8,6 +8,7 @@ import {
   DatePicker,
 } from '../../components'
 import { GITA_OPTIONS, mapPushLabel, removePhoneHyphen, addPhoneHyphen } from './constants'
+import CompanyDetailModal from './components/CompanyDetailModal'
 
 interface Driver {
   num: number
@@ -68,6 +69,9 @@ export default function DriverSearch() {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
   const [drivers, setDrivers] = useState<Driver[]>([])
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -295,19 +299,23 @@ export default function DriverSearch() {
         header: '대리운전회사',
         cell: (row) => {
           const companyText = (row.companyName || '') + (row.companyNum ? ` (${row.companyNum})` : '')
+          const companyNum = row.companyNum ? Number(row.companyNum) : null
           return (
-            <a
-              href="#"
-              className="text-primary hover:underline whitespace-nowrap"
+            <button
+              type="button"
+              className="text-primary hover:underline whitespace-nowrap text-left"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                // TODO: 회사 정보 모달 열기
-                console.log('회사 정보 모달:', row.companyNum)
+                if (companyNum) {
+                  setSelectedCompanyNum(companyNum)
+                  setSelectedCompanyName(row.companyName || '')
+                  setDetailModalOpen(true)
+                }
               }}
             >
               {companyText}
-            </a>
+            </button>
           )
         },
       },
@@ -471,6 +479,14 @@ export default function DriverSearch() {
           onPageSizeChange: handlePageSizeChange,
           pageSizeOptions: [20, 50, 100],
         }}
+      />
+
+      {/* 업체 상세 모달 */}
+      <CompanyDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        companyNum={selectedCompanyNum}
+        companyName={selectedCompanyName}
       />
     </div>
   )
