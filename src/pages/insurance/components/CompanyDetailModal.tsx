@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_OPTIONS, GITA_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
+import { INSURER_OPTIONS, GITA_OPTIONS, getGitaName } from '../constants'
 import MemberListModal from './MemberListModal'
 import EndorseModal from './EndorseModal'
 import PremiumModal from './PremiumModal'
@@ -171,11 +171,6 @@ export default function CompanyDetailModal({
     }
   }
 
-  const getInsurerName = (code?: number): string => {
-    if (!code) return '=선택='
-    return getInsurerNameUtil(code)
-  }
-
   const getDiviName = (divi?: number): string => {
     if (divi === 1) return '정상납'
     if (divi === 2) return '월납'
@@ -243,17 +238,6 @@ export default function CompanyDetailModal({
   const getNaStateColor = (color?: number): string => {
     if (!color) return 'text-gray-600'
     return NA_STATE_COLORS[color] || 'text-gray-600'
-  }
-
-  const formatDate = (date?: string): string => {
-    if (!date) return '-'
-    try {
-      const d = new Date(date)
-      if (isNaN(d.getTime())) return date
-      return d.toLocaleDateString('ko-KR')
-    } catch {
-      return date
-    }
   }
 
   return (
@@ -429,30 +413,22 @@ export default function CompanyDetailModal({
                             />
                           </td>
                           <td className="px-2 py-2 border border-border">
-                            {isNew ? (
-                              <input
-                                type="text"
-                                value={policy.policyNum || policy.certi || ''}
-                                onChange={(e) => updateEditingPolicy(idx, 'policyNum', e.target.value)}
-                                placeholder="증권번호"
-                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                              />
-                            ) : (
-                              policy.certi || policy.policyNum || '-'
-                            )}
+                            <input
+                              type="text"
+                              value={policy.policyNum || policy.certi || ''}
+                              onChange={(e) => updateEditingPolicy(idx, 'policyNum', e.target.value)}
+                              placeholder="증권번호"
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                            />
                           </td>
                           <td className="px-2 py-2 border border-border">
-                            {isNew ? (
-                              <input
-                                type="text"
-                                value={policy.nabang || ''}
-                                onChange={(e) => updateEditingPolicy(idx, 'nabang', e.target.value)}
-                                placeholder="분납"
-                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                              />
-                            ) : (
-                              policy.nabang || '-'
-                            )}
+                            <input
+                              type="text"
+                              value={policy.nabang || ''}
+                              onChange={(e) => updateEditingPolicy(idx, 'nabang', e.target.value)}
+                              placeholder="분납"
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                            />
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             <button
