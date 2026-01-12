@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
-import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
+import { useEffect, useState, useMemo } from 'react'
+import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
+import { INSURER_OPTIONS, GITA_OPTIONS, DIVI_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
 
 interface CompanyDetailModalProps {
   isOpen: boolean
@@ -26,8 +27,9 @@ interface CompanyDetail {
 }
 
 interface PolicyInfo {
-  num: number
+  num?: number
   certi?: string
+  policyNum?: string
   InsuraneCompany?: number
   startyDay?: string
   f_date?: string
@@ -36,9 +38,17 @@ interface PolicyInfo {
   naColor?: number
   gigan?: number | string
   diviName?: string
+  divi?: number
   gitaName?: string
+  gita?: number
+  nabang?: string
+  nabang_1?: number
   content?: string
   [key: string]: any
+}
+
+interface EditingPolicyInfo extends PolicyInfo {
+  isNew?: boolean
 }
 
 interface CompanyDetailResponse {
@@ -79,6 +89,8 @@ export default function CompanyDetailModal({
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<CompanyDetail | null>(null)
   const [policies, setPolicies] = useState<PolicyInfo[]>([])
+  const [editingPolicies, setEditingPolicies] = useState<EditingPolicyInfo[]>([])
+  const [savingPolicyIndex, setSavingPolicyIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -86,6 +98,7 @@ export default function CompanyDetailModal({
     } else {
       setDetail(null)
       setPolicies([])
+      setEditingPolicies([])
     }
   }, [isOpen, companyNum])
 
@@ -116,24 +129,101 @@ export default function CompanyDetailModal({
 
         setDetail(mainInfo as CompanyDetail)
         setPolicies(policyData)
+        // 편집용 상태 초기화 (기존 데이터 + 1 신규 입력행, 최대 10행)
+        const maxRows = Math.min((policyData.length || 0) + 1, 10)
+        const editingData: EditingPolicyInfo[] = []
+        for (let i = 0; i < maxRows; i++) {
+          if (i < policyData.length) {
+            editingData.push({ ...policyData[i] })
+          } else {
+            editingData.push({ isNew: true })
+          }
+        }
+        setEditingPolicies(editingData)
       } else {
         toast.error(response.data.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
         setDetail(null)
         setPolicies([])
+        setEditingPolicies([])
       }
     } catch (error: any) {
       console.error('업체 상세 정보 로드 오류:', error)
       toast.error(error.response?.data?.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
       setDetail(null)
       setPolicies([])
+      setEditingPolicies([])
     } finally {
       setLoading(false)
     }
   }
 
   const getInsurerName = (code?: number): string => {
-    if (!code) return '-'
-    return INSURER_NAMES[code] || String(code)
+    if (!code) return '=선택='
+    return getInsurerNameUtil(code)
+  }
+
+  const getDiviName = (divi?: number): string => {
+    if (divi === 1) return '정상납'
+    if (divi === 2) return '월납'
+    return '정상납'
+  }
+
+  // 필수 필드 검증 (보험사, 시작일, 증권번호, 분납)
+  const isPolicyValid = (policy: EditingPolicyInfo): boolean => {
+    return Boolean(
+      policy.InsuraneCompany &&
+      Number(policy.InsuraneCompany) > 0 &&
+      policy.startyDay &&
+      policy.policyNum &&
+      policy.nabang
+    )
+  }
+
+  // 증권 정보 저장
+  const handleSavePolicy = async (index: number) => {
+    const policy = editingPolicies[index]
+    if (!policy || !companyNum) return
+
+    if (!isPolicyValid(policy)) {
+      toast.error('필수 필드를 모두 입력해주세요. (보험사, 시작일, 증권번호, 분납)')
+      return
+    }
+
+    try {
+      setSavingPolicyIndex(index)
+      const response = await api.post('/api/insurance/kj-certi/save', {
+        certiNum: policy.num || undefined,
+        companyNum: companyNum,
+        InsuraneCompany: policy.InsuraneCompany,
+        startyDay: policy.startyDay,
+        policyNum: policy.policyNum || policy.certi,
+        nabang: policy.nabang,
+      })
+
+      if (response.data.success) {
+        toast.success(response.data.message || (policy.isNew ? '저장되었습니다.' : '수정되었습니다.'))
+        // 모달 재조회
+        setTimeout(() => {
+          loadDetail()
+        }, 300)
+      } else {
+        toast.error(response.data.error || '저장 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('증권 정보 저장 오류:', error)
+      toast.error(error.response?.data?.error || '저장 중 오류가 발생했습니다.')
+    } finally {
+      setSavingPolicyIndex(null)
+    }
+  }
+
+  // 증권 정보 업데이트
+  const updateEditingPolicy = (index: number, field: keyof EditingPolicyInfo, value: any) => {
+    setEditingPolicies((prev) => {
+      const newPolicies = [...prev]
+      newPolicies[index] = { ...newPolicies[index], [field]: value }
+      return newPolicies
+    })
   }
 
   const getNaStateColor = (color?: number): string => {
@@ -157,7 +247,7 @@ export default function CompanyDetailModal({
       isOpen={isOpen}
       onClose={onClose}
       title={companyName || detail?.company || '업체 상세 정보'}
-      maxWidth="4xl"
+      maxWidth="6xl"
       maxHeight="90vh"
     >
       {loading ? (
