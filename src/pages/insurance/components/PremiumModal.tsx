@@ -142,15 +142,22 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
       setRows(newRows)
     }
 
-    // 나이 끝 입력 시 다음 행의 시작 자동 설정 (다음 행이 완전히 비어있을 때만)
+    // 나이 끝 입력 시 다음 행의 시작 자동 설정 (원본과 동일한 로직)
     if (field === 'ageEnd' && typeof value === 'number' && value && index < 6) {
       const nextRow = newRows[index + 1]
-      // 다음 행이 완전히 비어있을 때만 자동 설정
-      const isNextRowEmpty = !nextRow.ageStart && !nextRow.ageEnd && 
-                              !nextRow.monthlyBasic && !nextRow.monthlySpecial && 
-                              !nextRow.yearlyBasic && !nextRow.yearlySpecial
-      if (isNextRowEmpty) {
-        newRows[index + 1] = { ...nextRow, ageStart: value + 1 }
+      const nextAgeStart = nextRow.ageStart
+      const expectedNextStart = value + 1
+      // 다음 행의 시작이 비어있거나 현재 행의 끝+1과 다르면 자동 설정
+      if (!nextAgeStart || nextAgeStart !== expectedNextStart) {
+        newRows[index + 1] = { ...nextRow, ageStart: expectedNextStart }
+        setRows(newRows)
+      }
+    } else if (field === 'ageEnd' && (!value || value === 0) && index < 6) {
+      // 나이 끝이 비어있거나 유효하지 않으면 다음 행의 시작도 비우기 (원본과 동일)
+      const nextRow = newRows[index + 1]
+      const currentStart = newRows[index].ageStart
+      if (currentStart && nextRow.ageStart === currentStart + 1) {
+        newRows[index + 1] = { ...nextRow, ageStart: undefined }
         setRows(newRows)
       }
     }
@@ -168,12 +175,9 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
 
     const premiumData: any[] = []
     rows.forEach((row, idx) => {
-      // 나이 시작 또는 끝이 있고, 보험료 정보가 있는 행만 저장
-      // 단, 나이만 있고 보험료가 없는 행은 저장하지 않음
-      const hasAge = row.ageStart || row.ageEnd
-      const hasPremium = row.monthlyBasic || row.monthlySpecial || row.yearlyBasic || row.yearlySpecial
-      
-      if (hasAge && hasPremium) {
+      // 원본과 동일: 나이 또는 보험료 중 하나라도 있으면 저장
+      if (row.ageStart || row.ageEnd || row.monthlyBasic || row.monthlySpecial || 
+          row.yearlyBasic || row.yearlySpecial) {
         premiumData.push({
           cNum: certiNum,
           rowNum: idx + 1,
@@ -245,8 +249,8 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
         <div className="overflow-x-auto border border-border rounded">
           <table className="w-full text-xs border-collapse" style={{ fontSize: '0.9rem' }}>
             <thead>
-              <tr className="bg-gray-100">
-                <th rowSpan={2} className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+              <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
+                <th rowSpan={2} className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%', verticalAlign: 'middle' }}>
                   순번
                 </th>
                 <th colSpan={2} className="px-2 py-2 text-center font-medium border border-border">
@@ -259,7 +263,7 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
                   10회분납
                 </th>
               </tr>
-              <tr className="bg-gray-100">
+              <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
                 <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
                   시작
                 </th>
