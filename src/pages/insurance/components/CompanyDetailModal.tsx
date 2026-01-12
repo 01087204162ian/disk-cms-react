@@ -488,7 +488,7 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {policy.num ? (
+                            {!isNew && policy.num ? (
                               <button
                                 onClick={() => {
                                   setSelectedCertiTableNum(policy.num!)
@@ -499,12 +499,10 @@ export default function CompanyDetailModal({
                               >
                                 {policy.inwon?.toLocaleString('ko-KR') || 0}명
                               </button>
-                            ) : (
-                              `${policy.inwon?.toLocaleString('ko-KR') || 0}명`
-                            )}
+                            ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {policy.num ? (
+                            {!isNew && policy.num ? (
                               <button
                                 onClick={() => {
                                   // Phase 2: 신규 입력 기능 구현 예정
@@ -518,7 +516,7 @@ export default function CompanyDetailModal({
                             ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {policy.num ? (
+                            {!isNew && policy.num ? (
                               <button
                                 onClick={() => {
                                   setEndorseModalData({
@@ -538,7 +536,7 @@ export default function CompanyDetailModal({
                             ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {policy.num ? (
+                            {!isNew && policy.num ? (
                               <button
                                 onClick={async () => {
                                   const currentDivi = policy.divi || 1
@@ -568,12 +566,10 @@ export default function CompanyDetailModal({
                               >
                                 {policy.diviName || getDiviName(policy.divi)}
                               </button>
-                            ) : (
-                              policy.diviName || getDiviName(policy.divi)
-                            )}
+                            ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {policy.num ? (
+                            {!isNew && policy.num ? (
                               <button
                                 onClick={() => {
                                   setSelectedPremiumCertiNum(policy.num!)
