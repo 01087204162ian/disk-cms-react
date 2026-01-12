@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_OPTIONS, GITA_OPTIONS, DIVI_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
+import { INSURER_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
 
 interface CompanyDetailModalProps {
   isOpen: boolean
@@ -62,16 +62,6 @@ interface CompanyDetailResponse {
   [key: string]: any
 }
 
-const INSURER_NAMES: Record<number, string> = {
-  1: '흥국',
-  2: 'DB',
-  3: 'KB',
-  4: '현대',
-  5: '롯데',
-  6: '하나',
-  7: '한화',
-  10: '보험료',
-}
 
 const NA_STATE_COLORS: Record<number, string> = {
   1: 'text-green-600', // 납
@@ -88,7 +78,6 @@ export default function CompanyDetailModal({
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
   const [detail, setDetail] = useState<CompanyDetail | null>(null)
-  const [policies, setPolicies] = useState<PolicyInfo[]>([])
   const [editingPolicies, setEditingPolicies] = useState<EditingPolicyInfo[]>([])
   const [savingPolicyIndex, setSavingPolicyIndex] = useState<number | null>(null)
 
@@ -97,7 +86,6 @@ export default function CompanyDetailModal({
       loadDetail()
     } else {
       setDetail(null)
-      setPolicies([])
       setEditingPolicies([])
     }
   }, [isOpen, companyNum])
@@ -128,7 +116,6 @@ export default function CompanyDetailModal({
         })
 
         setDetail(mainInfo as CompanyDetail)
-        setPolicies(policyData)
         // 편집용 상태 초기화 (기존 데이터 + 1 신규 입력행, 최대 10행)
         const maxRows = Math.min((policyData.length || 0) + 1, 10)
         const editingData: EditingPolicyInfo[] = []
@@ -143,14 +130,12 @@ export default function CompanyDetailModal({
       } else {
         toast.error(response.data.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
         setDetail(null)
-        setPolicies([])
         setEditingPolicies([])
       }
     } catch (error: any) {
       console.error('업체 상세 정보 로드 오류:', error)
       toast.error(error.response?.data?.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
       setDetail(null)
-      setPolicies([])
       setEditingPolicies([])
     } finally {
       setLoading(false)
@@ -387,42 +372,112 @@ export default function CompanyDetailModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {policies.length > 0 ? (
-                    policies.map((policy, idx) => (
-                      <tr key={policy.num || idx} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
-                        <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
-                        <td className="px-2 py-2 border border-border">{getInsurerName(policy.InsuraneCompany)}</td>
-                        <td className="px-2 py-2 border border-border">{formatDate(policy.startyDay)}</td>
-                        <td className="px-2 py-2 border border-border">{policy.certi || policy.policyNum || '-'}</td>
-                        <td className="px-2 py-2 border border-border">{policy.nabang || '-'}</td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          {/* Phase 2: 저장 버튼 구현 예정 */}
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">{policy.nabang_1 || '-'}</td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          <span className={getNaStateColor(policy.naColor)}>
-                            {policy.naState || '-'}
-                            {policy.gigan && typeof policy.gigan === 'number' && policy.gigan > 0 && (
-                              <span className="text-xs text-gray-500 ml-1">({Math.floor(policy.gigan)}일)</span>
+                  {editingPolicies.length > 0 ? (
+                    editingPolicies.map((policy, idx) => {
+                      const isNew = policy.isNew
+                      const isValid = isPolicyValid(policy)
+                      const isSaving = savingPolicyIndex === idx
+                      
+                      return (
+                        <tr key={policy.num || `new-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
+                          <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                          <td className="px-2 py-2 border border-border">
+                            {isNew ? (
+                              <Select
+                                value={policy.InsuraneCompany || 0}
+                                onChange={(e) => updateEditingPolicy(idx, 'InsuraneCompany', Number(e.target.value))}
+                                options={INSURER_OPTIONS}
+                                variant="modal"
+                                fullWidth={false}
+                                className="text-xs"
+                              />
+                            ) : (
+                              getInsurerName(policy.InsuraneCompany)
                             )}
-                          </span>
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          {policy.inwon?.toLocaleString('ko-KR') || 0}명
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          {/* Phase 2: 신규 입력 버튼 구현 예정 */}
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          {/* Phase 2: 운전자 추가 버튼 구현 예정 */}
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">{policy.diviName || '-'}</td>
-                        <td className="px-2 py-2 text-center border border-border">
-                          {/* Phase 2: 월보험료 버튼 구현 예정 */}
-                        </td>
-                        <td className="px-2 py-2 text-center border border-border">{policy.gitaName || '-'}</td>
-                      </tr>
-                    ))
+                          </td>
+                          <td className="px-2 py-2 border border-border">
+                            {isNew ? (
+                              <input
+                                type="date"
+                                value={policy.startyDay ? policy.startyDay.substring(0, 10) : ''}
+                                onChange={(e) => updateEditingPolicy(idx, 'startyDay', e.target.value)}
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              />
+                            ) : (
+                              formatDate(policy.startyDay)
+                            )}
+                          </td>
+                          <td className="px-2 py-2 border border-border">
+                            {isNew ? (
+                              <input
+                                type="text"
+                                value={policy.policyNum || policy.certi || ''}
+                                onChange={(e) => updateEditingPolicy(idx, 'policyNum', e.target.value)}
+                                placeholder="증권번호"
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              />
+                            ) : (
+                              policy.certi || policy.policyNum || '-'
+                            )}
+                          </td>
+                          <td className="px-2 py-2 border border-border">
+                            {isNew ? (
+                              <input
+                                type="text"
+                                value={policy.nabang || ''}
+                                onChange={(e) => updateEditingPolicy(idx, 'nabang', e.target.value)}
+                                placeholder="분납"
+                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              />
+                            ) : (
+                              policy.nabang || '-'
+                            )}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {isNew && (
+                              <button
+                                onClick={() => handleSavePolicy(idx)}
+                                disabled={!isValid || isSaving}
+                                className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {isSaving ? '저장 중...' : '저장'}
+                              </button>
+                            )}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {!isNew && policy.nabang_1 ? `${policy.nabang_1}회차` : '-'}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {!isNew && (
+                              <span className={getNaStateColor(policy.naColor)}>
+                                {policy.naState || '-'}
+                                {policy.gigan && typeof policy.gigan === 'number' && policy.gigan > 0 && (
+                                  <span className="text-xs text-gray-500 ml-1">({Math.floor(policy.gigan)}일)</span>
+                                )}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {!isNew && `${policy.inwon?.toLocaleString('ko-KR') || 0}명`}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {/* Phase 2: 신규 입력 버튼 구현 예정 */}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {/* Phase 2: 운전자 추가 버튼 구현 예정 */}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {!isNew && (policy.diviName || getDiviName(policy.divi))}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {/* Phase 2: 월보험료 버튼 구현 예정 */}
+                          </td>
+                          <td className="px-2 py-2 text-center border border-border">
+                            {!isNew && (policy.gitaName || (policy.gita ? getGitaName(policy.gita) : '-'))}
+                          </td>
+                        </tr>
+                      )
+                    })
                   ) : (
                     <tr>
                       <td colSpan={14} className="px-3 py-4 text-center text-gray-500 border border-border">
@@ -431,7 +486,7 @@ export default function CompanyDetailModal({
                     </tr>
                   )}
                 </tbody>
-                {policies.length > 0 && detail?.inWonTotal !== undefined && (
+                {editingPolicies.length > 0 && detail?.inWonTotal !== undefined && (
                   <tfoot>
                     <tr>
                       <td colSpan={8} className="px-2 py-2 text-right font-semibold border border-border">
