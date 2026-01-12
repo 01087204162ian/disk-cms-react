@@ -106,6 +106,20 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
 
   const handleRowChange = (index: number, field: keyof PremiumRow, value: string | number) => {
     const newRows = [...rows]
+    
+    // 숫자 입력 필드의 경우 천단위 컴마 자동 포맷팅
+    if (field === 'monthlyBasic' || field === 'monthlySpecial' || field === 'yearlyBasic' || field === 'yearlySpecial') {
+      if (typeof value === 'string') {
+        const numValue = removeComma(value)
+        if (numValue) {
+          const num = parseFloat(numValue)
+          if (!isNaN(num)) {
+            value = formatNumber(num)
+          }
+        }
+      }
+    }
+    
     newRows[index] = { ...newRows[index], [field]: value }
     setRows(newRows)
 
@@ -202,9 +216,10 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
       footer={
         <div className="flex justify-end">
           <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-success text-white rounded hover:bg-success/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? '저장 중...' : hasData ? '수정' : '저장'}
           </button>
