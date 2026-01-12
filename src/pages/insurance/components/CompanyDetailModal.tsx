@@ -284,7 +284,7 @@ export default function CompanyDetailModal({
               </button>
             </div>
             <div className="border border-border rounded overflow-hidden">
-              <table className="w-full text-xs border-collapse">
+              <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <tbody>
                   <tr>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">주민번호</th>
@@ -350,7 +350,7 @@ export default function CompanyDetailModal({
           <div className="mb-4">
             <h6 className="text-sm font-semibold mb-2">증권 정보</h6>
             <div className="overflow-x-auto border border-border rounded">
-              <table className="w-full text-xs border-collapse" style={{ fontSize: '0.85rem' }}>
+              <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '4%' }}>
@@ -680,7 +680,7 @@ export default function CompanyDetailModal({
           <div className="mb-4">
             <h6 className="text-sm font-semibold mb-2">메모</h6>
             <div className="overflow-x-auto border border-border rounded">
-              <table className="w-full text-xs border-collapse" style={{ fontSize: '0.85rem' }}>
+              <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
@@ -735,7 +735,7 @@ export default function CompanyDetailModal({
           <div className="mb-4">
             <h6 className="text-sm font-semibold mb-2">SMS 목록</h6>
             <div className="overflow-x-auto border border-border rounded">
-              <table className="w-full text-xs border-collapse" style={{ fontSize: '0.85rem' }}>
+              <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
