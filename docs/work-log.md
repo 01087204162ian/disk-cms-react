@@ -12,6 +12,55 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-12 (KJ 대리운전) - React 마이그레이션: 업체 상세 모달 Phase 2 고급, Phase 3, Phase 4 구현 및 검색/월보험료 모달 개선
+
+#### 작업 내용
+- **기능**: 업체 상세 모달 (CompanyDetailModal) Phase 2 고급, Phase 3, Phase 4 구현 및 버그 수정
+- **파일**: 
+  - `src/pages/insurance/components/CompanyDetailModal.tsx` (메모/SMS 목록 추가)
+  - `src/pages/insurance/components/MemberListModal.tsx` (신규 생성)
+  - `src/pages/insurance/components/EndorseModal.tsx` (신규 생성)
+  - `src/pages/insurance/components/PremiumModal.tsx` (신규 생성 및 개선)
+  - `src/pages/insurance/CompanyManagement.tsx` (검색 기능 개선)
+  - `routes/insurance/kj-driver-company.js` (검색 시 날짜 필터 무시)
+- **주요 구현 사항**:
+  - ✅ Phase 2 고급: 증권 정보 테이블 추가 기능 구현
+    - 인원 버튼 클릭 시 대리기사 리스트 모달 (`MemberListModal`)
+    - 배서 버튼 클릭 시 배서 모달 (`EndorseModal`)
+    - 월보험료 버튼 클릭 시 월보험료 모달 (`PremiumModal`)
+  - ✅ Phase 3: 메모 목록 구현
+    - 메모 데이터 표시 (최대 10개)
+    - 증권별 메모 내용 표시 (textarea)
+  - ✅ Phase 4: SMS 목록 구현
+    - SMS 데이터 표시 (최대 10개)
+    - 수신 상태에 따른 텍스트 색상 적용 (#0A8FC1)
+  - ✅ 검색 기능 개선
+    - 검색어가 있을 때 날짜 필터 무시 (프론트엔드 + 라우터)
+    - 검색 시 날짜와 관계없이 전체 업체 조회 가능
+  - ✅ 월보험료 모달 개선
+    - thead 색상 제거 (보라색 → 회색)
+    - 저장 버튼 스타일 수정 (EndorseModal과 동일)
+    - 나이 자동 설정 로직 개선 (빈 행에만 자동 설정)
+    - 저장 로직 개선 (나이와 보험료가 모두 있는 행만 저장)
+
+#### API 연동
+- `/api/insurance/kj-certi/member-list` - 대리기사 리스트 조회
+- `/api/insurance/kj-endorse/save` - 배서 저장
+- `/api/insurance/kj-premium` - 월보험료 조회
+- `/api/insurance/kj-premium/save` - 월보험료 저장
+- `/api/insurance/kj-company/list` - 업체 목록 조회 (검색 시 날짜 필터 무시)
+
+#### 해결한 이슈
+- 검색 시 날짜 필터가 적용되는 문제: 검색어가 있으면 날짜 필터 무시하도록 수정
+- 월보험료 모달 저장 시 빈 행이 저장되는 문제: 나이와 보험료가 모두 있는 행만 저장하도록 수정
+- 나이 구간 중복 생성 문제: 나이 자동 설정 로직 개선 (빈 행에만 적용)
+
+#### 남은 작업
+- Phase 5: 기본 정보 수정 기능 구현
+- Phase 6: 업체 I.D 관리 모달 구현
+
+---
+
 ### 2026-01-12 (KJ 대리운전) - React 마이그레이션: 업체 상세 모달 Phase 1, Phase 2 기본 구현 및 검색 기능 개선
 
 #### 작업 내용
@@ -1241,7 +1290,7 @@ work-log.md 파일 학습하자
 ---
 
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 12일 (KJ 대리운전 업체 상세 모달 Phase 1/2 구현 및 검색 기능 개선 완료)  
+**최종 업데이트**: 2026년 1월 12일 (KJ 대리운전 업체 상세 모달 Phase 2 고급/3/4 구현 및 검색/월보험료 모달 개선 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
@@ -1253,9 +1302,9 @@ work-log.md 파일 학습하자
 - **Phase 2**: 13개 작업 완료 (직원 관리 모듈 + 공통 컴포넌트 개발)
 - **Phase 3**: 진행 중 (보험 상품 모듈)
   - 약국배상책임보험: 10개 작업 완료 (Applications 페이지, 업체 추가 모달, 상세 모달, 인라인 편집/페이지네이션 개선, 일별/월별 실적 모달, 예치금 현황 조회 모달, 예치금 충전/리스트/사용내역 모달, 정산 데이터 정리 모달, 실적 조회 증권발급 기준 추가)
-  - KJ 대리운전: 3개 작업 완료 (마이그레이션 계획 수립, 기사 찾기 페이지, 업체 상세 모달 Phase 1/2)
+  - KJ 대리운전: 4개 작업 완료 (마이그레이션 계획 수립, 기사 찾기 페이지, 업체 상세 모달 Phase 1/2, 업체 상세 모달 Phase 2 고급/3/4)
 - **프로젝트 전반**: 1개 작업 완료 (번들 크기 최적화 및 성능 개선)
-- **총 36개 작업 완료**
+- **총 37개 작업 완료**
 
 ### 개발된 공통 컴포넌트
 - ✅ Modal (모달)
