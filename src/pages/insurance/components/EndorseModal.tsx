@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Modal, useToastHelpers } from '../../../components'
+import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { getInsurerName, getGitaName } from '../constants'
+import { useAuthStore } from '../../../store/authStore'
 
 interface EndorseModalProps {
   isOpen: boolean
@@ -31,6 +32,7 @@ export default function EndorseModal({
   onSuccess,
 }: EndorseModalProps) {
   const toast = useToastHelpers()
+  const { user } = useAuthStore()
   const [endorseDate, setEndorseDate] = useState('')
   const [members, setMembers] = useState<EndorseMember[]>(Array(10).fill({ name: '', juminNo: '', phoneNo: '' }))
   const [saving, setSaving] = useState(false)
@@ -103,6 +105,12 @@ export default function EndorseModal({
 
     try {
       setSaving(true)
+      // 로그인 사용자 이름 가져오기 (원본과 동일한 로직)
+      const userName = user?.name || 
+        (typeof window !== 'undefined' && window.sessionStorage?.getItem('userName')) ||
+        (typeof window !== 'undefined' && window.localStorage?.getItem('userName')) ||
+        'system'
+      
       const response = await api.post('/api/insurance/kj-endorse/save', {
         data: validMembers,
         cNum: certiTableNum,
@@ -111,6 +119,7 @@ export default function EndorseModal({
         endorseDay: endorseDate,
         policyNum: policyNum,
         gita: gita,
+        userName: userName,
       })
 
       if (response.data.success) {
@@ -131,30 +140,147 @@ export default function EndorseModal({
   const insurerName = insurerCode ? getInsurerName(insurerCode) : ''
   const gitaName = gita ? getGitaName(gita) : ''
 
+  if (!isOpen) return null
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={
-        <div className="flex items-center gap-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div
+        className="w-full rounded-xl bg-background border border-border overflow-hidden flex flex-col"
+        style={{ maxWidth: '40%' }}
+      >
+        {/* 헤더 - 원본과 동일한 배경색 및 레이아웃 */}
+        <div className="px-6 py-4 flex items-center justify-between flex-shrink-0" style={{ backgroundColor: '#e8f5e9' }}>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
+              onClick={() => {
+                // ExcelUp 기능은 추후 구현
+                toast.info('ExcelUp 기능은 추후 구현 예정입니다.')
+              }}
+            >
+              ExcelUp
+            </button>
+            <span className="font-bold">
+              [{insurerName}][{policyNum || ''}]
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="font-bold mb-0">배서기준일</label>
+            <input
+              type="date"
+              value={endorseDate}
+              onChange={(e) => setEndorseDate(e.target.value)}
+              className="px-2 py-1 text-sm border border-border rounded"
+              style={{ width: '150px' }}
+            />
+          </div>
           <button
-            type="button"
-            className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90"
-            onClick={() => {
-              // ExcelUp 기능은 추후 구현
-              toast.info('ExcelUp 기능은 추후 구현 예정입니다.')
-            }}
+            onClick={onClose}
+            className="text-gray-700 hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+            aria-label="닫기"
           >
-            ExcelUp
+            ×
           </button>
-          <span className="font-bold">
-            [{insurerName}][{policyNum || ''}]
-          </span>
         </div>
-      }
-      maxWidth="2xl"
-      footer={
-        <div className="flex justify-end">
+
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto p-6 bg-white" style={{ maxHeight: '70vh' }}>
+          <div className="overflow-x-auto border border-border rounded">
+            <table className="w-full border-collapse" style={{ fontSize: '0.9rem' }}>
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-2 py-2 font-medium border border-border" style={{ width: '5%' }}>
+                    순번
+                  </th>
+                  <th className="px-2 py-2 font-medium border border-border" style={{ width: '20%' }}>
+                    성명
+                  </th>
+                  <th className="px-2 py-2 font-medium border border-border" style={{ width: '25%' }}>
+                    주민번호
+                  </th>
+                  <th className="px-2 py-2 font-medium border border-border" style={{ width: '20%' }}>
+                    핸드폰번호
+                  </th>
+                  <th className="px-2 py-2 font-medium border border-border" style={{ width: '30%' }}>
+                    증권성격
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.map((member, idx) => (
+                  <tr key={idx} style={{ backgroundColor: '#ffffff' }}>
+                    <td className="px-2 py-2 text-center border border-border" style={{ padding: 0 }}>
+                      {idx + 1}
+                    </td>
+                    <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
+                      <input
+                        type="text"
+                        value={member.name}
+                        onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
+                        placeholder="성명"
+                        className="w-full px-2 py-1 text-xs"
+                        style={{ 
+                          backgroundColor: '#ffffff', 
+                          border: 'none', 
+                          outline: 'none', 
+                          boxShadow: 'none',
+                          width: '100%'
+                        }}
+                      />
+                    </td>
+                    <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
+                      <input
+                        type="text"
+                        value={member.juminNo}
+                        onChange={(e) => {
+                          const formatted = formatJumin(e.target.value)
+                          handleMemberChange(idx, 'juminNo', formatted)
+                        }}
+                        placeholder="주민번호"
+                        maxLength={14}
+                        className="w-full px-2 py-1 text-xs"
+                        style={{ 
+                          backgroundColor: '#ffffff', 
+                          border: 'none', 
+                          outline: 'none', 
+                          boxShadow: 'none',
+                          width: '100%'
+                        }}
+                      />
+                    </td>
+                    <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
+                      <input
+                        type="text"
+                        value={member.phoneNo}
+                        onChange={(e) => {
+                          const formatted = formatPhone(e.target.value)
+                          handleMemberChange(idx, 'phoneNo', formatted)
+                        }}
+                        placeholder="핸드폰번호"
+                        maxLength={13}
+                        className="w-full px-2 py-1 text-xs"
+                        style={{ 
+                          backgroundColor: '#ffffff', 
+                          border: 'none', 
+                          outline: 'none', 
+                          boxShadow: 'none',
+                          width: '100%'
+                        }}
+                      />
+                    </td>
+                    <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
+                      <span className="px-2 py-1 text-xs">{gitaName}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 푸터 - 원본과 동일한 배경색 */}
+        <div className="border-t border-gray-200 px-6 py-4 flex-shrink-0 flex justify-end" style={{ backgroundColor: '#e8f5e9' }}>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -163,87 +289,7 @@ export default function EndorseModal({
             {saving ? '저장 중...' : '저장'}
           </button>
         </div>
-      }
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <label className="font-bold">배서기준일</label>
-        <input
-          type="date"
-          value={endorseDate}
-          onChange={(e) => setEndorseDate(e.target.value)}
-          className="px-2 py-1 text-sm border border-border rounded"
-          style={{ width: '150px' }}
-        />
       </div>
-      <div className="overflow-x-auto border border-border rounded">
-        <table className="w-full text-xs border-collapse" style={{ fontSize: '0.9rem' }}>
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
-                순번
-              </th>
-              <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '20%' }}>
-                성명
-              </th>
-              <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '25%' }}>
-                주민번호
-              </th>
-              <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '20%' }}>
-                핸드폰번호
-              </th>
-              <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '30%' }}>
-                증권성격
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {members.map((member, idx) => (
-              <tr key={idx} style={{ backgroundColor: '#ffffff' }}>
-                <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
-                <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
-                  <input
-                    type="text"
-                    value={member.name}
-                    onChange={(e) => handleMemberChange(idx, 'name', e.target.value)}
-                    placeholder="성명"
-                    className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none"
-                    style={{ backgroundColor: '#ffffff' }}
-                  />
-                </td>
-                <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
-                  <input
-                    type="text"
-                    value={member.juminNo}
-                    onChange={(e) => {
-                      const formatted = formatJumin(e.target.value)
-                      handleMemberChange(idx, 'juminNo', formatted)
-                    }}
-                    placeholder="주민번호"
-                    maxLength={14}
-                    className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none"
-                    style={{ backgroundColor: '#ffffff' }}
-                  />
-                </td>
-                <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
-                  <input
-                    type="text"
-                    value={member.phoneNo}
-                    onChange={(e) => {
-                      const formatted = formatPhone(e.target.value)
-                      handleMemberChange(idx, 'phoneNo', formatted)
-                    }}
-                    placeholder="핸드폰번호"
-                    maxLength={13}
-                    className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none"
-                    style={{ backgroundColor: '#ffffff' }}
-                  />
-                </td>
-                <td className="px-2 py-2 border border-border">{gitaName}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Modal>
+    </div>
   )
 }
