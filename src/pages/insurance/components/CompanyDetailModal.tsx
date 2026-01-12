@@ -83,6 +83,8 @@ export default function CompanyDetailModal({
   const [detail, setDetail] = useState<CompanyDetail | null>(null)
   const [editingPolicies, setEditingPolicies] = useState<EditingPolicyInfo[]>([])
   const [savingPolicyIndex, setSavingPolicyIndex] = useState<number | null>(null)
+  const [memoData, setMemoData] = useState<any[]>([])
+  const [contentData, setContentData] = useState<string[]>([])
   const [memberListModalOpen, setMemberListModalOpen] = useState(false)
   const [selectedCertiTableNum, setSelectedCertiTableNum] = useState<number | null>(null)
   const [endorseModalOpen, setEndorseModalOpen] = useState(false)
@@ -102,6 +104,8 @@ export default function CompanyDetailModal({
     } else {
       setDetail(null)
       setEditingPolicies([])
+      setMemoData([])
+      setContentData([])
     }
   }, [isOpen, companyNum])
 
@@ -142,6 +146,9 @@ export default function CompanyDetailModal({
           }
         }
         setEditingPolicies(editingData)
+        // 메모 데이터 설정
+        setMemoData(response.data.memoData || [])
+        setContentData(response.data.content || [])
       } else {
         toast.error(response.data.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
         setDetail(null)
@@ -152,6 +159,8 @@ export default function CompanyDetailModal({
       toast.error(error.response?.data?.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
       setDetail(null)
       setEditingPolicies([])
+      setMemoData([])
+      setContentData([])
     } finally {
       setLoading(false)
     }
@@ -657,6 +666,61 @@ export default function CompanyDetailModal({
             </div>
           </div>
         </div>
+      )}
+
+      {/* 메모 목록 */}
+      {(memoData.length > 0 || contentData.length > 0) && (
+        <>
+          <hr className="my-4" />
+          <div className="mb-4">
+            <h6 className="text-sm font-semibold mb-2">메모</h6>
+            <div className="overflow-x-auto border border-border rounded">
+              <table className="w-full text-xs border-collapse" style={{ fontSize: '0.85rem' }}>
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+                      순번
+                    </th>
+                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '10%' }}>
+                      날자
+                    </th>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+                      종류
+                    </th>
+                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '40%' }}>
+                      내용
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {memoData.slice(0, 10).map((memo, idx) => {
+                    const bgClass = idx % 2 === 0 ? 'bg-gray-50' : ''
+                    return (
+                      <tr key={idx} className={bgClass}>
+                        <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                        <td className="px-2 py-2 border border-border">{memo.wdate || ''}</td>
+                        <td className="px-2 py-2 text-center border border-border">{memo.memokindName || '일반'}</td>
+                        <td className="px-2 py-2 border border-border">{memo.memo || ''}</td>
+                      </tr>
+                    )
+                  })}
+                  {contentData.length > 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-2 py-2 border border-border">
+                        <textarea
+                          className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none resize-none"
+                          rows={3}
+                          readOnly
+                          value={contentData.join('\n')}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* 대리기사 리스트 모달 */}
