@@ -411,30 +411,22 @@ export default function CompanyDetailModal({
                         <tr key={policy.num || `new-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
                           <td className="px-2 py-2 border border-border">{idx + 1}</td>
                           <td className="px-2 py-2 border border-border">
-                            {isNew ? (
-                              <Select
-                                value={policy.InsuraneCompany || 0}
-                                onChange={(e) => updateEditingPolicy(idx, 'InsuraneCompany', Number(e.target.value))}
-                                options={INSURER_OPTIONS}
-                                variant="modal"
-                                fullWidth={false}
-                                className="text-xs"
-                              />
-                            ) : (
-                              getInsurerName(policy.InsuraneCompany)
-                            )}
+                            <Select
+                              value={policy.InsuraneCompany || 0}
+                              onChange={(e) => updateEditingPolicy(idx, 'InsuraneCompany', Number(e.target.value))}
+                              options={INSURER_OPTIONS}
+                              variant="modal"
+                              fullWidth={false}
+                              className="text-xs"
+                            />
                           </td>
                           <td className="px-2 py-2 border border-border">
-                            {isNew ? (
-                              <input
-                                type="date"
-                                value={policy.startyDay ? policy.startyDay.substring(0, 10) : ''}
-                                onChange={(e) => updateEditingPolicy(idx, 'startyDay', e.target.value)}
-                                className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
-                              />
-                            ) : (
-                              formatDate(policy.startyDay)
-                            )}
+                            <input
+                              type="date"
+                              value={policy.startyDay ? policy.startyDay.substring(0, 10) : ''}
+                              onChange={(e) => updateEditingPolicy(idx, 'startyDay', e.target.value)}
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                            />
                           </td>
                           <td className="px-2 py-2 border border-border">
                             {isNew ? (
@@ -463,15 +455,13 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {isNew && (
-                              <button
-                                onClick={() => handleSavePolicy(idx)}
-                                disabled={!isValid || isSaving}
-                                className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {isSaving ? '저장 중...' : '저장'}
-                              </button>
-                            )}
+                            <button
+                              onClick={() => handleSavePolicy(idx)}
+                              disabled={!isValid || isSaving}
+                              className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isSaving ? '저장 중...' : (policy.num ? '수정' : '저장')}
+                            </button>
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {!isNew && policy.num ? (
@@ -522,25 +512,37 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && policy.num ? (
+                            {policy.num ? (
                               <button
                                 onClick={() => {
                                   setSelectedCertiTableNum(policy.num!)
                                   setMemberListModalOpen(true)
                                 }}
-                                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+                                className="text-xs text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:rounded hover:px-2 hover:py-1 hover:border hover:border-blue-300 transition-all cursor-pointer"
+                                style={{ background: 'transparent', border: 'none', padding: '0' }}
                               >
                                 {policy.inwon?.toLocaleString('ko-KR') || 0}명
                               </button>
                             ) : (
-                              !isNew && `${policy.inwon?.toLocaleString('ko-KR') || 0}명`
+                              `${policy.inwon?.toLocaleString('ko-KR') || 0}명`
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {/* Phase 2: 신규 입력 버튼 구현 예정 */}
+                            {policy.num ? (
+                              <button
+                                onClick={() => {
+                                  // Phase 2: 신규 입력 기능 구현 예정
+                                  console.log('신규 입력 클릭')
+                                }}
+                                className="text-xs text-gray-700 hover:bg-green-100 hover:text-green-700 hover:rounded hover:px-2 hover:py-1 hover:border hover:border-green-300 transition-all cursor-pointer"
+                                style={{ background: 'transparent', border: 'none', padding: '0' }}
+                              >
+                                신규
+                              </button>
+                            ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && policy.num ? (
+                            {policy.num ? (
                               <button
                                 onClick={() => {
                                   setEndorseModalData({
@@ -552,14 +554,15 @@ export default function CompanyDetailModal({
                                   })
                                   setEndorseModalOpen(true)
                                 }}
-                                className="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 border border-yellow-300"
+                                className="text-xs text-gray-700 hover:bg-yellow-100 hover:text-yellow-700 hover:rounded hover:px-2 hover:py-1 hover:border hover:border-yellow-300 transition-all cursor-pointer"
+                                style={{ background: 'transparent', border: 'none', padding: '0' }}
                               >
                                 배서
                               </button>
                             ) : null}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && policy.num ? (
+                            {policy.num ? (
                               <button
                                 onClick={async () => {
                                   const currentDivi = policy.divi || 1
@@ -584,7 +587,8 @@ export default function CompanyDetailModal({
                                     toast.error(error.response?.data?.error || '결제방식 변경 중 오류가 발생했습니다.')
                                   }
                                 }}
-                                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 border border-gray-300"
+                                className="text-xs text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:rounded hover:px-2 hover:py-1 hover:border hover:border-gray-300 transition-all cursor-pointer"
+                                style={{ background: 'transparent', border: 'none', padding: '0' }}
                               >
                                 {policy.diviName || getDiviName(policy.divi)}
                               </button>
@@ -593,13 +597,14 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && policy.num ? (
+                            {policy.num ? (
                               <button
                                 onClick={() => {
                                   setSelectedPremiumCertiNum(policy.num!)
                                   setPremiumModalOpen(true)
                                 }}
-                                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+                                className="text-xs text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:rounded hover:px-2 hover:py-1 hover:border hover:border-blue-300 transition-all cursor-pointer"
+                                style={{ background: 'transparent', border: 'none', padding: '0' }}
                               >
                                 {policy.divi === 2 ? '보험료' : '입력'}
                               </button>
