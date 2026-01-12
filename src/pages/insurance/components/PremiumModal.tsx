@@ -219,7 +219,7 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
         <div className="overflow-x-auto border border-border rounded">
           <table className="w-full text-xs border-collapse" style={{ fontSize: '0.9rem' }}>
             <thead>
-              <tr className="bg-purple-600 text-white">
+              <tr className="bg-gray-100">
                 <th rowSpan={2} className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
                   순번
                 </th>
@@ -233,7 +233,7 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
                   10회분납
                 </th>
               </tr>
-              <tr className="bg-purple-600 text-white">
+              <tr className="bg-gray-100">
                 <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
                   시작
                 </th>
