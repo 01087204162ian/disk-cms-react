@@ -337,19 +337,19 @@ export default function CompanyDetailModal({
               <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '4%' }}>
-                      순번
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '4%' }}>
+                      #
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '8%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
                       보험사
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '6%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '6%' }}>
                       시작일
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '10%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '12%' }}>
                       증권번호
                     </th>
-                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '5%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
                       분납
                     </th>
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '7%' }}>
@@ -358,7 +358,7 @@ export default function CompanyDetailModal({
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '9%' }}>
                       회차
                     </th>
-                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '6%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
                       상태
                     </th>
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '6%' }}>
@@ -379,7 +379,7 @@ export default function CompanyDetailModal({
                     <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '7%' }}>
                       월보험료
                     </th>
-                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '11%' }}>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
                       성격
                     </th>
                   </tr>
@@ -393,7 +393,7 @@ export default function CompanyDetailModal({
                       
                       return (
                         <tr key={policy.num || `new-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
-                          <td className="px-2 py-2 border border-border">{idx + 1}</td>
+                          <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
                           <td className="px-2 py-2 border border-border">
                             <Select
                               value={policy.InsuraneCompany || 0}
