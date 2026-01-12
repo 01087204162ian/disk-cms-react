@@ -140,8 +140,9 @@ export default function CompanyManagement() {
         currentInwon: filters.status,
       }
 
-      // 검색 시에는 날짜 필터를 무시
-      if (filters.date && !skipDateFilter) {
+      // 검색어가 있으면 날짜 필터를 무시 (검색 시 날짜와 관계없이 조회)
+      const hasSearch = filters.search && filters.search.trim() !== ''
+      if (filters.date && !skipDateFilter && !hasSearch) {
         params.getDay = filters.date
       }
       if (filters.manager) {
@@ -175,10 +176,10 @@ export default function CompanyManagement() {
     }
   }
 
-  // 검색 실행 (검색 시에는 날짜 필터 무시)
+  // 검색 실행 (검색어가 있으면 자동으로 날짜 필터 무시됨)
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
-    loadCompanies(1, pagination.pageSize, true) // skipDateFilter = true
+    loadCompanies(1, pagination.pageSize) // 검색어가 있으면 자동으로 날짜 필터 무시됨
   }
 
   // 페이지 변경
@@ -298,14 +299,18 @@ export default function CompanyManagement() {
     setFilters((prev) => ({ ...prev, date: todayDay }))
   }, [])
 
-  // 날짜 필터가 설정되면 자동으로 로드 (날짜만 변경 시)
+  // 날짜 필터가 설정되면 자동으로 로드 (날짜만 변경 시, 검색어가 없을 때만)
   useEffect(() => {
     if (!filters.date) return
+    
+    // 검색어가 있으면 날짜 필터 무시 (검색 시 날짜와 관계없이 조회)
+    const currentFilters = filtersRef.current
+    const hasSearch = currentFilters.search && currentFilters.search.trim() !== ''
+    if (hasSearch) return
 
     const loadWithDate = async () => {
       try {
         setLoading(true)
-        const currentFilters = filtersRef.current
         const params: any = {
           page: 1,
           limit: Number(currentFilters.pageSize),
