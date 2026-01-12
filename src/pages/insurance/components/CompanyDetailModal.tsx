@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
+import { INSURER_OPTIONS, GITA_OPTIONS, getInsurerName as getInsurerNameUtil, getGitaName } from '../constants'
 
 interface CompanyDetailModalProps {
   isOpen: boolean
@@ -445,7 +445,42 @@ export default function CompanyDetailModal({
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && policy.nabang_1 ? `${policy.nabang_1}회차` : '-'}
+                            {!isNew && policy.num ? (
+                              <Select
+                                value={policy.nabang_1 || 1}
+                                onChange={async (e) => {
+                                  const newNabang = Number(e.target.value)
+                                  if (!window.confirm(`${newNabang}회차로 변경하시겠습니까?`)) {
+                                    e.target.value = String(policy.nabang_1 || 1)
+                                    return
+                                  }
+                                  try {
+                                    const response = await api.get(
+                                      `/api/insurance/kj-certi/update-nabang?nabsunso=${newNabang}&certiTableNum=${policy.num}&sunso=${idx}`
+                                    )
+                                    if (response.data.success) {
+                                      toast.success(response.data.message || `${newNabang}회차로 변경되었습니다.`)
+                                      updateEditingPolicy(idx, 'nabang_1', newNabang)
+                                      if (response.data.naState) updateEditingPolicy(idx, 'naState', response.data.naState)
+                                      if (response.data.naColor) updateEditingPolicy(idx, 'naColor', response.data.naColor)
+                                    } else {
+                                      toast.error(response.data.error || '회차 변경에 실패했습니다.')
+                                      e.target.value = String(policy.nabang_1 || 1)
+                                    }
+                                  } catch (error: any) {
+                                    console.error('회차 변경 오류:', error)
+                                    toast.error(error.response?.data?.error || '회차 변경 중 오류가 발생했습니다.')
+                                    e.target.value = String(policy.nabang_1 || 1)
+                                  }
+                                }}
+                                options={Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1}회차` }))}
+                                variant="modal"
+                                fullWidth={false}
+                                className="text-xs"
+                              />
+                            ) : (
+                              '-'
+                            )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {!isNew && (
@@ -467,13 +502,79 @@ export default function CompanyDetailModal({
                             {/* Phase 2: 운전자 추가 버튼 구현 예정 */}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && (policy.diviName || getDiviName(policy.divi))}
+                            {!isNew && policy.num ? (
+                              <button
+                                onClick={async () => {
+                                  const currentDivi = policy.divi || 1
+                                  const newDivi = currentDivi === 1 ? 2 : 1
+                                  const diviName = newDivi === 1 ? '정상납' : '월납'
+                                  if (!window.confirm(`결제방식을 "${diviName}"로 변경하시겠습니까?`)) {
+                                    return
+                                  }
+                                  try {
+                                    const response = await api.get(
+                                      `/api/insurance/kj-certi/update-divi?cNum=${policy.num}&divi=${currentDivi}`
+                                    )
+                                    if (response.data.success) {
+                                      toast.success(response.data.message || `결제방식이 "${response.data.diviName || diviName}"로 변경되었습니다.`)
+                                      updateEditingPolicy(idx, 'divi', response.data.divi || newDivi)
+                                      updateEditingPolicy(idx, 'diviName', response.data.diviName || diviName)
+                                    } else {
+                                      toast.error(response.data.error || '결제방식 변경에 실패했습니다.')
+                                    }
+                                  } catch (error: any) {
+                                    console.error('결제방식 변경 오류:', error)
+                                    toast.error(error.response?.data?.error || '결제방식 변경 중 오류가 발생했습니다.')
+                                  }
+                                }}
+                                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 border border-gray-300"
+                              >
+                                {policy.diviName || getDiviName(policy.divi)}
+                              </button>
+                            ) : (
+                              policy.diviName || getDiviName(policy.divi)
+                            )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
                             {/* Phase 2: 월보험료 버튼 구현 예정 */}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
-                            {!isNew && (policy.gitaName || (policy.gita ? getGitaName(policy.gita) : '-'))}
+                            {!isNew && policy.num ? (
+                              <Select
+                                value={policy.gita || 1}
+                                onChange={async (e) => {
+                                  const newGita = Number(e.target.value)
+                                  const gitaLabel = getGitaName(newGita)
+                                  if (!window.confirm(`증권성격을 "${gitaLabel}"로 변경하시겠습니까?`)) {
+                                    e.target.value = String(policy.gita || 1)
+                                    return
+                                  }
+                                  try {
+                                    const response = await api.get(
+                                      `/api/insurance/kj-certi/update-gita?cNum=${policy.num}&gita=${newGita}`
+                                    )
+                                    if (response.data.success) {
+                                      toast.success(response.data.message || '증권성격이 변경되었습니다.')
+                                      updateEditingPolicy(idx, 'gita', newGita)
+                                      updateEditingPolicy(idx, 'gitaName', gitaLabel)
+                                    } else {
+                                      toast.error(response.data.error || '증권성격 변경에 실패했습니다.')
+                                      e.target.value = String(policy.gita || 1)
+                                    }
+                                  } catch (error: any) {
+                                    console.error('증권성격 변경 오류:', error)
+                                    toast.error(error.response?.data?.error || '증권성격 변경 중 오류가 발생했습니다.')
+                                    e.target.value = String(policy.gita || 1)
+                                  }
+                                }}
+                                options={GITA_OPTIONS}
+                                variant="modal"
+                                fullWidth={false}
+                                className="text-xs"
+                              />
+                            ) : (
+                              policy.gitaName || (policy.gita ? getGitaName(policy.gita) : '-')
+                            )}
                           </td>
                         </tr>
                       )
