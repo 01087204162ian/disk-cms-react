@@ -85,6 +85,7 @@ export default function CompanyDetailModal({
   const [savingPolicyIndex, setSavingPolicyIndex] = useState<number | null>(null)
   const [memoData, setMemoData] = useState<any[]>([])
   const [contentData, setContentData] = useState<string[]>([])
+  const [smsData, setSmsData] = useState<any[]>([])
   const [memberListModalOpen, setMemberListModalOpen] = useState(false)
   const [selectedCertiTableNum, setSelectedCertiTableNum] = useState<number | null>(null)
   const [endorseModalOpen, setEndorseModalOpen] = useState(false)
@@ -106,6 +107,7 @@ export default function CompanyDetailModal({
       setEditingPolicies([])
       setMemoData([])
       setContentData([])
+      setSmsData([])
     }
   }, [isOpen, companyNum])
 
@@ -149,6 +151,8 @@ export default function CompanyDetailModal({
         // 메모 데이터 설정
         setMemoData(response.data.memoData || [])
         setContentData(response.data.content || [])
+        // SMS 데이터 설정
+        setSmsData(response.data.smsData || [])
       } else {
         toast.error(response.data.error || '업체 정보를 불러오는 중 오류가 발생했습니다.')
         setDetail(null)
@@ -161,6 +165,7 @@ export default function CompanyDetailModal({
       setEditingPolicies([])
       setMemoData([])
       setContentData([])
+      setSmsData([])
     } finally {
       setLoading(false)
     }
@@ -716,6 +721,62 @@ export default function CompanyDetailModal({
                       </td>
                     </tr>
                   )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* SMS 목록 */}
+      {smsData.length > 0 && (
+        <>
+          <hr className="my-4" />
+          <div className="mb-4">
+            <h6 className="text-sm font-semibold mb-2">SMS 목록</h6>
+            <div className="overflow-x-auto border border-border rounded">
+              <table className="w-full text-xs border-collapse" style={{ fontSize: '0.85rem' }}>
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%' }}>
+                      번호
+                    </th>
+                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '20%' }}>
+                      발송일
+                    </th>
+                    <th className="px-2 py-2 text-left font-medium border border-border">
+                      메세지
+                    </th>
+                    <th className="px-2 py-2 text-left font-medium border border-border" style={{ width: '10%' }}>
+                      회사
+                    </th>
+                    <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '10%' }}>
+                      결과
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {smsData.slice(0, 10).map((sms, idx) => {
+                    const bgClass = idx % 2 === 0 ? 'bg-gray-50' : ''
+                    const textColor = sms.get == 2 ? '#0A8FC1' : ''
+                    return (
+                      <tr key={idx} className={bgClass}>
+                        <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                        <td className="px-2 py-2 border border-border" style={{ color: textColor }}>
+                          {sms.dates || ''}
+                        </td>
+                        <td className="px-2 py-2 border border-border" style={{ color: textColor }}>
+                          {sms.Msg || ''}
+                        </td>
+                        <td className="px-2 py-2 border border-border" style={{ color: textColor }}>
+                          {sms.comName || ''}
+                        </td>
+                        <td className="px-2 py-2 text-center border border-border">
+                          {sms.get == 2 ? '수신' : ''}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
