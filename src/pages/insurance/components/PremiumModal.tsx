@@ -65,22 +65,24 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
         )
         setHasData(hasExistingData)
 
-        // 7개 행으로 채우기 (기존 데이터 + 빈 행)
-        const newRows: PremiumRow[] = Array(7).fill({})
-        premiumData.forEach((row, idx) => {
-          if (idx < 7) {
-            newRows[idx] = {
-              ageStart: row.ageStart,
-              ageEnd: row.ageEnd === 999 ? undefined : row.ageEnd,
-              monthlyBasic: formatNumber(row.monthlyBasic),
-              monthlySpecial: formatNumber(row.monthlySpecial),
-              monthlyTotal: formatNumber(row.monthlyTotal),
-              yearlyBasic: formatNumber(row.yearlyBasic),
-              yearlySpecial: formatNumber(row.yearlySpecial),
-              yearlyTotal: formatNumber(row.yearlyTotal),
+        // 7개 행 생성 (기존 데이터 + 빈 행)
+        const newRows: PremiumRow[] = Array(7).fill(null).map((_, idx) => {
+          const rowData = premiumData[idx]
+          if (rowData) {
+            return {
+              ageStart: rowData.ageStart,
+              ageEnd: rowData.ageEnd === 999 ? undefined : rowData.ageEnd,
+              monthlyBasic: formatNumber(rowData.monthlyBasic),
+              monthlySpecial: formatNumber(rowData.monthlySpecial),
+              monthlyTotal: formatNumber(rowData.monthlyTotal),
+              yearlyBasic: formatNumber(rowData.yearlyBasic),
+              yearlySpecial: formatNumber(rowData.yearlySpecial),
+              yearlyTotal: formatNumber(rowData.yearlyTotal),
             }
           }
+          return {}
         })
+
         setRows(newRows)
       } else {
         toast.error(response.data.error || '보험료 정보를 불러올 수 없습니다.')
@@ -140,10 +142,14 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
       setRows(newRows)
     }
 
-    // 나이 끝 입력 시 다음 행의 시작 자동 설정
+    // 나이 끝 입력 시 다음 행의 시작 자동 설정 (다음 행이 완전히 비어있을 때만)
     if (field === 'ageEnd' && typeof value === 'number' && value && index < 6) {
       const nextRow = newRows[index + 1]
-      if (!nextRow.ageStart || nextRow.ageStart === value + 1) {
+      // 다음 행이 완전히 비어있을 때만 자동 설정
+      const isNextRowEmpty = !nextRow.ageStart && !nextRow.ageEnd && 
+                              !nextRow.monthlyBasic && !nextRow.monthlySpecial && 
+                              !nextRow.yearlyBasic && !nextRow.yearlySpecial
+      if (isNextRowEmpty) {
         newRows[index + 1] = { ...nextRow, ageStart: value + 1 }
         setRows(newRows)
       }
@@ -162,7 +168,12 @@ export default function PremiumModal({ isOpen, onClose, certiNum, onSuccess }: P
 
     const premiumData: any[] = []
     rows.forEach((row, idx) => {
-      if (row.ageStart || row.ageEnd || row.monthlyBasic || row.monthlySpecial || row.yearlyBasic || row.yearlySpecial) {
+      // 나이 시작 또는 끝이 있고, 보험료 정보가 있는 행만 저장
+      // 단, 나이만 있고 보험료가 없는 행은 저장하지 않음
+      const hasAge = row.ageStart || row.ageEnd
+      const hasPremium = row.monthlyBasic || row.monthlySpecial || row.yearlyBasic || row.yearlySpecial
+      
+      if (hasAge && hasPremium) {
         premiumData.push({
           cNum: certiNum,
           rowNum: idx + 1,
