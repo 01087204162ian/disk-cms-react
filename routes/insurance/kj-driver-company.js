@@ -28,10 +28,14 @@ router.get('/kj-company/list', async (req, res) => {
       currentInwon = '1',
     } = req.query;
 
+    // 검색어가 있으면 날짜 필터 무시 (검색 시 날짜와 관계없이 조회)
+    const hasSearch = s_contents && String(s_contents).trim() !== '';
+    const finalGetDay = hasSearch ? '' : getDay;
+
     const apiUrl = `${PHP_API_BASE_URL}/kj-company-list.php`;
 
     const response = await axios.get(apiUrl, {
-      params: { page, limit, getDay, damdanja, s_contents, currentInwon },
+      params: { page, limit, getDay: finalGetDay, damdanja, s_contents, currentInwon },
       timeout: DEFAULT_TIMEOUT,
       headers: getDefaultHeaders(),
     });
