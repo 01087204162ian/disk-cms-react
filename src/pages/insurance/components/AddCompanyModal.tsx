@@ -80,10 +80,6 @@ export default function AddCompanyModal({
     const formatted = formatJumin(value)
     setJumin(formatted)
     
-    // 형식 검증
-    const juminRegex = /^\d{6}-\d{7}$/
-    const isValid = juminRegex.test(formatted)
-    
     // 검증 결과 초기화
     if (juminCheckResult.checked) {
       setJuminCheckResult({
