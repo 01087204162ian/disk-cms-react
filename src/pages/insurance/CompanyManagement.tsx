@@ -9,6 +9,7 @@ import {
 } from '../../components'
 import CompanyDetailModal from './components/CompanyDetailModal'
 import SettlementModal from './components/SettlementModal'
+import AddCompanyModal from './components/AddCompanyModal'
 
 interface Manager {
   num: number
@@ -70,6 +71,7 @@ export default function CompanyManagement() {
   const [settlementModalOpen, setSettlementModalOpen] = useState(false)
   const [selectedSettlementCompanyNum, setSelectedSettlementCompanyNum] = useState<number | null>(null)
   const [selectedSettlementCompanyName, setSelectedSettlementCompanyName] = useState<string>('')
+  const [addCompanyModalOpen, setAddCompanyModalOpen] = useState(false)
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -360,8 +362,18 @@ export default function CompanyManagement() {
 
   // 대리운전회사 신규 버튼 클릭
   const handleAddCompany = () => {
-    console.log('대리운전회사 신규 추가')
-    // TODO: 신규 업체 추가 모달 구현
+    setAddCompanyModalOpen(true)
+  }
+
+  // 신규 업체 등록 성공 시
+  const handleAddCompanySuccess = (companyNum: number, companyName: string) => {
+    // 목록 새로고침
+    loadCompanies(1, pagination.pageSize)
+    
+    // 상세 모달 열기
+    setSelectedCompanyNum(companyNum)
+    setSelectedCompanyName(companyName)
+    setDetailModalOpen(true)
   }
 
   return (
@@ -448,6 +460,13 @@ export default function CompanyManagement() {
         }}
         companyNum={selectedSettlementCompanyNum}
         companyName={selectedSettlementCompanyName}
+      />
+
+      {/* 신규 업체 등록 모달 */}
+      <AddCompanyModal
+        isOpen={addCompanyModalOpen}
+        onClose={() => setAddCompanyModalOpen(false)}
+        onSuccess={handleAddCompanySuccess}
       />
     </div>
   )

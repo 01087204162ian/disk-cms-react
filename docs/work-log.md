@@ -12,6 +12,52 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-12 (KJ 대리운전) - 정산 모달 엑셀 다운로드 기능 구현 및 UI 개선
+
+#### 작업 내용
+- **기능**: 정산 모달 (SettlementModal) 엑셀 다운로드 기능 구현 및 UI 개선
+- **파일**: 
+  - `src/pages/insurance/components/SettlementModal.tsx` (엑셀 다운로드 기능 추가 및 버튼 위치 변경)
+  - `src/pages/insurance/components/SettlementListModal.tsx` (메모 저장 토스트 메시지 추가, 필터 레이블 삭제, 현황 배치 변경)
+  - `pci0327/api/insurance/kj-settlement-list-save.php` (메모 저장 오류 수정)
+- **주요 구현 사항**:
+  - ✅ 정산 모달 엑셀 다운로드 기능 구현
+    - ExcelJS 동적 import 사용
+    - `/api/insurance/kj-company/settlement/excel-data` API 연동
+    - 회원리스트와 배서리스트를 단일 시트에 포함
+    - 원본 코드와 동일한 구조로 엑셀 파일 생성
+    - 회원리스트 섹션: 헤더, 데이터 행, 합계 행
+    - 배서리스트 섹션: 헤더, 데이터 행, 배서 합계 행, 최종 합계 행
+    - 셀 병합, 스타일링, 컬럼 너비 설정
+    - 파일명: `정산리스트_{업체명}_{날짜}.xlsx`
+    - 로딩 상태 표시 및 성공/오류 메시지
+  - ✅ 정산 모달 버튼 위치 변경
+    - 확정보험료 입력 버튼: 상단 날짜 필터 영역의 오른쪽 끝으로 이동
+    - 엑셀 다운로드 버튼: 하단 버튼 영역의 첫 번째 버튼으로 이동
+  - ✅ 정산리스트 모달 UI 개선
+    - 필터 레이블 삭제 ("시작일", "종료일", "담당자", "구분" 레이블 제거)
+    - 현황(통계) 정보를 검색 버튼 우측에 배치
+    - 메모 저장 성공 시 토스트 메시지 표시
+  - ✅ 정산리스트 모달 메모 저장 오류 수정
+    - 백엔드 PHP 파일에서 ID 존재 여부 확인 로직 추가
+    - UPDATE 후 `rowCount()`가 0을 반환해도 ID가 존재하면 성공으로 처리
+    - "해당 ID의 데이터를 찾을 수 없습니다" 오류 해결
+
+#### API 연동
+- `/api/insurance/kj-company/settlement/excel-data` - 정산 엑셀 데이터 조회
+- `/api/insurance/kj-company/settlement/list-save` - 정산리스트 메모 저장 (오류 수정)
+
+#### 해결한 이슈
+- 정산리스트 모달 메모 저장 시 "해당 ID의 데이터를 찾을 수 없습니다" 오류: 백엔드에서 ID 존재 여부를 먼저 확인하고, UPDATE 후 rowCount()가 0이어도 ID가 존재하면 성공으로 처리하도록 수정
+- 정산 모달 버튼 위치: 확정보험료 입력 버튼과 엑셀 다운로드 버튼 위치 교환
+
+#### 파일
+- `src/pages/insurance/components/SettlementModal.tsx`: 엑셀 다운로드 기능 추가 및 버튼 위치 변경
+- `src/pages/insurance/components/SettlementListModal.tsx`: UI 개선 및 메모 저장 토스트 메시지 추가
+- `pci0327/api/insurance/kj-settlement-list-save.php`: 메모 저장 오류 수정
+
+---
+
 ### 2026-01-12 (KJ 대리운전) - 업체 상세 모달 Phase 5 구현 및 입력 필드 포맷팅 기능 추가
 
 #### 작업 내용
