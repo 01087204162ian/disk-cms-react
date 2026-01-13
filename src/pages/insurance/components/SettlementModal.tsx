@@ -889,8 +889,6 @@ export default function SettlementModal({
         onClose={() => setConfirmPremiumModalOpen(false)}
         companyNum={companyNum}
         defaultDate={endDate}
-        startDate={startDate}
-        endDate={endDate}
         totalDrivers={
           adjustmentData.reduce((sum, item) => sum + (item.drivers_count || 0), 0)
         }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Modal, useToastHelpers } from '../../../components'
-import api from '../../../lib/api'
 import { useAuthStore } from '../../../store/authStore'
 
 interface ConfirmPremiumModalProps {
@@ -8,8 +7,6 @@ interface ConfirmPremiumModalProps {
   onClose: () => void
   companyNum: number | null
   defaultDate?: string
-  startDate?: string
-  endDate?: string
   totalDrivers?: number
   onSuccess?: () => void
 }
@@ -25,8 +22,6 @@ export default function ConfirmPremiumModal({
   onClose,
   companyNum,
   defaultDate,
-  startDate,
-  endDate,
   totalDrivers = 0,
   onSuccess,
 }: ConfirmPremiumModalProps) {
