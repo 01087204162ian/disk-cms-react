@@ -705,11 +705,12 @@ export default function SettlementModal({
             </div>
             <div className="ms-auto">
               <button
-                className="px-4 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleDownloadExcel}
-                disabled={exporting || !startDate || !endDate}
+                className="px-4 py-1.5 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+                onClick={() => {
+                  setConfirmPremiumModalOpen(true)
+                }}
               >
-                {exporting ? '생성 중...' : '엑셀 다운로드'}
+                확정보험료 입력
               </button>
             </div>
           </div>
@@ -875,12 +876,11 @@ export default function SettlementModal({
           {/* 업체에 통보할 보험료 버튼들 */}
           <div className="mb-4 flex gap-2">
             <button
-              className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
-              onClick={() => {
-                setConfirmPremiumModalOpen(true)
-              }}
+              className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleDownloadExcel}
+              disabled={exporting || !startDate || !endDate}
             >
-              확정보험료 입력
+              {exporting ? '생성 중...' : '엑셀 다운로드'}
             </button>
             <button
               className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
