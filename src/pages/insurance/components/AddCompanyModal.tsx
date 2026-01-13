@@ -45,7 +45,6 @@ export default function AddCompanyModal({
     dNum: null,
     isValid: false,
   })
-  const [existingCompanyNum, setExistingCompanyNum] = useState<number | null>(null)
 
   // 모달이 닫힐 때 초기화
   useEffect(() => {
@@ -63,7 +62,6 @@ export default function AddCompanyModal({
         dNum: null,
         isValid: false,
       })
-      setExistingCompanyNum(null)
     }
   }, [isOpen])
 
@@ -90,7 +88,6 @@ export default function AddCompanyModal({
         dNum: null,
         isValid: false,
       })
-      setExistingCompanyNum(null)
     }
   }
 
@@ -131,7 +128,6 @@ export default function AddCompanyModal({
         dNum,
         isValid: true,
       })
-      setExistingCompanyNum(dNum || null)
 
       if (exists && dNum) {
         // 기존 회사 존재 - 사용자에게 안내 후 선택
@@ -164,7 +160,6 @@ export default function AddCompanyModal({
         dNum: null,
         isValid: false,
       })
-      setExistingCompanyNum(null)
     } finally {
       setCheckingJumin(false)
     }
