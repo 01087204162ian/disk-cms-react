@@ -241,7 +241,7 @@ export default function SettlementListModal({
       console.log('메모 저장 응답:', data)
 
       if (data.success) {
-        // 성공 (조용히 저장)
+        toast.success('메모가 저장되었습니다.')
       } else {
         toast.error(data.message || data.error || '저장에 실패했습니다.')
       }
