@@ -224,6 +224,10 @@ export default function SettlementListModal({
         receiveUser: userName,
       }
 
+      // 디버깅 로그
+      console.log('메모 저장 요청:', requestData)
+      console.log('정산리스트에서 받은 id:', id, 'type:', typeof id)
+
       const response = await fetch('/api/insurance/kj-company/settlement/list-save', {
         method: 'POST',
         headers: {
@@ -233,6 +237,8 @@ export default function SettlementListModal({
       })
 
       const data = await response.json()
+
+      console.log('메모 저장 응답:', data)
 
       if (data.success) {
         // 성공 (조용히 저장)
