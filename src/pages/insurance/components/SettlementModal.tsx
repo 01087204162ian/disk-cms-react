@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
+import { useAuthStore } from '../../../store/authStore'
 
 interface SettlementModalProps {
   isOpen: boolean
@@ -42,6 +43,7 @@ export default function SettlementModal({
   companyName,
 }: SettlementModalProps) {
   const toast = useToastHelpers()
+  const { user } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -50,6 +52,11 @@ export default function SettlementModal({
   const [endorseListModalOpen, setEndorseListModalOpen] = useState(false)
   const [endorseListData, setEndorseListData] = useState<any[]>([])
   const [loadingEndorseList, setLoadingEndorseList] = useState(false)
+  const [jumin, setJumin] = useState('')
+  const [memoList, setMemoList] = useState<any[]>([])
+  const [memoInput, setMemoInput] = useState('')
+  const [loadingMemo, setLoadingMemo] = useState(false)
+  const [savingMemo, setSavingMemo] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -61,6 +68,9 @@ export default function SettlementModal({
       setTotalPremium(0)
       setEndorseListModalOpen(false)
       setEndorseListData([])
+      setJumin('')
+      setMemoList([])
+      setMemoInput('')
     }
   }, [isOpen, companyNum])
 
@@ -94,6 +104,11 @@ export default function SettlementModal({
         } else {
           // Fallback: 오늘
           setEndDate(formatDate(new Date()))
+        }
+        if (response.data.jumin) {
+          setJumin(response.data.jumin)
+          // 메모 목록 로드
+          loadSettlementMemo(response.data.jumin)
         }
       } else {
         // Fallback
@@ -213,6 +228,92 @@ export default function SettlementModal({
     return num.toLocaleString('ko-KR')
   }
 
+  // 메모 조회
+  const loadSettlementMemo = async (juminValue: string) => {
+    if (!juminValue) return
+
+    try {
+      setLoadingMemo(true)
+      // 원본과 동일하게 FormData 사용
+      const formData = new URLSearchParams()
+      formData.append('jumin', juminValue)
+
+      const response = await fetch('/api/insurance/kj-company/settlement/memo-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      })
+
+      const result = await response.json()
+      
+      if (result.status === 'error') {
+        throw new Error(result.message || 'API 오류')
+      }
+
+      setMemoList(result.data || [])
+    } catch (error: any) {
+      console.error('메모 조회 실패:', error)
+      setMemoList([])
+      toast.error('메모 조회 중 오류가 발생했습니다.')
+    } finally {
+      setLoadingMemo(false)
+    }
+  }
+
+  // 메모 저장
+  const handleSaveMemo = async () => {
+    if (!jumin) {
+      toast.error('주민번호 정보가 없습니다.')
+      return
+    }
+
+    const memo = memoInput.trim()
+    if (!memo) {
+      toast.error('메모 내용을 입력해주세요.')
+      return
+    }
+
+    try {
+      setSavingMemo(true)
+      const userName = user?.name || 
+        (typeof window !== 'undefined' && window.sessionStorage?.getItem('userName')) ||
+        (typeof window !== 'undefined' && window.localStorage?.getItem('userName')) ||
+        'system'
+
+      // 원본과 동일하게 FormData 사용
+      const formData = new URLSearchParams()
+      formData.append('jumin', jumin)
+      formData.append('memo', memo)
+      formData.append('memokind', '일반')
+      formData.append('userid', userName)
+
+      const response = await fetch('/api/insurance/kj-company/settlement/memo-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.message || 'API 오류')
+      }
+
+      setMemoInput('')
+      await loadSettlementMemo(jumin)
+      toast.success('메모가 저장되었습니다.')
+    } catch (error: any) {
+      console.error('메모 저장 실패:', error)
+      toast.error(`메모 저장 중 오류가 발생했습니다: ${error.message}`)
+    } finally {
+      setSavingMemo(false)
+    }
+  }
+
   // 배서리스트 조회
   const handleSearchEndorseList = async () => {
     if (!companyNum || !startDate || !endDate) {
@@ -253,10 +354,15 @@ export default function SettlementModal({
   // 배서 상태 업데이트
   const handleUpdateEndorseStatus = async (seqNo: string, status: string) => {
     try {
+      const userName = user?.name || 
+        (typeof window !== 'undefined' && window.sessionStorage?.getItem('userName')) ||
+        (typeof window !== 'undefined' && window.localStorage?.getItem('userName')) ||
+        'system'
+      
       const response = await api.post('/api/insurance/kj-company/settlement/update', {
         seqNo,
         status,
-        userName: '', // TODO: 사용자 정보 가져오기
+        userName,
       })
 
       if (response.data.success) {
@@ -521,6 +627,85 @@ export default function SettlementModal({
               </div>
             </div>
             <div className="text-sm text-muted-foreground">{formatNumber(totalPremium)}원</div>
+          </div>
+
+          {/* 메모 입력 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">메모</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 px-3 py-1.5 text-sm border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="메모를 입력하세요"
+                value={memoInput}
+                onChange={(e) => setMemoInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSaveMemo()
+                  }
+                }}
+              />
+              <button
+                className="px-4 py-1.5 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
+                onClick={handleSaveMemo}
+                disabled={savingMemo}
+              >
+                {savingMemo ? '저장 중...' : '저장'}
+              </button>
+            </div>
+          </div>
+
+          {/* 메모 목록 */}
+          <div className="mb-4">
+            <h4 className="text-sm font-medium mb-2">메모 목록</h4>
+            <div className="overflow-x-auto border border-border rounded">
+              <table className="w-full text-xs border-collapse">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '10%' }}>
+                      번호
+                    </th>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                      작성일
+                    </th>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                      유형
+                    </th>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '50%' }}>
+                      내용
+                    </th>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '10%' }}>
+                      작성자
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loadingMemo ? (
+                    <tr>
+                      <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-muted-foreground">
+                        메모를 불러오는 중...
+                      </td>
+                    </tr>
+                  ) : memoList.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="border border-gray-300 px-3 py-4 text-center text-muted-foreground">
+                        메모가 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    memoList.map((memo, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 px-3 py-2 text-center">{index + 1}</td>
+                        <td className="border border-gray-300 px-3 py-2">{memo.wdate || '-'}</td>
+                        <td className="border border-gray-300 px-3 py-2">{memo.memokind || '일반'}</td>
+                        <td className="border border-gray-300 px-3 py-2">{memo.memo || '-'}</td>
+                        <td className="border border-gray-300 px-3 py-2">{memo.userid || '-'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
