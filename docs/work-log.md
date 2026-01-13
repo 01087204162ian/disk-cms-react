@@ -12,6 +12,69 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-13 (KJ 대리운전) - 배서 리스트 페이지 마이그레이션 및 선택상자 기능 구현
+
+#### 작업 내용
+- **기능**: 배서 리스트 페이지 (`EndorseList.tsx`) 마이그레이션 및 진행단계/요율/배서처리 선택상자 기능 구현
+- **파일**: 
+  - `src/pages/insurance/EndorseList.tsx` (신규 생성 및 수정)
+  - `src/pages/insurance/components/EndorseStatusModal.tsx` (신규 생성)
+  - `src/pages/insurance/components/DailyEndorseListModal.tsx` (신규 생성)
+  - `src/pages/insurance/components/SmsListModal.tsx` (신규 생성)
+  - `pci0327/api/insurance/kj-endorse-list.php` (sangtae 필드 추가)
+  - `routes/insurance/kj-driver-company.js` (새로운 API 엔드포인트 추가)
+- **주요 구현 사항**:
+  - ✅ 배서 리스트 페이지 기본 구조 구현
+    - 필터: 상태(청약/해지), 진행단계, 기준일, 보험회사, 증권번호, 대리운전회사, 페이지 크기
+    - 테이블: No, 담당자, 대리운전회사명, 성명, 주민번호(나이), 핸드폰, 진행단계, manager, 기준일, 신청일, 증권번호, 증권성격, 요율, 상태, 배서처리, 보험사, 보험료, C보험료, 중복여부
+    - 페이지네이션 및 통계 정보 표시
+  - ✅ 진행단계/요율/배서처리 컬럼을 선택상자로 구현
+    - 진행단계: 선택, 프린트, 스캔, 고객등록, 심사중, 입금대기, 카드승인, 수납중, 확정중
+    - 요율: 선택, 1, 0.9, 0.925, 0.898, 0.889, 1.074, 1.085, 1.242, 1.253, 1.314, 1.428, 1.435, 1.447, 1.459
+    - 배서처리: 미처리, 처리
+    - 각 선택상자 변경 시 확인 메시지 표시 및 API 호출
+  - ✅ 배서현황 모달 구현 (`EndorseStatusModal.tsx`)
+    - 날짜 범위 선택 (기본값: 지난 달 1일 ~ 오늘)
+    - 일별 배서 현황 통계 표시: 청약, 해지, 청약거절, 청약취소, 해지취소, 계
+    - 합계 행 표시
+  - ✅ 일일배서리스트 모달 구현 (`DailyEndorseListModal.tsx`)
+    - 날짜, 대리운전회사, 증권번호 필터
+    - 일일 배서 내역 테이블 표시
+    - 페이지네이션 지원
+  - ✅ 문자리스트 모달 구현 (`SmsListModal.tsx`)
+    - 정렬 방식: 날짜 범위, 전화번호, 대리운전회사
+    - SMS 발송 내역 테이블 표시
+    - 페이지네이션 지원
+  - ✅ 테이블 행 클릭 시 배서 모달 열기 기능
+  - ✅ API 응답에 `sangtae` 필드 추가 (배서처리 상태: 1=미처리, 2=처리)
+  - ✅ Node.js 라우터에 새로운 API 엔드포인트 추가
+    - `/api/insurance/kj-endorse/update-progress` - 진행단계 변경
+    - `/api/insurance/kj-endorse/update-rate` - 요율 변경
+    - `/api/insurance/kj-endorse/update-status` - 배서처리 변경 (changeEndorse.php 사용)
+
+#### API 연동
+- `/api/insurance/kj-endorse/list` - 배서 리스트 조회
+- `/api/insurance/kj-endorse/policy-list` - 증권번호 목록 조회
+- `/api/insurance/kj-endorse/company-list` - 대리운전회사 목록 조회
+- `/api/insurance/kj-daily-endorse/current-situation` - 배서현황 조회
+- `/api/insurance/kj-daily-endorse/search` - 일일배서리스트 조회
+- `/api/insurance/kj-sms/list` - 문자리스트 조회
+- `/api/insurance/kj-endorse/update-progress` - 진행단계 변경 (신규)
+- `/api/insurance/kj-endorse/update-rate` - 요율 변경 (신규)
+- `/api/insurance/kj-endorse/update-status` - 배서처리 변경 (수정)
+
+#### 해결한 이슈
+- 테이블 폰트 크기 조정: `text-xs` 및 `fontSize: '0.75rem'` 적용하여 이전 버전과 동일한 가시성 확보
+- 필터 및 버튼을 한 행에 배치: `flex-nowrap` 및 `overflow-x-auto` 적용
+- 기준일 필터 폭 조정: `DatePicker`의 `fullWidth={false}` 설정으로 `className`의 폭이 적용되도록 수정
+- 선택상자 클릭 시 행 클릭 이벤트 방지: `onClick={(e) => e.stopPropagation()}` 추가
+
+#### 참고 사항
+- 이전 버전: `pci0327/05/js/kj_endorseList.js`, `disk-cms/public/pages/insurance/kj-driver-endorse-list.html`
+- 진행단계/요율/배서처리 변경 시 확인 메시지 표시 및 성공 시 리스트 자동 새로고침
+
+---
+
 ### 2026-01-13 (KJ 대리운전) - 신규 업체 등록 모달 구현 및 주민번호 검증 API 개발
 
 #### 작업 내용
@@ -1454,8 +1517,29 @@ work-log.md 파일 학습하자
 
 ---
 
+## 🔄 진행 중인 작업
+
+### 2026-01-13 (KJ 대리운전) - 배서 리스트 페이지 개선 작업
+
+#### 할 일 목록
+1. **대리운전회사명 클릭 시 모달 열기 기능 구현**
+   - `CompanyManagement.tsx`의 `handleOpenCompanyModal` 함수 참조
+   - `EndorseList.tsx`에 `CompanyDetailModal` 통합
+   - 대리운전회사명 컬럼을 클릭 가능한 버튼으로 변경
+   - 선택된 업체 정보를 모달에 전달
+2. **선택 시 체크 표시 기능 구현**
+   - 테이블 행 선택 기능 추가
+   - 선택된 행에 체크 표시 또는 배경색 변경
+   - 다중 선택 지원 여부 확인 필요
+
+#### 참고 파일
+- `src/pages/insurance/CompanyManagement.tsx` (업체명 클릭 시 모달 열기 구현 참조)
+- `src/pages/insurance/components/CompanyDetailModal.tsx` (업체 상세 모달 컴포넌트)
+
+---
+
 **작성자**: AI Assistant  
-**최종 업데이트**: 2026년 1월 12일 (업체 상세 모달 Phase 5 구현 및 입력 필드 포맷팅 기능 추가 완료)  
+**최종 업데이트**: 2026년 1월 13일 (배서 리스트 페이지 마이그레이션 및 선택상자 기능 구현 완료)  
 **프로젝트**: Disk-CMS React 마이그레이션
 
 ---
