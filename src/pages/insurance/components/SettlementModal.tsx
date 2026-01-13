@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { useAuthStore } from '../../../store/authStore'
+import { getInsurerName, getGitaName } from '../constants'
 import ConfirmPremiumModal from './ConfirmPremiumModal'
 import SettlementListModal from './SettlementListModal'
 
@@ -61,6 +62,7 @@ export default function SettlementModal({
   const [savingMemo, setSavingMemo] = useState(false)
   const [confirmPremiumModalOpen, setConfirmPremiumModalOpen] = useState(false)
   const [settlementListModalOpen, setSettlementListModalOpen] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -383,6 +385,272 @@ export default function SettlementModal({
     }
   }
 
+  // 엑셀 다운로드
+  const handleDownloadExcel = async () => {
+    if (!companyNum) {
+      toast.error('업체 정보가 없습니다.')
+      return
+    }
+
+    if (!startDate || !endDate) {
+      toast.error('시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    setExporting(true)
+    try {
+      // ExcelJS 동적 import
+      const ExcelJS = (await import('exceljs')).default
+
+      // API 호출하여 데이터 가져오기
+      const response = await api.post('/api/insurance/kj-company/settlement/excel-data', {
+        dNum: companyNum,
+        lastMonthDueDate: startDate,
+        thisMonthDueDate: endDate,
+      })
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || '데이터 조회 실패')
+      }
+
+      const data = response.data.data
+
+      // 워크북 생성
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet('정산리스트')
+
+      // 컬럼 너비 설정
+      worksheet.columns = [
+        { width: 6 },   // 구분
+        { width: 10 },  // 성명
+        { width: 15 },  // 주민번호
+        { width: 6 },   // 나이
+        { width: 10 },  // 보험회사
+        { width: 15 },  // 증권번호
+        { width: 8 },   // 탁/일
+        { width: 10 },  // 기타
+        { width: 12 },  // 보험료
+        { width: 20 },  // 보험회사에 내는 월보험료
+        { width: 10 },  // 담당자
+        { width: 15 },  // 정상납 보험료
+        { width: 15 },  // 단체구분
+        { width: 10 },  // 사고유무
+        { width: 20 },  // 사고유무명
+      ]
+
+      let currentRow = 1
+
+      // 제목 영역
+      worksheet.mergeCells(currentRow, 1, currentRow, 15)
+      const titleCell = worksheet.getCell(currentRow, 1)
+      titleCell.value = `${data.companyName || companyName || ''} 회원리스트`
+      titleCell.font = { bold: true, size: 14 }
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' }
+      currentRow++
+
+      // 다운로드 일시
+      worksheet.mergeCells(currentRow, 1, currentRow, 15)
+      const dateCell = worksheet.getCell(currentRow, 1)
+      dateCell.value = `다운로드 일시: ${new Date().toLocaleString('ko-KR')}`
+      dateCell.alignment = { horizontal: 'center' }
+      currentRow++
+
+      // 빈 행
+      currentRow++
+
+      // 회원리스트 헤더
+      const memberHeaderRow = worksheet.getRow(currentRow)
+      memberHeaderRow.values = [
+        '구분', '성명', '주민번호', '나이', '보험회사', '증권번호', '탁/일', '기타',
+        '보험료', '보험회사에 내는 월보험료', '담당자', '정상납 보험료', '단체구분', '사고유무', '사고유무'
+      ]
+      memberHeaderRow.font = { bold: true }
+      memberHeaderRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' },
+      }
+      memberHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' }
+      const memberHeaderRowIndex = currentRow
+      currentRow++
+
+      // 회원 데이터 행
+      let j = 1
+      if (data.members && Array.isArray(data.members)) {
+        data.members.forEach((row: any) => {
+          const InsuranceCompany = getInsurerName(row.InsuranceCompany || 0)
+          const etag = getGitaName(row.etag || 0)
+
+          const monthlyPremium = (row.divi == 2) ? (row.AdjustedInsuranceMothlyPremium || 0) : 0
+          const companyPremium = (row.divi == 2) ? (row.ConversionPremium || 0) : 0
+          const adjustedPremium = (row.divi != 2) ? (row.AdjustedInsuranceCompanyPremium || 0) : 0
+
+          const dataRow = worksheet.getRow(currentRow)
+          dataRow.values = [
+            j++,
+            row.Name || '',
+            row.Jumin || '',
+            row.nai || '',
+            InsuranceCompany,
+            row.dongbuCerti || '',
+            etag,
+            row.gita || '',
+            monthlyPremium || '-',
+            companyPremium || '-',
+            '', // 담당자
+            adjustedPremium || '-',
+            row.dongbuCerti || '',
+            row.discountRate || '',
+            row.discountRateName || ''
+          ]
+          currentRow++
+        })
+      }
+
+      const memberDataEndRow = currentRow - 1
+
+      // 회원리스트 합계 행
+      const memberSummaryRow = worksheet.getRow(currentRow)
+      worksheet.mergeCells(currentRow, 1, currentRow, 8)
+      memberSummaryRow.values = [
+        '합계', '', '', '', '', '', '', '',
+        data.summary?.sum_monthlyPremium || 0,
+        data.summary?.sum_companyPremium || 0,
+        '',
+        data.summary?.sum_adjustedPremium || 0,
+        '', '', ''
+      ]
+      memberSummaryRow.font = { bold: true }
+      memberSummaryRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE7F5FF' },
+      }
+      currentRow++
+
+      // 배서리스트 (있는 경우)
+      if (data.endorsements && Array.isArray(data.endorsements) && data.endorsements.length > 0) {
+        // 빈 행
+        currentRow++
+
+        // 배서리스트 제목
+        worksheet.mergeCells(currentRow, 1, currentRow, 15)
+        const endorseTitleCell = worksheet.getCell(currentRow, 1)
+        endorseTitleCell.value = '배서리스트'
+        endorseTitleCell.font = { bold: true, size: 12 }
+        endorseTitleCell.alignment = { horizontal: 'center' }
+        currentRow++
+
+        // 빈 행
+        currentRow++
+
+        // 배서리스트 헤더
+        const endorseHeaderRow = worksheet.getRow(currentRow)
+        endorseHeaderRow.values = [
+          '구분', '배서일', '성명', '나이', '보험회사', '증권번호', '일/탁', '배서종류',
+          '배서보험료', '증권성격', '', '정상납보험료', '입금할 보험료'
+        ]
+        endorseHeaderRow.font = { bold: true }
+        endorseHeaderRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' },
+        }
+        endorseHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' }
+        currentRow++
+
+        // 배서 데이터 행
+        let j_ = 1
+        data.endorsements.forEach((erow: any) => {
+          const inName = getInsurerName(erow.InsuranceCompany || 0)
+          const metat = getGitaName(erow.etag || 0)
+
+          const monthlyPremium = (erow.divi == 2) ? (erow.preminum || 0) : 0
+          const adjustedPremium = (erow.divi != 2) ? (erow.c_preminum || 0) : 0
+
+          const endorseDataRow = worksheet.getRow(currentRow)
+          endorseDataRow.values = [
+            j_++,
+            erow.endorse_day || '',
+            erow.Name || '',
+            erow.nai || '',
+            inName,
+            erow.dongbuCerti || '',
+            metat,
+            erow.pushName || '',
+            monthlyPremium || 0,
+            erow.gita || '',
+            '',
+            adjustedPremium || 0,
+            ''
+          ]
+          currentRow++
+        })
+
+        // 배서 합계 행
+        const endorseSummaryRow = worksheet.getRow(currentRow)
+        worksheet.mergeCells(currentRow, 1, currentRow, 8)
+        endorseSummaryRow.values = [
+          '배서 보험료 소계', '', '', '', '', '', '', '',
+          data.summary?.sum_En_monthlyPremium || 0,
+          '', '',
+          data.summary?.sum_En_adjustedPremium || 0,
+          ''
+        ]
+        endorseSummaryRow.font = { bold: true }
+        endorseSummaryRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE7F5FF' },
+        }
+        currentRow++
+
+        // 최종 합계 행
+        const finalSummaryRow = worksheet.getRow(currentRow)
+        worksheet.mergeCells(currentRow, 1, currentRow, 8)
+        finalSummaryRow.values = [
+          '입금 하실 보험료=월 보험료 소계+배서 보험료 소계', '', '', '', '', '', '', '',
+          (data.summary?.sum_monthlyPremium || 0) + (data.summary?.sum_En_monthlyPremium || 0),
+          '', '',
+          (data.summary?.sum_adjustedPremium || 0) + (data.summary?.sum_En_adjustedPremium || 0),
+          ''
+        ]
+        finalSummaryRow.font = { bold: true, size: 12 }
+        finalSummaryRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFFFE0E0' },
+        }
+      }
+
+      // 파일명 생성
+      const today = new Date().toISOString().substring(0, 10).replace(/-/g, '')
+      const safeCompanyName = (companyName || '').replace(/[^\w가-힣]/g, '_')
+      const fileName = `정산리스트_${safeCompanyName}_${today}.xlsx`
+
+      // 다운로드
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      link.click()
+      window.URL.revokeObjectURL(url)
+
+      const memberCount = data.members?.length || 0
+      const endorseCount = data.endorsements?.length || 0
+      toast.success(`엑셀 파일이 다운로드되었습니다.\n\n회원: ${memberCount}건\n배서: ${endorseCount}건`)
+    } catch (error: any) {
+      console.error('정산 엑셀 다운로드 오류:', error)
+      toast.error(`정산 엑셀 다운로드 중 오류가 발생했습니다.\n\n${error.message || '알 수 없는 오류'}`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -440,13 +708,11 @@ export default function SettlementModal({
             </div>
             <div className="ms-auto">
               <button
-                className="px-4 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                onClick={() => {
-                  // TODO: 엑셀 다운로드
-                  toast.info('엑셀 다운로드 기능은 추후 구현 예정입니다.')
-                }}
+                className="px-4 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleDownloadExcel}
+                disabled={exporting || !startDate || !endDate}
               >
-                엑셀 다운로드
+                {exporting ? '생성 중...' : '엑셀 다운로드'}
               </button>
             </div>
           </div>
