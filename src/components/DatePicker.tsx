@@ -11,11 +11,14 @@ export interface DatePickerProps extends Omit<FormInputProps, 'type' | 'leftIcon
 }
 
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ value, onChange, variant = 'default', className = '', ...props }, ref) => {
+  ({ value, onChange, variant = 'default', className = '', fullWidth, ...props }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value
       onChange?.(newValue)
     }
+
+    // variant가 'filter'일 때는 fullWidth를 false로 설정 (className의 width가 적용되도록)
+    const shouldFullWidth = fullWidth !== undefined ? fullWidth : variant !== 'filter'
 
     return (
       <FormInput
@@ -26,6 +29,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         variant={variant}
         leftIcon={<Calendar className="w-4 h-4 text-muted-foreground" />}
         className={className}
+        fullWidth={shouldFullWidth}
         {...props}
       />
     )
