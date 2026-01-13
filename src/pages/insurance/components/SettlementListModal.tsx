@@ -281,8 +281,7 @@ export default function SettlementListModal({
 
         {/* 본문 */}
         <div className="flex-1 overflow-y-auto p-6 bg-white">
-      <div className="p-4">
-        {/* 검색 영역 */}
+          {/* 검색 영역 */}
         <div className="mb-4 flex flex-wrap gap-2 items-end justify-between">
           <div className="flex flex-wrap gap-2 items-end">
             <div>
