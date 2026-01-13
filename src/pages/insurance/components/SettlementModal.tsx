@@ -3,6 +3,7 @@ import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { useAuthStore } from '../../../store/authStore'
 import ConfirmPremiumModal from './ConfirmPremiumModal'
+import SettlementListModal from './SettlementListModal'
 
 interface SettlementModalProps {
   isOpen: boolean
@@ -59,6 +60,7 @@ export default function SettlementModal({
   const [loadingMemo, setLoadingMemo] = useState(false)
   const [savingMemo, setSavingMemo] = useState(false)
   const [confirmPremiumModalOpen, setConfirmPremiumModalOpen] = useState(false)
+  const [settlementListModalOpen, setSettlementListModalOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -74,6 +76,7 @@ export default function SettlementModal({
       setMemoList([])
       setMemoInput('')
       setConfirmPremiumModalOpen(false)
+      setSettlementListModalOpen(false)
     }
   }, [isOpen, companyNum])
 
@@ -620,8 +623,7 @@ export default function SettlementModal({
                 <button
                   className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                   onClick={() => {
-                    // TODO: 정산리스트 모달
-                    toast.info('정산리스트 기능은 추후 구현 예정입니다.')
+                    setSettlementListModalOpen(true)
                   }}
                 >
                   정산리스트
@@ -898,6 +900,13 @@ export default function SettlementModal({
             loadSettlementData()
           }
         }}
+      />
+
+      {/* 정산리스트 모달 */}
+      <SettlementListModal
+        isOpen={settlementListModalOpen}
+        onClose={() => setSettlementListModalOpen(false)}
+        defaultAttempted="1"
       />
     </div>
   )
