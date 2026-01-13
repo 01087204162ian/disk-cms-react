@@ -252,12 +252,35 @@ export default function SettlementListModal({
   if (!isOpen) return null
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="정산리스트"
-      maxWidth="6xl"
-    >
+    <div className="fixed inset-0 z-50 bg-black/50 p-4" style={{ display: isOpen ? 'block' : 'none' }}>
+      <div
+        className="w-full rounded-xl bg-background border border-border overflow-hidden flex flex-col shadow-xl"
+        style={{
+          position: 'fixed',
+          left: '1%',
+          top: '1%',
+          width: '78%',
+          maxWidth: '78%',
+          maxHeight: '95vh',
+          zIndex: 1057,
+        }}
+      >
+        {/* 헤더 */}
+        <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div>
+            <h5 className="text-lg font-semibold text-white m-0">정산리스트</h5>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-white hover:bg-white/10 rounded p-1 text-xl leading-none transition-colors"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto p-6 bg-white">
       <div className="p-4">
         {/* 검색 영역 */}
         <div className="mb-4 flex flex-wrap gap-2 items-end justify-between">
@@ -464,7 +487,8 @@ export default function SettlementListModal({
             </tbody>
           </table>
         </div>
+        </div>
       </div>
-    </Modal>
+    </div>
   )
 }
