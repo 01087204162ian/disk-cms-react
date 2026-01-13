@@ -281,6 +281,7 @@ export default function CompanyDetailModal({
         Pname: editingBasicInfo.Pname || detail.Pname || '',
         hphone: editingBasicInfo.hphone || detail.hphone || '',
         cphone: editingBasicInfo.cphone || detail.cphone || '',
+        fax: editingBasicInfo.fax || detail.fax || '',
         cNumber: editingBasicInfo.cNumber || detail.cNumber || '',
         lNumber: editingBasicInfo.lNumber || detail.lNumber || '',
         postNum: editingBasicInfo.postNum || detail.postNum || '',
@@ -366,7 +367,7 @@ export default function CompanyDetailModal({
               <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <tbody>
                   <tr>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">주민번호</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">주민번호</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -379,7 +380,7 @@ export default function CompanyDetailModal({
                         displayBasicInfo?.jumin || '-'
                       )}
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">대리운전회사</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">대리운전회사</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -392,7 +393,7 @@ export default function CompanyDetailModal({
                         displayBasicInfo?.company || companyName || '-'
                       )}
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">성명</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">성명</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -405,7 +406,7 @@ export default function CompanyDetailModal({
                         displayBasicInfo?.Pname || '-'
                       )}
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">핸드폰번호</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">핸드폰번호</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -424,7 +425,7 @@ export default function CompanyDetailModal({
                     </td>
                   </tr>
                   <tr>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">전화번호</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">전화번호</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -441,11 +442,26 @@ export default function CompanyDetailModal({
                         displayBasicInfo?.cphone || '-'
                       )}
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">담당자</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">담당자</th>
                     <td className="px-3 py-2 border border-border">{displayBasicInfo?.name || displayBasicInfo?.damdanga || '-'}</td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">팩스</th>
-                    <td className="px-3 py-2 border border-border">{displayBasicInfo?.fax || '-'}</td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">사업자번호</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">팩스</th>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.fax || ''}
+                          onChange={(e) => {
+                            const cleaned = removePhoneHyphen(e.target.value)
+                            const formatted = addPhoneHyphen(cleaned)
+                            updateEditingBasicInfo('fax', formatted)
+                          }}
+                        />
+                      ) : (
+                        displayBasicInfo?.fax || '-'
+                      )}
+                    </td>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">사업자번호</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -464,7 +480,7 @@ export default function CompanyDetailModal({
                     </td>
                   </tr>
                   <tr>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">법인번호</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">법인번호</th>
                     <td className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <input
@@ -481,7 +497,7 @@ export default function CompanyDetailModal({
                         displayBasicInfo?.lNumber || '-'
                       )}
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">보험료 받는날</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">보험료 받는날</th>
                     <td className="px-3 py-2 border border-border">
                       <input
                         type="date"
@@ -490,7 +506,7 @@ export default function CompanyDetailModal({
                         readOnly
                       />
                     </td>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">업체 I.D</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">업체 I.D</th>
                     <td colSpan={3} className="px-3 py-2 border border-border">
                       <button
                         type="button"
@@ -506,7 +522,7 @@ export default function CompanyDetailModal({
                     </td>
                   </tr>
                   <tr>
-                    <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">주소</th>
+                    <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border">주소</th>
                     <td colSpan={7} className="px-3 py-2 border border-border">
                       {isEditingBasicInfo ? (
                         <div className="flex gap-2">
