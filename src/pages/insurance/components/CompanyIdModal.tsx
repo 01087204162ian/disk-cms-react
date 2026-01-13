@@ -266,19 +266,25 @@ export default function CompanyIdModal({
 
     try {
       setIdCheckStatus('checking')
-      const response = await api.post('/api/insurance/kj-company/check-id', {
-        mem_id: id.trim(),
+      // 원본과 동일하게 FormData 사용
+      const formData = new URLSearchParams()
+      formData.append('mem_id', id.trim())
+
+      const response = await fetch('/api/insurance/kj-company/check-id', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
       })
 
-      if (response.data.success) {
-        if (response.data.available) {
-          setIdCheckStatus('available')
-        } else {
-          setIdCheckStatus('duplicate')
-        }
+      const result = await response.json()
+
+      // 원본 코드와 동일하게 available 속성 직접 확인
+      if (result.available) {
+        setIdCheckStatus('available')
       } else {
-        setIdCheckStatus('idle')
-        toast.error(response.data.error || 'ID 중복 검사 중 오류가 발생했습니다.')
+        setIdCheckStatus('duplicate')
       }
     } catch (error: any) {
       console.error('ID 중복 검사 오류:', error)
@@ -367,7 +373,7 @@ export default function CompanyIdModal({
       isOpen={isOpen}
       onClose={onClose}
       title="업체 I.D 관리"
-      maxWidth="xl"
+      maxWidth="2xl"
     >
       <div className="p-4">
         {loading ? (
