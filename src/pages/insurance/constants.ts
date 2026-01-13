@@ -123,6 +123,44 @@ export const getRateName = (code: number | string): string => {
   return RATE_NAME_MAP[Number(code)] || '기본'
 }
 
+// 배서 상태(push) 옵션
+export const PUSH_OPTIONS = [
+  { value: '', label: '선택' },
+  { value: '1', label: '청약' },
+  { value: '4', label: '해지' },
+]
+
+// 배서 상태(push) 매핑
+export const PUSH_MAP: Record<string, string> = {
+  '1': '청약',
+  '4': '해지',
+}
+
+// 배서 진행단계 옵션
+export const PROGRESS_OPTIONS = [
+  { value: '', label: '진행단계' },
+  { value: '1', label: '프린트' },
+  { value: '2', label: '스캔' },
+  { value: '3', label: '고객등록' },
+  { value: '4', label: '심사중' },
+  { value: '5', label: '입금대기' },
+  { value: '6', label: '카드승인' },
+  { value: '7', label: '수납중' },
+  { value: '8', label: '확정중' },
+]
+
+// 배서 진행단계 매핑
+export const PROGRESS_MAP: Record<string, string> = {
+  '1': '프린트',
+  '2': '스캔',
+  '3': '고객등록',
+  '4': '심사중',
+  '5': '입금대기',
+  '6': '카드승인',
+  '7': '수납중',
+  '8': '확정중',
+}
+
 // 상태(push) → 라벨
 export const mapPushLabel = (push: number | string): string => {
   const v = Number(push)

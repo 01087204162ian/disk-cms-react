@@ -2,14 +2,23 @@ import { useEffect, useState, useMemo } from 'react'
 import { BarChart3, List, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
 import {
-  FilterBar,
   FilterSelect,
   DataTable,
   type Column,
   useToastHelpers,
   DatePicker,
 } from '../../components'
-import { INSURER_MAP, GITA_MAP, RATE_NAME_MAP, addPhoneHyphen } from './constants'
+import {
+  INSURER_OPTIONS,
+  INSURER_MAP,
+  GITA_MAP,
+  RATE_NAME_MAP,
+  addPhoneHyphen,
+  PUSH_OPTIONS,
+  PUSH_MAP,
+  PROGRESS_OPTIONS,
+  PROGRESS_MAP,
+} from './constants'
 
 interface EndorseItem {
   num: number
@@ -67,47 +76,11 @@ interface CompanyOption {
   company?: string
 }
 
-const PUSH_OPTIONS = [
-  { value: '', label: '선택' },
-  { value: '1', label: '청약' },
-  { value: '4', label: '해지' },
-]
-
-const PROGRESS_OPTIONS = [
-  { value: '', label: '진행단계' },
-  { value: '1', label: '프린트' },
-  { value: '2', label: '스캔' },
-  { value: '3', label: '고객등록' },
-  { value: '4', label: '심사중' },
-  { value: '5', label: '입금대기' },
-  { value: '6', label: '카드승인' },
-  { value: '7', label: '수납중' },
-  { value: '8', label: '확정중' },
-]
-
 const PAGE_SIZE_OPTIONS = [
   { value: '20', label: '20개' },
   { value: '50', label: '50개' },
   { value: '100', label: '100개' },
 ]
-
-// 진행단계 매핑
-const PROGRESS_MAP: Record<string, string> = {
-  '1': '프린트',
-  '2': '스캔',
-  '3': '고객등록',
-  '4': '심사중',
-  '5': '입금대기',
-  '6': '카드승인',
-  '7': '수납중',
-  '8': '확정중',
-}
-
-// 상태(push) 매핑
-const PUSH_MAP: Record<string, string> = {
-  '1': '청약',
-  '4': '해지',
-}
 
 export default function EndorseList() {
   const toast = useToastHelpers()
@@ -291,19 +264,14 @@ export default function EndorseList() {
     return options
   }, [companyOptions])
 
-  // 보험회사 옵션
+  // 보험회사 옵션 (공통 상수 사용)
   const insurerOptions = useMemo(() => {
     return [
       { value: '', label: '-- 보험회사 선택 --' },
-      { value: '1', label: '흥국' },
-      { value: '2', label: 'DB' },
-      { value: '3', label: 'KB' },
-      { value: '4', label: '현대' },
-      { value: '5', label: '롯데' },
-      { value: '6', label: '하나' },
-      { value: '7', label: '한화' },
-      { value: '8', label: '삼성' },
-      { value: '9', label: '메리츠' },
+      ...INSURER_OPTIONS.filter(opt => opt.value !== 0).map(opt => ({
+        value: String(opt.value),
+        label: opt.label,
+      })),
     ]
   }, [])
 
@@ -465,9 +433,87 @@ export default function EndorseList() {
 
   return (
     <div className="p-6">
-      <FilterBar
-        actionButtons={
-          <>
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <FilterSelect
+            value={filters.push}
+            onChange={(value) => {
+              setFilters({ ...filters, push: value })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            options={PUSH_OPTIONS}
+            className="w-[90px]"
+          />
+          <FilterSelect
+            value={filters.progress}
+            onChange={(value) => {
+              setFilters({ ...filters, progress: value })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            options={PROGRESS_OPTIONS}
+            className="w-[110px]"
+          />
+          <DatePicker
+            value={filters.endorseDay}
+            onChange={(value) => {
+              setFilters({ ...filters, endorseDay: value || '' })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            variant="filter"
+            className="w-[140px]"
+          />
+          <FilterSelect
+            value={filters.insuranceCom}
+            onChange={(value) => {
+              setFilters({ ...filters, insuranceCom: value })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            options={insurerOptions}
+            className="w-[156px]"
+          />
+          <FilterSelect
+            value={filters.policyNum}
+            onChange={(value) => {
+              setFilters({ ...filters, policyNum: value, companyNum: '' })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            options={policySelectOptions}
+            className="w-[180px]"
+          />
+          <select
+            value={filters.companyNum}
+            onChange={(e) => {
+              setFilters({ ...filters, companyNum: e.target.value })
+              setPagination({ ...pagination, currentPage: 1 })
+            }}
+            disabled={!filters.policyNum}
+            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer w-[182px] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              fontFamily: 'inherit',
+              lineHeight: '1.5',
+              boxSizing: 'border-box',
+              minHeight: '40px',
+              height: '40px',
+            }}
+          >
+            {companySelectOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <FilterSelect
+            value={filters.pageSize}
+            onChange={(value) => {
+              setFilters({ ...filters, pageSize: value })
+              const newPageSize = parseInt(value)
+              setPagination({ ...pagination, pageSize: newPageSize, currentPage: 1 })
+              loadEndorseList(1, newPageSize)
+            }}
+            options={PAGE_SIZE_OPTIONS}
+            className="w-[75px]"
+          />
+          <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={handleEndorseStatus}
               className="h-[31px] px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
@@ -489,96 +535,17 @@ export default function EndorseList() {
               <MessageSquare className="w-3.5 h-3.5" />
               문자리스트
             </button>
-          </>
-        }
-      >
-        <FilterSelect
-          value={filters.push}
-          onChange={(value) => {
-            setFilters({ ...filters, push: value })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          options={PUSH_OPTIONS}
-          className="w-[90px]"
-        />
-        <FilterSelect
-          value={filters.progress}
-          onChange={(value) => {
-            setFilters({ ...filters, progress: value })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          options={PROGRESS_OPTIONS}
-          className="w-[110px]"
-        />
-        <DatePicker
-          value={filters.endorseDay}
-          onChange={(value) => {
-            setFilters({ ...filters, endorseDay: value || '' })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          variant="filter"
-          className="w-[140px]"
-        />
-        <FilterSelect
-          value={filters.insuranceCom}
-          onChange={(value) => {
-            setFilters({ ...filters, insuranceCom: value })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          options={insurerOptions}
-          className="w-[156px]"
-        />
-        <FilterSelect
-          value={filters.policyNum}
-          onChange={(value) => {
-            setFilters({ ...filters, policyNum: value, companyNum: '' })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          options={policySelectOptions}
-          className="w-[180px]"
-        />
-        <select
-          value={filters.companyNum}
-          onChange={(e) => {
-            setFilters({ ...filters, companyNum: e.target.value })
-            setPagination({ ...pagination, currentPage: 1 })
-          }}
-          disabled={!filters.policyNum}
-          className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer w-[182px] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{
-            fontFamily: 'inherit',
-            lineHeight: '1.5',
-            boxSizing: 'border-box',
-            minHeight: '40px',
-            height: '40px',
-          }}
-        >
-          {companySelectOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <FilterSelect
-          value={filters.pageSize}
-          onChange={(value) => {
-            setFilters({ ...filters, pageSize: value })
-            const newPageSize = parseInt(value)
-            setPagination({ ...pagination, pageSize: newPageSize, currentPage: 1 })
-            loadEndorseList(1, newPageSize)
-          }}
-          options={PAGE_SIZE_OPTIONS}
-          className="w-[75px]"
-        />
-        <div className="flex items-center gap-1 text-xs bg-info/10 border border-info text-dark px-2 py-1 rounded h-[31px] ml-auto">
-          <strong>청약:</strong>
-          <span>{stats.subscription.toLocaleString('ko-KR')}</span>,
-          <strong>해지:</strong>
-          <span>{stats.cancellation.toLocaleString('ko-KR')}</span>,
-          <strong>계:</strong>
-          <span>{stats.total.toLocaleString('ko-KR')}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs bg-info/10 border border-info text-dark px-2 py-1 rounded h-[31px]">
+            <strong>청약:</strong>
+            <span>{stats.subscription.toLocaleString('ko-KR')}</span>,
+            <strong>해지:</strong>
+            <span>{stats.cancellation.toLocaleString('ko-KR')}</span>,
+            <strong>계:</strong>
+            <span>{stats.total.toLocaleString('ko-KR')}</span>
+          </div>
         </div>
-      </FilterBar>
+      </div>
 
       <DataTable
         data={endorseList}
