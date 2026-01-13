@@ -580,41 +580,47 @@ export default function SettlementModal({
                       </tr>
                     </thead>
                     <tbody>
-                      {endorseListData.map((item, index) => {
-                        const push = parseInt(String(item.push || 0))
-                        const divi = String(item.divi || '')
-                        const monthlyPremium = parseFloat(String(item.preminum || 0))
-                        const cPremium = parseFloat(String(item.c_preminum || 0))
-                        const jumin = String(item.Jumin || '')
-                        const maskedJumin = jumin.length >= 7 ? jumin.substring(0, 7) + '-******' : jumin
-                        const getStatus = String(item.get || '')
+                      {(() => {
+                        let totalMonthlyPremium = 0
+                        let totalCPremium = 0
 
-                        // 배서종류 표시
-                        let endorseTypeText = '-'
-                        if (push === 2) {
-                          endorseTypeText = '해지'
-                        } else if (push === 4 || push === 1) {
-                          endorseTypeText = '청약'
-                        }
+                        const rows = endorseListData.map((item, index) => {
+                          const push = parseInt(String(item.push || 0))
+                          const divi = String(item.divi || '')
+                          const monthlyPremium = parseFloat(String(item.preminum || 0))
+                          const cPremium = parseFloat(String(item.c_preminum || 0))
+                          const jumin = String(item.Jumin || '')
+                          const maskedJumin = jumin.length >= 7 ? jumin.substring(0, 7) + '-******' : jumin
+                          const getStatus = String(item.get || '')
 
-                        // 보험료 표시
-                        let monthlyPremiumDisplay = '-'
-                        let cPremiumDisplay = '-'
-                        let premiumValue = 0
-
-                        if (divi === '2') {
-                          // 월납
-                          if (monthlyPremium > 0) {
-                            premiumValue = push === 2 ? -monthlyPremium : monthlyPremium
-                            monthlyPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(monthlyPremium)
+                          // 배서종류 표시
+                          let endorseTypeText = '-'
+                          if (push === 2) {
+                            endorseTypeText = '해지'
+                          } else if (push === 4 || push === 1) {
+                            endorseTypeText = '청약'
                           }
-                        } else {
-                          // 10회분납
-                          if (cPremium > 0) {
-                            premiumValue = push === 2 ? -cPremium : cPremium
-                            cPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(cPremium)
+
+                          // 보험료 표시
+                          let monthlyPremiumDisplay = '-'
+                          let cPremiumDisplay = '-'
+                          let premiumValue = 0
+
+                          if (divi === '2') {
+                            // 월납
+                            if (monthlyPremium > 0) {
+                              premiumValue = push === 2 ? -monthlyPremium : monthlyPremium
+                              monthlyPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(monthlyPremium)
+                              totalMonthlyPremium += premiumValue
+                            }
+                          } else {
+                            // 10회분납
+                            if (cPremium > 0) {
+                              premiumValue = push === 2 ? -cPremium : cPremium
+                              cPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(cPremium)
+                              totalCPremium += premiumValue
+                            }
                           }
-                        }
 
                         return (
                           <tr key={index}>
@@ -639,7 +645,40 @@ export default function SettlementModal({
                             <td className="border border-gray-300 px-3 py-2">{item.manager || '-'}</td>
                           </tr>
                         )
-                      })}
+
+                        return row
+                      })
+
+                        // 합계 행 추가
+                        const totalPremium = totalMonthlyPremium + totalCPremium
+                        const totalRow = (
+                          <tr key="total" className="bg-gray-100 font-bold">
+                            <td colSpan={5} className="border border-gray-300 px-3 py-2 text-center">
+                              합계
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2 text-right">
+                              {totalMonthlyPremium !== 0
+                                ? (totalMonthlyPremium > 0 ? '+' : '') + formatNumber(totalMonthlyPremium)
+                                : '-'}
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2 text-right">
+                              {totalCPremium !== 0
+                                ? (totalCPremium > 0 ? '+' : '') + formatNumber(totalCPremium)
+                                : '-'}
+                            </td>
+                            <td colSpan={2} className="border border-gray-300 px-3 py-2 text-center">
+                              계
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2 text-right">
+                              {totalPremium !== 0
+                                ? (totalPremium > 0 ? '+' : '') + formatNumber(totalPremium)
+                                : '-'}
+                            </td>
+                          </tr>
+                        )
+
+                        return [...rows, totalRow]
+                      })()}
                     </tbody>
                   </table>
                 </div>
