@@ -7,14 +7,16 @@ interface FilterSelectProps {
   options: Array<{ value: string; label: string }>
   placeholder?: string
   className?: string
+  disabled?: boolean
 }
 
-export function FilterSelect({ value, onChange, options, placeholder, className = '' }: FilterSelectProps) {
+export function FilterSelect({ value, onChange, options, placeholder, className = '', disabled = false }: FilterSelectProps) {
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer ${className}`}
+      disabled={disabled}
+      className={`h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       style={{
         fontFamily: 'inherit',
         lineHeight: '1.5',

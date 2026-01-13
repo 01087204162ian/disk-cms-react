@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { BarChart3, List, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
 import {
-  FilterSelect,
+  FilterBar,
   DataTable,
   type Column,
   useToastHelpers,
@@ -431,89 +431,24 @@ export default function EndorseList() {
     toast.info('문자리스트 기능은 준비 중입니다.')
   }
 
+  // 페이지 크기 변경 핸들러
+  const handlePageSizeChange = (newPageSize: number) => {
+    setFilters((prev) => ({ ...prev, pageSize: String(newPageSize) }))
+    setPagination((prev) => ({ ...prev, currentPage: 1, pageSize: newPageSize }))
+    loadEndorseList(1, newPageSize)
+  }
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, currentPage: page }))
+    loadEndorseList(page, pagination.pageSize)
+  }
+
   return (
-    <div className="p-6">
-      <div className="bg-card rounded-xl border border-border p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <FilterSelect
-            value={filters.push}
-            onChange={(value) => {
-              setFilters({ ...filters, push: value })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            options={PUSH_OPTIONS}
-            className="w-[90px]"
-          />
-          <FilterSelect
-            value={filters.progress}
-            onChange={(value) => {
-              setFilters({ ...filters, progress: value })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            options={PROGRESS_OPTIONS}
-            className="w-[110px]"
-          />
-          <DatePicker
-            value={filters.endorseDay}
-            onChange={(value) => {
-              setFilters({ ...filters, endorseDay: value || '' })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            variant="filter"
-            className="w-[140px]"
-          />
-          <FilterSelect
-            value={filters.insuranceCom}
-            onChange={(value) => {
-              setFilters({ ...filters, insuranceCom: value })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            options={insurerOptions}
-            className="w-[156px]"
-          />
-          <FilterSelect
-            value={filters.policyNum}
-            onChange={(value) => {
-              setFilters({ ...filters, policyNum: value, companyNum: '' })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            options={policySelectOptions}
-            className="w-[180px]"
-          />
-          <select
-            value={filters.companyNum}
-            onChange={(e) => {
-              setFilters({ ...filters, companyNum: e.target.value })
-              setPagination({ ...pagination, currentPage: 1 })
-            }}
-            disabled={!filters.policyNum}
-            className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer w-[182px] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              fontFamily: 'inherit',
-              lineHeight: '1.5',
-              boxSizing: 'border-box',
-              minHeight: '40px',
-              height: '40px',
-            }}
-          >
-            {companySelectOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <FilterSelect
-            value={filters.pageSize}
-            onChange={(value) => {
-              setFilters({ ...filters, pageSize: value })
-              const newPageSize = parseInt(value)
-              setPagination({ ...pagination, pageSize: newPageSize, currentPage: 1 })
-              loadEndorseList(1, newPageSize)
-            }}
-            options={PAGE_SIZE_OPTIONS}
-            className="w-[75px]"
-          />
-          <div className="flex items-center gap-2 ml-auto">
+    <div className="space-y-6">
+      <FilterBar
+        actionButtons={
+          <>
             <button
               onClick={handleEndorseStatus}
               className="h-[31px] px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
@@ -535,17 +470,78 @@ export default function EndorseList() {
               <MessageSquare className="w-3.5 h-3.5" />
               문자리스트
             </button>
-          </div>
-          <div className="flex items-center gap-1 text-xs bg-info/10 border border-info text-dark px-2 py-1 rounded h-[31px]">
-            <strong>청약:</strong>
-            <span>{stats.subscription.toLocaleString('ko-KR')}</span>,
-            <strong>해지:</strong>
-            <span>{stats.cancellation.toLocaleString('ko-KR')}</span>,
-            <strong>계:</strong>
-            <span>{stats.total.toLocaleString('ko-KR')}</span>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      >
+        <FilterBar.Select
+          value={filters.push}
+          onChange={(value) => {
+            setFilters({ ...filters, push: value })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          options={PUSH_OPTIONS}
+          className="w-[90px]"
+        />
+        <FilterBar.Select
+          value={filters.progress}
+          onChange={(value) => {
+            setFilters({ ...filters, progress: value })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          options={PROGRESS_OPTIONS}
+          className="w-[110px]"
+        />
+        <DatePicker
+          value={filters.endorseDay}
+          onChange={(value) => {
+            setFilters({ ...filters, endorseDay: value || '' })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          variant="filter"
+          className="w-[140px]"
+        />
+        <FilterBar.Select
+          value={filters.insuranceCom}
+          onChange={(value) => {
+            setFilters({ ...filters, insuranceCom: value })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          options={insurerOptions}
+          className="w-[156px]"
+        />
+        <FilterBar.Select
+          value={filters.policyNum}
+          onChange={(value) => {
+            setFilters({ ...filters, policyNum: value, companyNum: '' })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          options={policySelectOptions}
+          className="w-[180px]"
+        />
+        <FilterBar.Select
+          value={filters.companyNum}
+          onChange={(value) => {
+            setFilters({ ...filters, companyNum: value })
+            setPagination({ ...pagination, currentPage: 1 })
+          }}
+          options={companySelectOptions}
+          disabled={!filters.policyNum}
+          className="w-[182px]"
+        />
+        <FilterBar.Select
+          value={filters.pageSize}
+          onChange={(value) => handlePageSizeChange(Number(value))}
+          options={PAGE_SIZE_OPTIONS}
+          className="w-[75px]"
+        />
+        <FilterBar.Stats
+          stats={[
+            { label: '청약:', value: stats.subscription },
+            { label: '해지:', value: stats.cancellation },
+            { label: '계:', value: stats.total },
+          ]}
+        />
+      </FilterBar>
 
       <DataTable
         data={endorseList}
@@ -555,10 +551,9 @@ export default function EndorseList() {
           currentPage: pagination.currentPage,
           pageSize: pagination.pageSize,
           totalCount: pagination.totalCount,
-          onPageChange: (page) => {
-            setPagination({ ...pagination, currentPage: page })
-            loadEndorseList(page, pagination.pageSize)
-          },
+          onPageChange: handlePageChange,
+          onPageSizeChange: handlePageSizeChange,
+          pageSizeOptions: [20, 50, 100],
         }}
         emptyMessage="필터를 선택하세요."
       />
