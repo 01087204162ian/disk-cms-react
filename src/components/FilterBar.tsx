@@ -141,7 +141,7 @@ export default function FilterBar({ children, actionButtons, className = '' }: F
   return (
     <div className={`bg-card rounded-xl border border-border p-6 ${className}`}>
       {/* 필터 행 */}
-      <div className="flex flex-wrap items-center gap-3">{children}</div>
+      <div className="flex flex-nowrap items-center gap-3 overflow-x-auto">{children}</div>
 
       {/* 액션 버튼 영역 */}
       {actionButtons && (
