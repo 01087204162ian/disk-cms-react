@@ -213,21 +213,21 @@ export default function EndorseList() {
     }
   }, [filters.policyNum])
 
-  // 초기 로드: 증권번호 목록 로드
+  // 초기 로드: 증권번호 목록 로드 및 배서 리스트 로드
   useEffect(() => {
     loadPolicyOptions()
     loadCompanyOptions()
+    // 초기 로드 시 배서 리스트도 함께 로드
+    const pageSize = parseInt(filters.pageSize)
+    loadEndorseList(1, pageSize)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // 필터 변경 시 자동 검색 (필터가 하나라도 선택된 경우)
+  // 필터 변경 시 자동 검색
   useEffect(() => {
-    const hasFilter = filters.push || filters.progress || filters.endorseDay || 
-                     filters.insuranceCom || filters.policyNum || filters.companyNum
-    if (hasFilter) {
-      const pageSize = parseInt(filters.pageSize)
-      setPagination((prev) => ({ ...prev, currentPage: 1, pageSize }))
-      loadEndorseList(1, pageSize)
-    }
+    const pageSize = parseInt(filters.pageSize)
+    setPagination((prev) => ({ ...prev, currentPage: 1, pageSize }))
+    loadEndorseList(1, pageSize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.push, filters.progress, filters.endorseDay, filters.insuranceCom, filters.policyNum, filters.companyNum, filters.pageSize])
 
@@ -472,7 +472,7 @@ export default function EndorseList() {
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
-          className="w-[100px]"
+          className="w-[80px]"
         />
         <FilterBar.Select
           value={filters.insuranceCom}
