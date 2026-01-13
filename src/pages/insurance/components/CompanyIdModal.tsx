@@ -373,7 +373,7 @@ export default function CompanyIdModal({
       isOpen={isOpen}
       onClose={onClose}
       title="업체 I.D 관리"
-      maxWidth="3xl"
+      maxWidth="4xl"
     >
       <div className="p-4">
         {loading ? (

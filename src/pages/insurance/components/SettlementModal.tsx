@@ -7,7 +7,6 @@ interface SettlementModalProps {
   onClose: () => void
   companyNum: number | null
   companyName?: string
-  onSuccess?: () => void
 }
 
 interface SettlementAdjustmentItem {
@@ -41,7 +40,6 @@ export default function SettlementModal({
   onClose,
   companyNum,
   companyName,
-  onSuccess,
 }: SettlementModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
@@ -49,7 +47,6 @@ export default function SettlementModal({
   const [endDate, setEndDate] = useState('')
   const [adjustmentData, setAdjustmentData] = useState<SettlementAdjustmentItem[]>([])
   const [totalPremium, setTotalPremium] = useState(0)
-  const [jumin, setJumin] = useState('')
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -59,7 +56,6 @@ export default function SettlementModal({
       setEndDate('')
       setAdjustmentData([])
       setTotalPremium(0)
-      setJumin('')
     }
   }, [isOpen, companyNum])
 
@@ -93,9 +89,6 @@ export default function SettlementModal({
         } else {
           // Fallback: 오늘
           setEndDate(formatDate(new Date()))
-        }
-        if (response.data.jumin) {
-          setJumin(response.data.jumin)
         }
       } else {
         // Fallback
