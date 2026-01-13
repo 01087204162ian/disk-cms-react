@@ -47,6 +47,9 @@ export default function SettlementModal({
   const [endDate, setEndDate] = useState('')
   const [adjustmentData, setAdjustmentData] = useState<SettlementAdjustmentItem[]>([])
   const [totalPremium, setTotalPremium] = useState(0)
+  const [endorseListModalOpen, setEndorseListModalOpen] = useState(false)
+  const [endorseListData, setEndorseListData] = useState<any[]>([])
+  const [loadingEndorseList, setLoadingEndorseList] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -56,6 +59,8 @@ export default function SettlementModal({
       setEndDate('')
       setAdjustmentData([])
       setTotalPremium(0)
+      setEndorseListModalOpen(false)
+      setEndorseListData([])
     }
   }, [isOpen, companyNum])
 
@@ -208,6 +213,65 @@ export default function SettlementModal({
     return num.toLocaleString('ko-KR')
   }
 
+  // 배서리스트 조회
+  const handleSearchEndorseList = async () => {
+    if (!companyNum || !startDate || !endDate) {
+      toast.error('시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    try {
+      setLoadingEndorseList(true)
+      setEndorseListModalOpen(true)
+      
+      const response = await api.get<any>(
+        `/api/insurance/kj-company/settlement/monthly`,
+        {
+          params: {
+            dNum: companyNum,
+            lastMonthDueDate: startDate,
+            thisMonthDueDate: endDate,
+          },
+        }
+      )
+
+      if (response.data.success && response.data.smsData) {
+        setEndorseListData(response.data.smsData || [])
+      } else {
+        setEndorseListData([])
+        toast.error(response.data.error || '배서리스트 조회에 실패했습니다.')
+      }
+    } catch (error: any) {
+      console.error('배서리스트 조회 오류:', error)
+      setEndorseListData([])
+      toast.error('배서리스트 조회 중 오류가 발생했습니다.')
+    } finally {
+      setLoadingEndorseList(false)
+    }
+  }
+
+  // 배서 상태 업데이트
+  const handleUpdateEndorseStatus = async (seqNo: string, status: string) => {
+    try {
+      const response = await api.post('/api/insurance/kj-company/settlement/update', {
+        seqNo,
+        status,
+        userName: '', // TODO: 사용자 정보 가져오기
+      })
+
+      if (response.data.success) {
+        toast.success('정산 상태가 업데이트되었습니다.')
+        // 배서리스트 다시 로드
+        handleSearchEndorseList()
+      } else {
+        toast.error(response.data.error || '정산 상태 업데이트에 실패했습니다.')
+      }
+    } catch (error: any) {
+      console.error('정산 상태 업데이트 오류:', error)
+      toast.error('정산 상태 업데이트 중 오류가 발생했습니다.')
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -248,6 +312,17 @@ export default function SettlementModal({
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
+            </div>
+            <div>
+              <button
+                className="px-4 py-1.5 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                onClick={() => {
+                  // 배서리스트 조회 버튼 클릭
+                  handleSearchEndorseList()
+                }}
+              >
+                배서리스트 조회
+              </button>
             </div>
             <div className="ms-auto">
               <button
@@ -459,6 +534,130 @@ export default function SettlementModal({
           </button>
         </div>
       </div>
+
+      {/* 배서리스트 모달 (좌측에 표시) */}
+      {endorseListModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-start bg-black/50 p-4 pointer-events-none">
+          <div
+            className="w-full rounded-xl bg-background border border-border overflow-hidden flex flex-col shadow-xl pointer-events-auto"
+            style={{ maxWidth: '48%', height: '90vh', position: 'fixed', left: '1%', top: '50%', transform: 'translateY(-50%)' }}
+          >
+            {/* 헤더 */}
+            <div className="px-6 py-4 flex items-center justify-between flex-shrink-0 border-b border-border">
+              <h3 className="text-lg font-semibold">배서리스트</h3>
+              <button
+                onClick={() => setEndorseListModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 본문 */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {loadingEndorseList ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <p className="mt-2 text-sm text-muted-foreground">데이터를 불러오는 중...</p>
+                </div>
+              ) : endorseListData.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">데이터가 없습니다.</div>
+              ) : (
+                <div className="overflow-x-auto border border-border rounded">
+                  <table className="w-full text-xs border-collapse">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">번호</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">성명</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">주민번호</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">증권번호</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">배서일</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">월보험료</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">1/10 보험료</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">배서종류</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">처리</th>
+                        <th className="border border-gray-300 px-3 py-2 text-center font-medium">처리자</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {endorseListData.map((item, index) => {
+                        const push = parseInt(String(item.push || 0))
+                        const divi = String(item.divi || '')
+                        const monthlyPremium = parseFloat(String(item.preminum || 0))
+                        const cPremium = parseFloat(String(item.c_preminum || 0))
+                        const jumin = String(item.Jumin || '')
+                        const maskedJumin = jumin.length >= 7 ? jumin.substring(0, 7) + '-******' : jumin
+                        const getStatus = String(item.get || '')
+
+                        // 배서종류 표시
+                        let endorseTypeText = '-'
+                        if (push === 2) {
+                          endorseTypeText = '해지'
+                        } else if (push === 4 || push === 1) {
+                          endorseTypeText = '청약'
+                        }
+
+                        // 보험료 표시
+                        let monthlyPremiumDisplay = '-'
+                        let cPremiumDisplay = '-'
+                        let premiumValue = 0
+
+                        if (divi === '2') {
+                          // 월납
+                          if (monthlyPremium > 0) {
+                            premiumValue = push === 2 ? -monthlyPremium : monthlyPremium
+                            monthlyPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(monthlyPremium)
+                          }
+                        } else {
+                          // 10회분납
+                          if (cPremium > 0) {
+                            premiumValue = push === 2 ? -cPremium : cPremium
+                            cPremiumDisplay = (push === 2 ? '-' : '+') + formatNumber(cPremium)
+                          }
+                        }
+
+                        return (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-3 py-2 text-center">{index + 1}</td>
+                            <td className="border border-gray-300 px-3 py-2">{item.Name || '-'}</td>
+                            <td className="border border-gray-300 px-3 py-2">{maskedJumin}</td>
+                            <td className="border border-gray-300 px-3 py-2">{item.dongbuCerti || '-'}</td>
+                            <td className="border border-gray-300 px-3 py-2">{item.endorse_day || '-'}</td>
+                            <td className="border border-gray-300 px-3 py-2 text-right">{monthlyPremiumDisplay}</td>
+                            <td className="border border-gray-300 px-3 py-2 text-right">{cPremiumDisplay}</td>
+                            <td className="border border-gray-300 px-3 py-2">{endorseTypeText}</td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <select
+                                className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                                value={getStatus}
+                                onChange={(e) => handleUpdateEndorseStatus(String(item.SeqNo || ''), e.target.value)}
+                              >
+                                <option value="2">미정산</option>
+                                <option value="1">정산완료</option>
+                              </select>
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">{item.manager || '-'}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* 푸터 */}
+            <div className="px-6 py-4 flex justify-end flex-shrink-0 border-t border-border">
+              <button
+                onClick={() => setEndorseListModalOpen(false)}
+                className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded hover:bg-secondary/80 transition-colors"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
