@@ -472,7 +472,7 @@ export default function EndorseList() {
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
-          className="w-[16px]"
+          className="w-[120px]"
         />
         <FilterBar.Select
           value={filters.insuranceCom}
