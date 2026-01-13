@@ -1065,6 +1065,7 @@ router.get('/kj-company/check-jumin', async (req, res) => {
     const { jumin } = req.query;
     if (!jumin) {
       return res.status(400).json({
+        success: false,
         exists: false,
         error: '주민번호가 필요합니다.'
       });
@@ -1077,11 +1078,32 @@ router.get('/kj-company/check-jumin', async (req, res) => {
       headers: getDefaultHeaders(),
     });
 
-    res.json(response.data);
+    // PHP API 응답을 그대로 전달 (exists, dNum 필드 포함)
+    // PHP API는 주민번호를 찾지 못해도 정상 응답(200)을 반환하므로
+    // response.data를 그대로 전달
+    res.json({
+      success: true,
+      ...response.data
+    });
   } catch (error) {
     console.error('KJ company check-jumin proxy error:', error.message);
+    console.error('Error details:', error.response?.data);
+    
+    // PHP API가 400 상태 코드를 반환한 경우 (주민번호 형식 오류 등)
+    if (error.response?.status === 400) {
+      return res.status(200).json({
+        success: true,
+        exists: false,
+        dNum: null,
+        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
+      });
+    }
+    
+    // 기타 오류
     res.status(error.response?.status || 500).json({
+      success: false,
       exists: false,
+      dNum: null,
       error: '주민번호 확인 중 오류가 발생했습니다.',
       details: error.response?.data || error.message,
     });
