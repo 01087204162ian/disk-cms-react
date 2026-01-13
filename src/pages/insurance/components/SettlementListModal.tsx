@@ -56,7 +56,7 @@ export default function SettlementListModal({
   const [attempted, setAttempted] = useState(defaultAttempted)
   const [managers, setManagers] = useState<Manager[]>([])
   const [settlementList, setSettlementList] = useState<SettlementListItem[]>([])
-  const [statistics, setStatistics] = useState<SettlementListResponse['statistics']>(null)
+  const [statistics, setStatistics] = useState<SettlementListResponse['statistics']>(undefined)
   const [editingReceivedAmount, setEditingReceivedAmount] = useState<Record<number, string>>({})
   const [editingMemo, setEditingMemo] = useState<Record<number, string>>({})
 
@@ -72,7 +72,7 @@ export default function SettlementListModal({
       setAttempted(defaultAttempted)
       setDamdanga('')
       setSettlementList([])
-      setStatistics(null)
+      setStatistics(undefined)
       setEditingReceivedAmount({})
       setEditingMemo({})
       
@@ -152,7 +152,7 @@ export default function SettlementListModal({
 
       if (response.data.success) {
         setSettlementList(response.data.data || [])
-        setStatistics(response.data.statistics || null)
+        setStatistics(response.data.statistics || undefined)
         
         // 편집 상태 초기화
         const receivedAmounts: Record<number, string> = {}
@@ -170,13 +170,13 @@ export default function SettlementListModal({
       } else {
         toast.error(response.data.error || '정산리스트 조회에 실패했습니다.')
         setSettlementList([])
-        setStatistics(null)
+        setStatistics(undefined)
       }
     } catch (error: any) {
       console.error('정산리스트 조회 오류:', error)
       toast.error('정산리스트 조회 중 오류가 발생했습니다.')
       setSettlementList([])
-      setStatistics(null)
+      setStatistics(undefined)
     } finally {
       setLoading(false)
     }
