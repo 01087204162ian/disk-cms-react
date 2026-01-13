@@ -471,7 +471,6 @@ export default function SettlementModal({
         fgColor: { argb: 'FFE0E0E0' },
       }
       memberHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' }
-      const memberHeaderRowIndex = currentRow
       currentRow++
 
       // 회원 데이터 행
@@ -506,8 +505,6 @@ export default function SettlementModal({
           currentRow++
         })
       }
-
-      const memberDataEndRow = currentRow - 1
 
       // 회원리스트 합계 행
       const memberSummaryRow = worksheet.getRow(currentRow)
