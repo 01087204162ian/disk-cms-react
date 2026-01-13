@@ -18,6 +18,7 @@ interface CompanyIdItem {
   hphone?: string
   readIs?: string | number
   permit?: string | number
+  company?: string
 }
 
 interface CompanyIdListResponse {
