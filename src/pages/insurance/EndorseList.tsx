@@ -19,6 +19,10 @@ import {
   PROGRESS_OPTIONS,
   PROGRESS_MAP,
 } from './constants'
+import EndorseModal from './components/EndorseModal'
+import EndorseStatusModal from './components/EndorseStatusModal'
+import DailyEndorseListModal from './components/DailyEndorseListModal'
+import SmsListModal from './components/SmsListModal'
 
 interface EndorseItem {
   num: number
@@ -30,7 +34,7 @@ interface EndorseItem {
   cancel?: string
   manager?: string
   damdanja?: string
-  standardDate?: string
+  standardDate?: string // endorse_day (배서기준일)
   applicationDate?: string
   policyNum?: string
   certiType?: string
@@ -40,9 +44,11 @@ interface EndorseItem {
   premium?: number
   cPremium?: number
   duplicate?: string
-  companyNum?: number | string
+  companyNum?: number | string // 2012DaeriCompanyNum
   companyName?: string
   age?: number | string
+  cNum?: number | string // CertiTableNum (증권 테이블 번호)
+  pNum?: number | string // EndorsePnum (배서 번호)
 }
 
 interface EndorseListResponse {
@@ -93,6 +99,32 @@ export default function EndorseList() {
     cancellation: 0,
     total: 0,
   })
+
+  // 배서 모달 상태
+  const [endorseModalOpen, setEndorseModalOpen] = useState(false)
+  const [selectedEndorseData, setSelectedEndorseData] = useState<{
+    endorseDay: string
+    companyNum: number | string
+    certiTableNum: number | string
+    endorsePnum: number | string
+    insurerCode?: number | string
+    policyNum?: string
+    gita?: number | string
+  } | null>(null)
+
+  // 배서현황 모달 상태
+  const [endorseStatusModalOpen, setEndorseStatusModalOpen] = useState(false)
+
+  // 일일배서리스트 모달 상태
+  const [dailyEndorseListModalOpen, setDailyEndorseListModalOpen] = useState(false)
+
+  // 문자리스트 모달 상태
+  const [smsListModalOpen, setSmsListModalOpen] = useState(false)
+  const [smsListInitialData, setSmsListInitialData] = useState<{
+    phone?: string
+    companyNum?: string | number
+    sort?: string
+  }>({})
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -418,17 +450,18 @@ export default function EndorseList() {
 
   // 배서현황 버튼 클릭
   const handleEndorseStatus = () => {
-    toast.info('배서현황 기능은 준비 중입니다.')
+    setEndorseStatusModalOpen(true)
   }
 
   // 일일배서리스트 버튼 클릭
   const handleDailyEndorseList = () => {
-    toast.info('일일배서리스트 기능은 준비 중입니다.')
+    setDailyEndorseListModalOpen(true)
   }
 
   // 문자리스트 버튼 클릭
   const handleSmsList = () => {
-    toast.info('문자리스트 기능은 준비 중입니다.')
+    setSmsListInitialData({ sort: '2' })
+    setSmsListModalOpen(true)
   }
 
   // 페이지 크기 변경 핸들러
@@ -551,6 +584,65 @@ export default function EndorseList() {
           pageSizeOptions: [20, 50, 100],
         }}
         emptyMessage="필터를 선택하세요."
+        onRowClick={(row) => {
+          // 배서 모달 열기
+          if (row.standardDate && row.companyNum && row.cNum && row.pNum) {
+            setSelectedEndorseData({
+              endorseDay: row.standardDate,
+              companyNum: row.companyNum,
+              certiTableNum: row.cNum,
+              endorsePnum: row.pNum,
+              insurerCode: row.insuranceCom,
+              policyNum: row.policyNum,
+              gita: row.certiType,
+            })
+            setEndorseModalOpen(true)
+          }
+        }}
+      />
+
+      {/* 배서 모달 */}
+      {selectedEndorseData && (
+        <EndorseModal
+          isOpen={endorseModalOpen}
+          onClose={() => {
+            setEndorseModalOpen(false)
+            setSelectedEndorseData(null)
+          }}
+          certiTableNum={Number(selectedEndorseData.certiTableNum)}
+          insurerCode={selectedEndorseData.insurerCode ? Number(selectedEndorseData.insurerCode) : undefined}
+          policyNum={selectedEndorseData.policyNum}
+          gita={selectedEndorseData.gita ? Number(selectedEndorseData.gita) : undefined}
+          companyNum={selectedEndorseData.companyNum ? Number(selectedEndorseData.companyNum) : undefined}
+          onSuccess={() => {
+            // 배서 저장 성공 시 리스트 새로고침
+            loadEndorseList(pagination.currentPage, pagination.pageSize)
+          }}
+        />
+      )}
+
+      {/* 배서현황 모달 */}
+      <EndorseStatusModal
+        isOpen={endorseStatusModalOpen}
+        onClose={() => setEndorseStatusModalOpen(false)}
+      />
+
+      {/* 일일배서리스트 모달 */}
+      <DailyEndorseListModal
+        isOpen={dailyEndorseListModalOpen}
+        onClose={() => setDailyEndorseListModalOpen(false)}
+      />
+
+      {/* 문자리스트 모달 */}
+      <SmsListModal
+        isOpen={smsListModalOpen}
+        onClose={() => {
+          setSmsListModalOpen(false)
+          setSmsListInitialData({})
+        }}
+        initialPhone={smsListInitialData.phone}
+        initialCompanyNum={smsListInitialData.companyNum}
+        initialSort={smsListInitialData.sort}
       />
     </div>
   )
