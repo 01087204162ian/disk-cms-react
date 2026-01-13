@@ -118,8 +118,8 @@ export default function AddCompanyModal({
         params: { jumin: juminValue },
       })
 
-      const data = response.data
-      const exists = data.exists || false
+      const data = response.data || {}
+      const exists = !!data.exists
       const dNum = data.dNum || null
 
       setJuminCheckResult({
@@ -130,9 +130,8 @@ export default function AddCompanyModal({
       })
 
       if (exists && dNum) {
-        // 기존 회사 존재 - 해당 회사 정보 불러오기
+        // 기존 회사 존재 - 안내 후 기존 회사 상세로 이동
         toast.warning('이미 등록된 주민번호입니다. 기존 회사 정보를 불러옵니다.')
-        // 기존 회사 정보 불러오기
         if (onSuccess) {
           onSuccess(dNum, data.companyName || '')
         }
@@ -140,23 +139,25 @@ export default function AddCompanyModal({
       } else {
         // 신규 등록 가능
         toast.success('신규 등록 가능한 주민번호입니다.')
-        // 회사명 입력 필드로 포커스 이동 (다음 입력 필드로 자동 이동)
         const companyInput = document.getElementById('company-input')
         if (companyInput) {
-          setTimeout(() => {
-            companyInput.focus()
-          }, 100)
+          setTimeout(() => companyInput.focus(), 100)
         }
       }
     } catch (error: any) {
       console.error('주민번호 확인 오류:', error)
-      toast.error('주민번호 확인 중 오류가 발생했습니다.')
+      // 오류가 나더라도 신규 등록 가능 흐름으로 처리
       setJuminCheckResult({
-        checked: false,
+        checked: true,
         exists: false,
         dNum: null,
-        isValid: false,
+        isValid: true,
       })
+      toast.info('주민번호 확인 중 오류가 발생했지만 신규 등록은 가능합니다.')
+      const companyInput = document.getElementById('company-input')
+      if (companyInput) {
+        setTimeout(() => companyInput.focus(), 100)
+      }
     } finally {
       setCheckingJumin(false)
     }

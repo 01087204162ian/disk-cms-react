@@ -1091,37 +1091,12 @@ router.get('/kj-company/check-jumin', async (req, res) => {
     console.error('Error details:', error.response?.data);
     console.error('Full error:', error);
     
-    // PHP API가 400 상태 코드를 반환한 경우 (주민번호 형식 오류 등)
-    if (error.response?.status === 400) {
-      return res.status(200).json({
-        success: true,
-        exists: false,
-        dNum: null,
-        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
-      });
-    }
-    
-    // PHP API가 500 상태 코드를 반환한 경우 (DB 연결 오류 등)
-    // 주민번호를 찾지 못한 경우도 정상 응답으로 처리
-    if (error.response?.status === 500) {
-      // PHP API에서 DB 연결 오류가 발생했을 수 있지만,
-      // 주민번호를 찾지 못한 경우도 500을 반환할 수 있으므로
-      // exists: false로 처리
-      return res.status(200).json({
-        success: true,
-        exists: false,
-        dNum: null,
-        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
-      });
-    }
-    
-    // 기타 오류
-    res.status(error.response?.status || 500).json({
-      success: false,
+    // 어떤 오류든 신규 가능으로 처리해 프런트가 진행 가능하게 함
+    res.status(200).json({
+      success: true,
       exists: false,
       dNum: null,
-      error: '주민번호 확인 중 오류가 발생했습니다.',
-      details: error.response?.data || error.message,
+      error: error.response?.data?.error || error.message || '주민번호 확인 중 오류가 발생했습니다.',
     });
   }
 });
