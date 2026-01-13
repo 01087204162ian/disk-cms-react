@@ -15,6 +15,7 @@ import {
 import MemberListModal from './MemberListModal'
 import EndorseModal from './EndorseModal'
 import PremiumModal from './PremiumModal'
+import CompanyIdModal from './CompanyIdModal'
 
 interface CompanyDetailModalProps {
   isOpen: boolean
@@ -111,6 +112,7 @@ export default function CompanyDetailModal({
   const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
   const [editingBasicInfo, setEditingBasicInfo] = useState<Partial<CompanyDetail>>({})
   const [savingBasicInfo, setSavingBasicInfo] = useState(false)
+  const [idModalOpen, setIdModalOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -512,8 +514,7 @@ export default function CompanyDetailModal({
                         type="button"
                         className="text-primary hover:underline"
                         onClick={() => {
-                          // Phase 6: 업체 I.D 관리 모달 구현 예정
-                          console.log('업체 I.D 관리 모달 열기')
+                          setIdModalOpen(true)
                         }}
                       >
                         {displayBasicInfo?.mem_id || '클릭하여 관리'}
@@ -1033,6 +1034,22 @@ export default function CompanyDetailModal({
         certiNum={selectedPremiumCertiNum}
         onSuccess={() => {
           // 월보험료 저장 후 업체 상세 정보 재조회
+          if (companyNum) {
+            loadDetail()
+          }
+        }}
+      />
+
+      {/* 업체 I.D 관리 모달 */}
+      <CompanyIdModal
+        isOpen={idModalOpen}
+        onClose={() => {
+          setIdModalOpen(false)
+        }}
+        companyNum={companyNum}
+        companyName={companyName}
+        onSuccess={() => {
+          // 업체 I.D 변경 후 업체 상세 정보 재조회
           if (companyNum) {
             loadDetail()
           }
