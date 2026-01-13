@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Modal, LoadingSpinner, useToastHelpers, Select } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_OPTIONS, GITA_OPTIONS, getGitaName } from '../constants'
+import {
+  INSURER_OPTIONS,
+  GITA_OPTIONS,
+  getGitaName,
+  addPhoneHyphen,
+  removePhoneHyphen,
+  addBusinessNumberHyphen,
+  removeBusinessNumberHyphen,
+  addCorporateNumberHyphen,
+  removeCorporateNumberHyphen,
+} from '../constants'
 import MemberListModal from './MemberListModal'
 import EndorseModal from './EndorseModal'
 import PremiumModal from './PremiumModal'
@@ -402,7 +412,11 @@ export default function CompanyDetailModal({
                           type="text"
                           className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                           value={displayBasicInfo?.hphone || ''}
-                          onChange={(e) => updateEditingBasicInfo('hphone', e.target.value)}
+                          onChange={(e) => {
+                            const cleaned = removePhoneHyphen(e.target.value)
+                            const formatted = addPhoneHyphen(cleaned)
+                            updateEditingBasicInfo('hphone', formatted)
+                          }}
                         />
                       ) : (
                         displayBasicInfo?.hphone || '-'
@@ -417,7 +431,11 @@ export default function CompanyDetailModal({
                           type="text"
                           className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                           value={displayBasicInfo?.cphone || ''}
-                          onChange={(e) => updateEditingBasicInfo('cphone', e.target.value)}
+                          onChange={(e) => {
+                            const cleaned = removePhoneHyphen(e.target.value)
+                            const formatted = addPhoneHyphen(cleaned)
+                            updateEditingBasicInfo('cphone', formatted)
+                          }}
                         />
                       ) : (
                         displayBasicInfo?.cphone || '-'
@@ -434,7 +452,11 @@ export default function CompanyDetailModal({
                           type="text"
                           className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                           value={displayBasicInfo?.cNumber || ''}
-                          onChange={(e) => updateEditingBasicInfo('cNumber', e.target.value)}
+                          onChange={(e) => {
+                            const cleaned = removeBusinessNumberHyphen(e.target.value)
+                            const formatted = addBusinessNumberHyphen(cleaned)
+                            updateEditingBasicInfo('cNumber', formatted)
+                          }}
                         />
                       ) : (
                         displayBasicInfo?.cNumber || '-'
@@ -449,7 +471,11 @@ export default function CompanyDetailModal({
                           type="text"
                           className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
                           value={displayBasicInfo?.lNumber || ''}
-                          onChange={(e) => updateEditingBasicInfo('lNumber', e.target.value)}
+                          onChange={(e) => {
+                            const cleaned = removeCorporateNumberHyphen(e.target.value)
+                            const formatted = addCorporateNumberHyphen(cleaned)
+                            updateEditingBasicInfo('lNumber', formatted)
+                          }}
                         />
                       ) : (
                         displayBasicInfo?.lNumber || '-'

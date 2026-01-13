@@ -162,3 +162,31 @@ export const addPhoneHyphen = (phone: string): string => {
 export const removePhoneHyphen = (phone: string): string => {
   return phone.replace(/-/g, '')
 }
+
+// 사업자번호 하이픈 추가 함수 (123-45-67890 형식)
+export const addBusinessNumberHyphen = (businessNumber: string): string => {
+  const cleaned = businessNumber.replace(/-/g, '')
+  if (cleaned.length === 10) {
+    return cleaned.replace(/(\d{3})(\d{2})(\d{5})/, '$1-$2-$3')
+  }
+  return cleaned
+}
+
+// 사업자번호 하이픈 제거 함수
+export const removeBusinessNumberHyphen = (businessNumber: string): string => {
+  return businessNumber.replace(/-/g, '')
+}
+
+// 법인번호 하이픈 추가 함수 (123456-1234567 형식)
+export const addCorporateNumberHyphen = (corporateNumber: string): string => {
+  const cleaned = corporateNumber.replace(/-/g, '')
+  if (cleaned.length === 13) {
+    return cleaned.replace(/(\d{6})(\d{7})/, '$1-$2')
+  }
+  return cleaned
+}
+
+// 법인번호 하이픈 제거 함수
+export const removeCorporateNumberHyphen = (corporateNumber: string): string => {
+  return corporateNumber.replace(/-/g, '')
+}
