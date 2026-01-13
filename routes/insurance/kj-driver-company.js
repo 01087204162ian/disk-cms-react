@@ -661,14 +661,15 @@ router.post('/kj-endorse/save', async (req, res) => {
   }
 });
 
-// 배서처리 상태 업데이트 API
+// 배서처리 상태 업데이트 API (changeEndorse.php 사용)
 router.post('/kj-endorse/update-status', async (req, res) => {
   try {
-    const apiUrl = `${PHP_API_BASE_URL}/kj-endorse-update-status.php`;
+    // PHP API 경로: kj/api/kjDaeri/changeEndorse.php
+    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeEndorse.php`;
 
     const response = await axios.post(apiUrl, req.body, {
       timeout: DEFAULT_TIMEOUT,
-      headers: getDefaultHeaders(),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
     res.json(response.data);
@@ -677,6 +678,50 @@ router.post('/kj-endorse/update-status', async (req, res) => {
     res.status(error.response?.status || 500).json({
       success: false,
       error: '배서처리 상태 업데이트 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// 배서 진행단계 업데이트 API
+router.post('/kj-endorse/update-progress', async (req, res) => {
+  try {
+    // PHP API 경로: kj/api/kjDaeri/changeProgress.php
+    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeProgress.php`;
+
+    const response = await axios.post(apiUrl, req.body, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Insurance KJ-endorse update-progress proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '진행단계 변경 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// 배서 요율 업데이트 API (changeRate.php 사용)
+router.post('/kj-endorse/update-rate', async (req, res) => {
+  try {
+    // PHP API 경로: kj/api/kjDaeri/changeRate.php
+    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeRate.php`;
+
+    const response = await axios.post(apiUrl, req.body, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Insurance KJ-endorse update-rate proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '요율 변경 중 오류가 발생했습니다.',
       details: error.response?.data || error.message,
     });
   }
@@ -772,27 +817,6 @@ router.get('/kj-endorse/list', async (req, res) => {
   }
 });
 
-// 배서 상태 업데이트 API
-router.post('/kj-endorse/update-status', async (req, res) => {
-  try {
-    const apiUrl = `${PHP_API_BASE_URL}/kj-endorse-update-status.php`;
-
-    const response = await axios.post(apiUrl, req.body, {
-      timeout: DEFAULT_TIMEOUT,
-      headers: getDefaultHeaders(),
-    });
-
-    res.json(response.data);
-  } catch (error) {
-    console.error('Insurance KJ-endorse update-status proxy error:', error.message);
-    res.status(error.response?.status || 500).json({
-      success: false,
-      error: '배서 상태 업데이트 중 오류가 발생했습니다.',
-      details: error.response?.data || error.message,
-    });
-  }
-});
-
 // 배서 요율 업데이트 API
 router.post('/kj-endorse/rate-update', async (req, res) => {
   try {
@@ -806,6 +830,50 @@ router.post('/kj-endorse/rate-update', async (req, res) => {
     res.json(response.data);
   } catch (error) {
     console.error('Insurance KJ-endorse rate-update proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '요율 변경 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// 배서 진행단계 업데이트 API
+router.post('/kj-endorse/update-progress', async (req, res) => {
+  try {
+    // PHP API 경로: kj/api/kjDaeri/changeProgress.php
+    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeProgress.php`;
+
+    const response = await axios.post(apiUrl, req.body, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Insurance KJ-endorse update-progress proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '진행단계 변경 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// 배서 요율 업데이트 API (changeRate.php 사용)
+router.post('/kj-endorse/update-rate', async (req, res) => {
+  try {
+    // PHP API 경로: kj/api/kjDaeri/changeRate.php
+    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeRate.php`;
+
+    const response = await axios.post(apiUrl, req.body, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Insurance KJ-endorse update-rate proxy error:', error.message);
     res.status(error.response?.status || 500).json({
       success: false,
       error: '요율 변경 중 오류가 발생했습니다.',

@@ -12,13 +12,13 @@ import {
   INSURER_OPTIONS,
   INSURER_MAP,
   GITA_MAP,
-  RATE_NAME_MAP,
+  RATE_OPTIONS,
   addPhoneHyphen,
   PUSH_OPTIONS,
   PUSH_MAP,
   PROGRESS_OPTIONS,
-  PROGRESS_MAP,
 } from './constants'
+import { useAuthStore } from '../../store/authStore'
 import EndorseModal from './components/EndorseModal'
 import EndorseStatusModal from './components/EndorseStatusModal'
 import DailyEndorseListModal from './components/DailyEndorseListModal'
@@ -40,6 +40,7 @@ interface EndorseItem {
   certiType?: string
   rate?: string
   endorseProcess?: string
+  sangtae?: number | string // 배서처리 상태 (1=미처리, 2=처리)
   insuranceCom?: number | string
   premium?: number
   cPremium?: number
@@ -88,8 +89,15 @@ const PAGE_SIZE_OPTIONS = [
   { value: '100', label: '100개' },
 ]
 
+// 배서처리 옵션
+const ENDORSE_PROCESS_OPTIONS = [
+  { value: '1', label: '미처리' },
+  { value: '2', label: '처리' },
+]
+
 export default function EndorseList() {
   const toast = useToastHelpers()
+  const { user } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [endorseList, setEndorseList] = useState<EndorseItem[]>([])
   const [policyOptions, setPolicyOptions] = useState<PolicyOption[]>([])
@@ -358,7 +366,25 @@ export default function EndorseList() {
       {
         key: 'progressStep',
         header: '진행단계',
-        cell: (row) => PROGRESS_MAP[row.progressStep || ''] || row.progressStep || '-',
+        cell: (row) => {
+          const currentProgress = row.progressStep || '-1'
+          return (
+            <select
+              value={currentProgress}
+              onChange={(e) => handleProgressChange(row, e.target.value)}
+              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
+              style={{ fontSize: '0.75rem' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="-1">선택</option>
+              {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )
+        },
         className: 'w-24',
       },
       {
@@ -395,13 +421,21 @@ export default function EndorseList() {
         key: 'rate',
         header: '요율',
         cell: (row) => {
-          const rate = row.rate
-          if (!rate) return '-'
-          const rateName = RATE_NAME_MAP[Number(rate)] || rate
+          const currentRate = row.rate || '-1'
           return (
-            <span title={rateName} className="cursor-help">
-              {rate}
-            </span>
+            <select
+              value={currentRate}
+              onChange={(e) => handleRateChange(row, e.target.value)}
+              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
+              style={{ fontSize: '0.75rem' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {RATE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           )
         },
         className: 'w-20',
@@ -415,7 +449,25 @@ export default function EndorseList() {
       {
         key: 'endorseProcess',
         header: '배서처리',
-        cell: (row) => row.endorseProcess || '-',
+        cell: (row) => {
+          // API 응답에서 sangtae 값이 1이면 미처리, 2면 처리
+          const currentStatus = String(row.sangtae || '1')
+          return (
+            <select
+              value={currentStatus}
+              onChange={(e) => handleStatusChange(row, e.target.value)}
+              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
+              style={{ fontSize: '0.75rem' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {ENDORSE_PROCESS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )
+        },
         className: 'w-24',
       },
       {
@@ -475,6 +527,126 @@ export default function EndorseList() {
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, currentPage: page }))
     loadEndorseList(page, pagination.pageSize)
+  }
+
+  // 진행단계 변경 핸들러
+  const handleProgressChange = async (row: EndorseItem, newProgress: string) => {
+    if (!confirm('진행단계가 맞습니까?')) {
+      return
+    }
+
+    try {
+      const formData = new URLSearchParams()
+      formData.append('num', String(row.num))
+      formData.append('progress', newProgress)
+      formData.append('userName', user?.name || '')
+
+      const res = await api.post<{ success: boolean; message?: string; error?: string; manager?: string }>(
+        '/api/insurance/kj-endorse/update-progress',
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      )
+
+      if (res.data.success) {
+        toast.success(res.data.message || '진행단계가 변경되었습니다.')
+        // 리스트 새로고침
+        loadEndorseList(pagination.currentPage, pagination.pageSize)
+      } else {
+        toast.error(res.data.error || '진행단계 변경 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('진행단계 변경 오류:', error)
+      toast.error(error.response?.data?.error || '진행단계 변경 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 요율 변경 핸들러
+  const handleRateChange = async (row: EndorseItem, newRate: string) => {
+    if (newRate === '-1') {
+      toast.error('요율을 선택해주세요.')
+      return
+    }
+
+    if (!confirm('요율 변경값이 맞습니까?')) {
+      return
+    }
+
+    try {
+      const formData = new URLSearchParams()
+      formData.append('num', String(row.num))
+      formData.append('Jumin', row.jumin || '')
+      formData.append('rate', newRate)
+      formData.append('policyNum', row.policyNum || '')
+      formData.append('userName', user?.name || '')
+
+      const res = await api.post<{ success: boolean; message?: string; error?: string }>(
+        '/api/insurance/kj-endorse/update-rate',
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      )
+
+      if (res.data.success) {
+        toast.success(res.data.message || '요율이 변경되었습니다.')
+        // 리스트 새로고침
+        loadEndorseList(pagination.currentPage, pagination.pageSize)
+      } else {
+        toast.error(res.data.error || '요율 변경 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('요율 변경 오류:', error)
+      toast.error(error.response?.data?.error || '요율 변경 중 오류가 발생했습니다.')
+    }
+  }
+
+  // 배서처리 변경 핸들러
+  const handleStatusChange = async (row: EndorseItem, newStatus: string) => {
+    if (!row.rate || row.rate === '-1' || Number(row.rate) < 0) {
+      toast.error('개인 요율부터 입력하세요.')
+      return
+    }
+
+    const statusText = newStatus === '2' ? '처리됨' : '미처리'
+    if (!confirm(`정말로 상태를 ${statusText}로 변경하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      const formData = new URLSearchParams()
+      formData.append('num', String(row.num))
+      formData.append('status', newStatus)
+      formData.append('push', String(row.push))
+      formData.append('rate', String(row.rate))
+      formData.append('userName', user?.name || '')
+
+      const res = await api.post<{ success: boolean; message?: string; error?: string }>(
+        '/api/insurance/kj-endorse/update-status',
+        formData.toString(),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      )
+
+      if (res.data.success) {
+        toast.success(res.data.message || '상태가 변경되었습니다.')
+        // 리스트 새로고침
+        loadEndorseList(pagination.currentPage, pagination.pageSize)
+      } else {
+        toast.error(res.data.error || '상태 변경 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('상태 변경 오류:', error)
+      toast.error(error.response?.data?.error || '상태 변경 중 오류가 발생했습니다.')
+    }
   }
 
   return (
