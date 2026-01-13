@@ -446,33 +446,7 @@ export default function EndorseList() {
 
   return (
     <div className="space-y-6">
-      <FilterBar
-        actionButtons={
-          <>
-            <button
-              onClick={handleEndorseStatus}
-              className="h-[31px] px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              배서현황
-            </button>
-            <button
-              onClick={handleDailyEndorseList}
-              className="h-[31px] px-3 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors flex items-center gap-1"
-            >
-              <List className="w-3.5 h-3.5" />
-              일일배서리스트
-            </button>
-            <button
-              onClick={handleSmsList}
-              className="h-[31px] px-3 py-1 text-xs border border-info text-info rounded hover:bg-info hover:text-white transition-colors flex items-center gap-1"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              문자리스트
-            </button>
-          </>
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.push}
           onChange={(value) => {
@@ -498,7 +472,7 @@ export default function EndorseList() {
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
-          className="w-[140px]"
+          className="w-[100px]"
         />
         <FilterBar.Select
           value={filters.insuranceCom}
@@ -534,6 +508,27 @@ export default function EndorseList() {
           options={PAGE_SIZE_OPTIONS}
           className="w-[75px]"
         />
+        <button
+          onClick={handleEndorseStatus}
+          className="h-10 px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          배서현황
+        </button>
+        <button
+          onClick={handleDailyEndorseList}
+          className="h-10 px-3 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <List className="w-3.5 h-3.5" />
+          일일배서리스트
+        </button>
+        <button
+          onClick={handleSmsList}
+          className="h-10 px-3 py-1 text-xs border border-info text-info rounded hover:bg-info hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          문자리스트
+        </button>
         <FilterBar.Stats
           stats={[
             { label: '청약:', value: stats.subscription },
