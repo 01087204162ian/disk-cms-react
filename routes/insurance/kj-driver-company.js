@@ -243,7 +243,70 @@ router.get('/kj-company/managers', async (req, res) => {
   }
 });
 
-// 업체 상세 정보 조회 (모달용)
+// 주민번호로 회사 조회 (동적 라우트보다 위에 배치해야 함!)
+router.get('/kj-company/check-jumin', async (req, res) => {
+  try {
+    const { jumin } = req.query;
+    if (!jumin) {
+      return res.status(400).json({
+        success: false,
+        exists: false,
+        error: '주민번호가 필요합니다.'
+      });
+    }
+
+    const apiUrl = `${PHP_API_BASE_URL}/kj-company-check-jumin.php`;
+    const response = await axios.get(apiUrl, {
+      params: { jumin },
+      timeout: DEFAULT_TIMEOUT,
+      headers: getDefaultHeaders(),
+    });
+
+    // PHP API 응답을 그대로 전달 (exists, dNum, company 필드 포함)
+    res.json({
+      success: true,
+      ...response.data
+    });
+  } catch (error) {
+    console.error('KJ company check-jumin proxy error:', error.message);
+    console.error('Error status:', error.response?.status);
+    console.error('Error details:', error.response?.data);
+    
+    // PHP API가 400 상태 코드를 반환한 경우 (주민번호 형식 오류 등)
+    if (error.response?.status === 400) {
+      return res.status(200).json({
+        success: true,
+        exists: false,
+        dNum: null,
+        company: null,
+        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
+      });
+    }
+    
+    // PHP API가 500 상태 코드를 반환한 경우 (DB 연결 오류 등)
+    if (error.response?.status === 500) {
+      return res.status(200).json({
+        success: true,
+        exists: false,
+        dNum: null,
+        company: null,
+        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
+      });
+    }
+    
+    // 기타 오류
+    res.status(error.response?.status || 500).json({
+      success: false,
+      exists: false,
+      dNum: null,
+      company: null,
+      error: '주민번호 확인 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// 업체 상세 정보 조회 (모달용) - 동적 라우트는 정적 라우트보다 아래에 배치
 router.get('/kj-company/:companyNum', async (req, res) => {
   try {
     const { companyNum } = req.params;
@@ -1059,72 +1122,6 @@ router.post('/kj-company/check-id', async (req, res) => {
   }
 });
 
-// 주민번호로 회사 조회
-router.get('/kj-company/check-jumin', async (req, res) => {
-  try {
-    const { jumin } = req.query;
-    if (!jumin) {
-      return res.status(400).json({
-        success: false,
-        exists: false,
-        error: '주민번호가 필요합니다.'
-      });
-    }
-
-    const apiUrl = `${PHP_API_BASE_URL}/kj-company-check-jumin.php`;
-    const response = await axios.get(apiUrl, {
-      params: { jumin },
-      timeout: DEFAULT_TIMEOUT,
-      headers: getDefaultHeaders(),
-    });
-
-    // PHP API 응답을 그대로 전달 (exists, dNum 필드 포함)
-    // PHP API는 주민번호를 찾지 못해도 정상 응답(200)을 반환하므로
-    // response.data를 그대로 전달
-    res.json({
-      success: true,
-      ...response.data
-    });
-  } catch (error) {
-    console.error('KJ company check-jumin proxy error:', error.message);
-    console.error('Error status:', error.response?.status);
-    console.error('Error details:', error.response?.data);
-    console.error('Full error:', error);
-    
-    // PHP API가 400 상태 코드를 반환한 경우 (주민번호 형식 오류 등)
-    if (error.response?.status === 400) {
-      return res.status(200).json({
-        success: true,
-        exists: false,
-        dNum: null,
-        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
-      });
-    }
-    
-    // PHP API가 500 상태 코드를 반환한 경우 (DB 연결 오류 등)
-    // 주민번호를 찾지 못한 경우도 정상 응답으로 처리
-    if (error.response?.status === 500) {
-      // PHP API에서 DB 연결 오류가 발생했을 수 있지만,
-      // 주민번호를 찾지 못한 경우도 500을 반환할 수 있으므로
-      // exists: false로 처리
-      return res.status(200).json({
-        success: true,
-        exists: false,
-        dNum: null,
-        error: error.response?.data?.error || '주민번호 확인 중 오류가 발생했습니다.'
-      });
-    }
-    
-    // 기타 오류
-    res.status(error.response?.status || 500).json({
-      success: false,
-      exists: false,
-      dNum: null,
-      error: '주민번호 확인 중 오류가 발생했습니다.',
-      details: error.response?.data || error.message,
-    });
-  }
-});
 
 // 신규 회사 저장/수정
 router.post('/kj-company/store', async (req, res) => {
