@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { useAuthStore } from '../../../store/authStore'
+import ConfirmPremiumModal from './ConfirmPremiumModal'
 
 interface SettlementModalProps {
   isOpen: boolean
@@ -57,6 +58,7 @@ export default function SettlementModal({
   const [memoInput, setMemoInput] = useState('')
   const [loadingMemo, setLoadingMemo] = useState(false)
   const [savingMemo, setSavingMemo] = useState(false)
+  const [confirmPremiumModalOpen, setConfirmPremiumModalOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -71,6 +73,7 @@ export default function SettlementModal({
       setJumin('')
       setMemoList([])
       setMemoInput('')
+      setConfirmPremiumModalOpen(false)
     }
   }, [isOpen, companyNum])
 
@@ -609,8 +612,7 @@ export default function SettlementModal({
                 <button
                   className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
                   onClick={() => {
-                    // TODO: 확정보험료 입력 모달
-                    toast.info('확정보험료 입력 기능은 추후 구현 예정입니다.')
+                    setConfirmPremiumModalOpen(true)
                   }}
                 >
                   확정보험료 입력
@@ -880,6 +882,25 @@ export default function SettlementModal({
           </div>
         </div>
       )}
+
+      {/* 확정보험료 입력 모달 */}
+      <ConfirmPremiumModal
+        isOpen={confirmPremiumModalOpen}
+        onClose={() => setConfirmPremiumModalOpen(false)}
+        companyNum={companyNum}
+        defaultDate={endDate}
+        startDate={startDate}
+        endDate={endDate}
+        totalDrivers={
+          adjustmentData.reduce((sum, item) => sum + (item.drivers_count || 0), 0)
+        }
+        onSuccess={() => {
+          // 확정보험료 저장 후 정산 데이터 다시 로드
+          if (startDate && endDate) {
+            loadSettlementData()
+          }
+        }}
+      />
     </div>
   )
 }
