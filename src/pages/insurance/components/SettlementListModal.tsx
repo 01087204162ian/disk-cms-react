@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Modal, useToastHelpers } from '../../../components'
+import { useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { useAuthStore } from '../../../store/authStore'
 
