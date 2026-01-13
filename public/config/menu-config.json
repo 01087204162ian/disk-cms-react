@@ -90,7 +90,7 @@
                   "id": "kj-driver-search",
                   "title": "기사 찾기",
                   "page": "insurance/kj-driver-search",
-                  "order": 1
+              "order": 1
                 },
                 {
                   "id": "kj-driver-company",

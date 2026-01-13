@@ -45,6 +45,7 @@ export default function AddCompanyModal({
     dNum: null,
     isValid: false,
   })
+  const [existingCompanyNum, setExistingCompanyNum] = useState<number | null>(null)
 
   // 모달이 닫힐 때 초기화
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function AddCompanyModal({
         dNum: null,
         isValid: false,
       })
+      setExistingCompanyNum(null)
     }
   }, [isOpen])
 
@@ -88,6 +90,7 @@ export default function AddCompanyModal({
         dNum: null,
         isValid: false,
       })
+      setExistingCompanyNum(null)
     }
   }
 
@@ -118,8 +121,8 @@ export default function AddCompanyModal({
         params: { jumin: juminValue },
       })
 
-      const data = response.data || {}
-      const exists = !!data.exists
+      const data = response.data
+      const exists = data.exists || false
       const dNum = data.dNum || null
 
       setJuminCheckResult({
@@ -128,36 +131,40 @@ export default function AddCompanyModal({
         dNum,
         isValid: true,
       })
+      setExistingCompanyNum(dNum || null)
 
       if (exists && dNum) {
-        // 기존 회사 존재 - 안내 후 기존 회사 상세로 이동
-        toast.warning('이미 등록된 주민번호입니다. 기존 회사 정보를 불러옵니다.')
-        if (onSuccess) {
+        // 기존 회사 존재 - 사용자에게 안내 후 선택
+        const openExisting = window.confirm(
+          '이미 등록된 주민번호입니다. 기존 대리운전회사를 조회하시겠습니까?\n신규 등록을 하려면 다른 주민번호를 입력하세요.'
+        )
+        if (openExisting && onSuccess) {
           onSuccess(dNum, data.companyName || '')
+          onClose()
+        } else {
+          toast.info('신규 등록을 하려면 다른 주민번호를 입력하세요.')
         }
-        onClose()
       } else {
         // 신규 등록 가능
         toast.success('신규 등록 가능한 주민번호입니다.')
+        // 회사명 입력 필드로 포커스 이동 (다음 입력 필드로 자동 이동)
         const companyInput = document.getElementById('company-input')
         if (companyInput) {
-          setTimeout(() => companyInput.focus(), 100)
+          setTimeout(() => {
+            companyInput.focus()
+          }, 100)
         }
       }
     } catch (error: any) {
       console.error('주민번호 확인 오류:', error)
-      // 오류가 나더라도 신규 등록 가능 흐름으로 처리
+      toast.error('주민번호 확인 중 오류가 발생했습니다.')
       setJuminCheckResult({
-        checked: true,
+        checked: false,
         exists: false,
         dNum: null,
-        isValid: true,
+        isValid: false,
       })
-      toast.info('주민번호 확인 중 오류가 발생했지만 신규 등록은 가능합니다.')
-      const companyInput = document.getElementById('company-input')
-      if (companyInput) {
-        setTimeout(() => companyInput.focus(), 100)
-      }
+      setExistingCompanyNum(null)
     } finally {
       setCheckingJumin(false)
     }
@@ -205,7 +212,7 @@ export default function AddCompanyModal({
     }
 
     if (juminCheckResult.exists) {
-      toast.error('이미 등록된 주민번호입니다. 기존 회사 정보를 확인해주세요.')
+      toast.error('이미 등록된 주민번호입니다. 다른 주민번호를 사용해주세요. 기존 업체 조회는 엔터 검증 시 확인 버튼을 선택하세요.')
       return
     }
 
@@ -398,7 +405,7 @@ export default function AddCompanyModal({
           >
             <span className="text-sm">
               {juminCheckResult.exists
-                ? '이미 등록된 주민번호입니다. 기존 회사 정보를 불러옵니다.'
+                ? '이미 등록된 주민번호입니다. 기존 회사 조회를 원하면 엔터 검증 시 확인을 선택하세요. 신규 등록은 다른 주민번호를 입력하세요.'
                 : '신규 등록 가능한 주민번호입니다.'}
             </span>
           </div>
