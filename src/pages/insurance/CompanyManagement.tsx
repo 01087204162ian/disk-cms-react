@@ -8,6 +8,7 @@ import {
   useToastHelpers,
 } from '../../components'
 import CompanyDetailModal from './components/CompanyDetailModal'
+import SettlementModal from './components/SettlementModal'
 
 interface Manager {
   num: number
@@ -66,6 +67,9 @@ export default function CompanyManagement() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
+  const [settlementModalOpen, setSettlementModalOpen] = useState(false)
+  const [selectedSettlementCompanyNum, setSelectedSettlementCompanyNum] = useState<number | null>(null)
+  const [selectedSettlementCompanyName, setSelectedSettlementCompanyName] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -275,8 +279,9 @@ export default function CompanyManagement() {
             <div className="text-center whitespace-nowrap">
               <button
                 onClick={() => {
-                  console.log('정산 모달 열기:', { companyNum: row.num, companyName })
-                  // TODO: 정산 모달 구현
+                  setSelectedSettlementCompanyNum(row.num)
+                  setSelectedSettlementCompanyName(companyName)
+                  setSettlementModalOpen(true)
                 }}
                 className="px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors"
               >
@@ -429,6 +434,22 @@ export default function CompanyManagement() {
         companyNum={selectedCompanyNum}
         companyName={selectedCompanyName}
         onUpdate={() => {
+          loadCompanies()
+        }}
+      />
+
+      {/* 정산 모달 */}
+      <SettlementModal
+        isOpen={settlementModalOpen}
+        onClose={() => {
+          setSettlementModalOpen(false)
+          setSelectedSettlementCompanyNum(null)
+          setSelectedSettlementCompanyName('')
+        }}
+        companyNum={selectedSettlementCompanyNum}
+        companyName={selectedSettlementCompanyName}
+        onSuccess={() => {
+          // 정산 완료 후 업체 목록 갱신
           loadCompanies()
         }}
       />

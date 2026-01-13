@@ -373,7 +373,7 @@ export default function CompanyIdModal({
       isOpen={isOpen}
       onClose={onClose}
       title="업체 I.D 관리"
-      maxWidth="2xl"
+      maxWidth="3xl"
     >
       <div className="p-4">
         {loading ? (
@@ -391,19 +391,19 @@ export default function CompanyIdModal({
               <table className="w-full border-collapse text-xs">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '14%' }}>
                       담당자성명
                     </th>
-                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '14%' }}>
                       업체 I.D
                     </th>
-                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '20%' }}>
                       핸드폰번호
                     </th>
-                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '15%' }}>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '13%' }}>
                       권한
                     </th>
-                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '20%' }}>
+                    <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '19%' }}>
                       비밀번호
                     </th>
                     <th className="border border-gray-300 px-3 py-2 text-center font-medium" style={{ width: '20%' }}>
