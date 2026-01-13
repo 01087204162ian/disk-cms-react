@@ -83,7 +83,7 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
       isOpen={isOpen}
       onClose={onClose}
       title="배서현황"
-      size="xl"
+      maxWidth="6xl"
     >
       <div className="space-y-4">
         {/* 필터 영역 */}

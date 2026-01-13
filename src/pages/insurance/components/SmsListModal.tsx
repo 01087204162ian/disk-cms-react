@@ -179,7 +179,7 @@ export default function SmsListModal({
       isOpen={isOpen}
       onClose={onClose}
       title="문자리스트"
-      size="xl"
+      maxWidth="6xl"
     >
       <div className="space-y-4">
         {/* 필터 영역 */}

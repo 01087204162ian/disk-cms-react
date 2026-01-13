@@ -239,7 +239,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       isOpen={isOpen}
       onClose={onClose}
       title="일일배서리스트"
-      size="xl"
+      maxWidth="6xl"
     >
       <div className="space-y-4">
         {/* 필터 영역 */}
