@@ -448,10 +448,6 @@ export default function CompanyManagement() {
         }}
         companyNum={selectedSettlementCompanyNum}
         companyName={selectedSettlementCompanyName}
-        onSuccess={() => {
-          // 정산 완료 후 업체 목록 갱신
-          loadCompanies()
-        }}
       />
     </div>
   )
