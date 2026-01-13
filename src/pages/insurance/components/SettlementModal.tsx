@@ -645,8 +645,7 @@ export default function SettlementModal({
                             <td className="border border-gray-300 px-3 py-2">{item.manager || '-'}</td>
                           </tr>
                         )
-
-                        return row
+                      })
                       })
 
                         // 합계 행 추가
