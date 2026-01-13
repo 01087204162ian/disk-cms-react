@@ -285,7 +285,6 @@ export default function SettlementListModal({
         <div className="mb-4 flex flex-wrap gap-2 items-end justify-between">
           <div className="flex flex-wrap gap-2 items-end">
             <div>
-              <label className="block text-xs font-medium mb-1">시작일</label>
               <input
                 type="date"
                 className="px-2 py-1 text-sm border border-border rounded"
@@ -294,7 +293,6 @@ export default function SettlementListModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">종료일</label>
               <input
                 type="date"
                 className="px-2 py-1 text-sm border border-border rounded"
@@ -303,7 +301,6 @@ export default function SettlementListModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">담당자</label>
               <select
                 className="px-2 py-1 text-sm border border-border rounded"
                 value={damdanga}
@@ -318,7 +315,6 @@ export default function SettlementListModal({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">구분</label>
               <select
                 className="px-2 py-1 text-sm border border-border rounded"
                 value={attempted}
@@ -337,38 +333,37 @@ export default function SettlementListModal({
                 {loading ? '조회 중...' : '검색'}
               </button>
             </div>
+            {/* 통계 영역 - 검색 버튼 우측에 배치 */}
+            {statistics && (
+              <div className="flex gap-4 items-center ml-4">
+                <div className="text-center">
+                  <div className="text-xs font-medium text-primary">전체건</div>
+                  <div className="font-bold text-sm">{statistics.totalCount || 0}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-primary">전체금액</div>
+                  <div className="font-bold text-sm text-primary">{formatAmount(statistics.totalAdjustmentAmount || 0)}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-green-600">받은건</div>
+                  <div className="font-bold text-sm">{statistics.receivedCount || 0}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-green-600">받은금액</div>
+                  <div className="font-bold text-sm text-green-600">{formatAmount(statistics.totalReceivedAmount || 0)}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-red-600">미수건</div>
+                  <div className="font-bold text-sm">{statistics.unpaidCount || 0}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-red-600">미수금액</div>
+                  <div className="font-bold text-sm text-red-600">{formatAmount(statistics.totalUnpaidAmount || 0)}</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* 통계 영역 */}
-        {statistics && (
-          <div className="mb-4 p-3 bg-gray-50 rounded flex gap-4 items-center">
-            <div className="text-center">
-              <div className="text-xs font-medium text-primary">전체건</div>
-              <div className="font-bold">{statistics.totalCount || 0}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs font-medium text-primary">전체금액</div>
-              <div className="font-bold text-primary">{formatAmount(statistics.totalAdjustmentAmount || 0)}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs font-medium text-green-600">받은건</div>
-              <div className="font-bold">{statistics.receivedCount || 0}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs font-medium text-green-600">받은금액</div>
-              <div className="font-bold text-green-600">{formatAmount(statistics.totalReceivedAmount || 0)}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs font-medium text-red-600">미수건</div>
-              <div className="font-bold">{statistics.unpaidCount || 0}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs font-medium text-red-600">미수금액</div>
-              <div className="font-bold text-red-600">{formatAmount(statistics.totalUnpaidAmount || 0)}</div>
-            </div>
-          </div>
-        )}
 
         {/* 리스트 테이블 */}
         <div className="overflow-x-auto border border-border rounded">
