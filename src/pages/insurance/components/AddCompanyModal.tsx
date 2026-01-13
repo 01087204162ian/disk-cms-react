@@ -15,6 +15,8 @@ interface AddCompanyModalProps {
 
 interface JuminCheckResult {
   checked: boolean
+  exists: boolean
+  dNum: number | null
   isValid: boolean
 }
 
@@ -25,6 +27,7 @@ export default function AddCompanyModal({
 }: AddCompanyModalProps) {
   const toast = useToastHelpers()
   const [saving, setSaving] = useState(false)
+  const [checkingJumin, setCheckingJumin] = useState(false)
   
   // 입력 필드 상태
   const [jumin, setJumin] = useState('')
@@ -35,9 +38,11 @@ export default function AddCompanyModal({
   const [cNumber, setCNumber] = useState('')
   const [lNumber, setLNumber] = useState('')
   
-  // 주민번호 검증 결과 (13자리 숫자인지만 확인)
+  // 주민번호 검증 결과
   const [juminCheckResult, setJuminCheckResult] = useState<JuminCheckResult>({
     checked: false,
+    exists: false,
+    dNum: null,
     isValid: false,
   })
 
@@ -53,6 +58,8 @@ export default function AddCompanyModal({
       setLNumber('')
       setJuminCheckResult({
         checked: false,
+        exists: false,
+        dNum: null,
         isValid: false,
       })
     }
@@ -77,13 +84,15 @@ export default function AddCompanyModal({
     if (juminCheckResult.checked) {
       setJuminCheckResult({
         checked: false,
+        exists: false,
+        dNum: null,
         isValid: false,
       })
     }
   }
 
-  // 주민번호 검증 (엔터키) - 13자리 숫자인지만 확인
-  const handleJuminKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  // 주민번호 검증 (엔터키) - 서버와 통신하여 신규 등록 가능 여부 확인
+  const handleJuminKeyPress = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return
     
     e.preventDefault()
@@ -95,18 +104,62 @@ export default function AddCompanyModal({
       toast.error('주민번호는 13자리 숫자여야 합니다. 예: 660327-1069017')
       setJuminCheckResult({
         checked: true,
+        exists: false,
+        dNum: null,
         isValid: false,
       })
       return
     }
 
-    // 13자리 숫자 확인 완료
-    setJuminCheckResult({
-      checked: true,
-      isValid: true,
-    })
-    
-    toast.success('주민번호 형식이 올바릅니다.')
+    // 서버에서 주민번호로 기존 회사 조회
+    try {
+      setCheckingJumin(true)
+      const response = await api.get(`/api/insurance/kj-company/check-jumin`, {
+        params: { jumin: juminValue },
+      })
+
+      const data = response.data
+      const exists = data.exists || false
+      const dNum = data.dNum || null
+
+      setJuminCheckResult({
+        checked: true,
+        exists,
+        dNum,
+        isValid: true,
+      })
+
+      if (exists && dNum) {
+        // 기존 회사 존재 - 해당 회사 정보 불러오기
+        toast.warning('이미 등록된 주민번호입니다. 기존 회사 정보를 불러옵니다.')
+        // 기존 회사 정보 불러오기
+        if (onSuccess) {
+          onSuccess(dNum, data.companyName || '')
+        }
+        onClose()
+      } else {
+        // 신규 등록 가능
+        toast.success('신규 등록 가능한 주민번호입니다.')
+        // 회사명 입력 필드로 포커스 이동 (다음 입력 필드로 자동 이동)
+        const companyInput = document.getElementById('company-input')
+        if (companyInput) {
+          setTimeout(() => {
+            companyInput.focus()
+          }, 100)
+        }
+      }
+    } catch (error: any) {
+      console.error('주민번호 확인 오류:', error)
+      toast.error('주민번호 확인 중 오류가 발생했습니다.')
+      setJuminCheckResult({
+        checked: false,
+        exists: false,
+        dNum: null,
+        isValid: false,
+      })
+    } finally {
+      setCheckingJumin(false)
+    }
   }
 
   // 핸드폰번호 포맷팅
@@ -144,14 +197,18 @@ export default function AddCompanyModal({
 
   // 저장
   const handleSave = async () => {
-    // 주민번호 13자리 확인
-    const juminValue = jumin.trim()
-    const juminDigits = juminValue.replace(/[^0-9]/g, '')
-    
-    if (juminDigits.length !== 13) {
-      toast.error('주민번호는 13자리 숫자여야 합니다. (주민번호 입력 후 엔터키로 확인)')
+    // 주민번호 검증 확인
+    if (!juminCheckResult.checked) {
+      toast.error('주민번호를 먼저 확인해주세요. (주민번호 입력 후 엔터키)')
       return
     }
+
+    if (juminCheckResult.exists) {
+      toast.error('이미 등록된 주민번호입니다. 기존 회사 정보를 확인해주세요.')
+      return
+    }
+
+    const juminValue = jumin.trim()
 
     // 필수 입력 필드 검증
     const companyValue = company.trim()
@@ -235,6 +292,7 @@ export default function AddCompanyModal({
                       value={jumin}
                       onChange={handleJuminChange}
                       onKeyPress={handleJuminKeyPress}
+                      disabled={checkingJumin}
                     />
                     <small className="text-muted-foreground text-xs">
                       주민번호 입력 후 엔터키를 눌러주세요.
@@ -245,6 +303,7 @@ export default function AddCompanyModal({
                   </th>
                   <td className="px-3 py-2 border border-border" style={{ width: '20%' }}>
                     <input
+                      id="company-input"
                       type="text"
                       className="w-full px-2 py-1 text-sm border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="회사명"
@@ -323,18 +382,23 @@ export default function AddCompanyModal({
         </div>
 
         {/* 주민번호 검증 결과 */}
-        {juminCheckResult.checked && (
+        {checkingJumin && (
+          <div className="p-3 rounded bg-blue-50 text-blue-800 border border-blue-200">
+            <span className="text-sm">주민번호 확인 중...</span>
+          </div>
+        )}
+        {juminCheckResult.checked && !checkingJumin && (
           <div
             className={`p-3 rounded ${
-              juminCheckResult.isValid
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
+              juminCheckResult.exists
+                ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+                : 'bg-green-50 text-green-800 border border-green-200'
             }`}
           >
             <span className="text-sm">
-              {juminCheckResult.isValid
-                ? '주민번호 형식이 올바릅니다.'
-                : '주민번호는 13자리 숫자여야 합니다.'}
+              {juminCheckResult.exists
+                ? '이미 등록된 주민번호입니다. 기존 회사 정보를 불러옵니다.'
+                : '신규 등록 가능한 주민번호입니다.'}
             </span>
           </div>
         )}
@@ -358,7 +422,7 @@ export default function AddCompanyModal({
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || checkingJumin}
             className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? '저장 중...' : '저장'}
