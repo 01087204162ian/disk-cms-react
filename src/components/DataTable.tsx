@@ -47,7 +47,8 @@ export default function DataTable<T extends Record<string, any>>({
         {columns.map((column) => (
           <th
             key={column.key}
-            className={`px-4 py-3 text-left text-sm font-medium text-foreground ${column.className || ''}`}
+            className={`px-2 py-2 text-left text-xs font-medium text-foreground ${column.className || ''}`}
+            style={{ fontSize: '0.75rem' }}
           >
             {column.header}
           </th>
@@ -67,9 +68,13 @@ export default function DataTable<T extends Record<string, any>>({
         >
           {columns.map((column) => {
             const hasZeroPadding = column.className?.includes('p-0')
-            const defaultPadding = hasZeroPadding ? '' : 'px-4 py-3'
+            const defaultPadding = hasZeroPadding ? '' : 'px-2 py-2'
             return (
-              <td key={column.key} className={`${defaultPadding} text-xs ${column.className || ''}`}>
+              <td 
+                key={column.key} 
+                className={`${defaultPadding} text-xs ${column.className || ''}`}
+                style={{ fontSize: '0.75rem' }}
+              >
                 {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
               </td>
             )
