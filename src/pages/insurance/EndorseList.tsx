@@ -3,12 +3,11 @@ import { BarChart3, List, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
 import {
   FilterBar,
+  FilterSelect,
   DataTable,
   type Column,
   useToastHelpers,
   DatePicker,
-  Select,
-  Button,
 } from '../../components'
 import { INSURER_MAP, GITA_MAP, RATE_NAME_MAP, addPhoneHyphen } from './constants'
 
@@ -312,89 +311,90 @@ export default function EndorseList() {
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
       {
+        key: 'num',
         header: 'No',
-        accessorKey: 'num',
-        cell: ({ row, index }) => {
+        cell: (row) => {
+          const index = endorseList.indexOf(row)
           const page = pagination.currentPage
           const pageSize = pagination.pageSize
           return (page - 1) * pageSize + index + 1
         },
-        size: 60,
+        className: 'w-12 text-center',
       },
       {
+        key: 'damdanja',
         header: '담당자',
-        accessorKey: 'damdanja',
-        cell: ({ row }) => row.damdanja || '-',
-        size: 100,
+        cell: (row) => row.damdanja || '-',
+        className: 'w-24',
       },
       {
+        key: 'companyName',
         header: '대리운전회사명',
-        accessorKey: 'companyName',
-        cell: ({ row }) => row.companyName || '-',
-        size: 150,
+        cell: (row) => row.companyName || '-',
+        className: 'w-36',
       },
       {
+        key: 'name',
         header: '성명',
-        accessorKey: 'name',
-        cell: ({ row }) => row.name || '-',
-        size: 100,
+        cell: (row) => row.name || '-',
+        className: 'w-24',
       },
       {
+        key: 'jumin',
         header: '주민번호(나이)',
-        accessorKey: 'jumin',
-        cell: ({ row }) => {
+        cell: (row) => {
           const jumin = row.jumin || ''
           const age = row.age ? `(${row.age})` : ''
           return jumin ? `${jumin} ${age}` : '-'
         },
-        size: 150,
+        className: 'w-36',
       },
       {
+        key: 'phone',
         header: '핸드폰',
-        accessorKey: 'phone',
-        cell: ({ row }) => (row.phone ? addPhoneHyphen(row.phone) : '-'),
-        size: 120,
+        cell: (row) => (row.phone ? addPhoneHyphen(row.phone) : '-'),
+        className: 'w-28',
       },
       {
+        key: 'progressStep',
         header: '진행단계',
-        accessorKey: 'progressStep',
-        cell: ({ row }) => PROGRESS_MAP[row.progressStep || ''] || row.progressStep || '-',
-        size: 100,
+        cell: (row) => PROGRESS_MAP[row.progressStep || ''] || row.progressStep || '-',
+        className: 'w-24',
       },
       {
+        key: 'manager',
         header: 'manager',
-        accessorKey: 'manager',
-        cell: ({ row }) => row.manager || '-',
-        size: 100,
+        cell: (row) => row.manager || '-',
+        className: 'w-24',
       },
       {
+        key: 'standardDate',
         header: '기준일',
-        accessorKey: 'standardDate',
-        cell: ({ row }) => row.standardDate || '-',
-        size: 120,
+        cell: (row) => row.standardDate || '-',
+        className: 'w-28',
       },
       {
+        key: 'applicationDate',
         header: '신청일',
-        accessorKey: 'applicationDate',
-        cell: ({ row }) => row.applicationDate || '-',
-        size: 120,
+        cell: (row) => row.applicationDate || '-',
+        className: 'w-28',
       },
       {
+        key: 'policyNum',
         header: '증권번호',
-        accessorKey: 'policyNum',
-        cell: ({ row }) => row.policyNum || '-',
-        size: 150,
+        cell: (row) => row.policyNum || '-',
+        className: 'w-36',
       },
       {
+        key: 'certiType',
         header: '증권성격',
-        accessorKey: 'certiType',
-        cell: ({ row }) => GITA_MAP[Number(row.certiType)] || row.certiType || '-',
-        size: 100,
+        cell: (row) => GITA_MAP[Number(row.certiType)] || row.certiType || '-',
+        className: 'w-24',
       },
       {
+        key: 'rate',
         header: '요율',
-        accessorKey: 'rate',
-        cell: ({ row }) => {
+        cell: (row) => {
           const rate = row.rate
           if (!rate) return '-'
           const rateName = RATE_NAME_MAP[Number(rate)] || rate
@@ -404,50 +404,48 @@ export default function EndorseList() {
             </span>
           )
         },
-        size: 80,
+        className: 'w-20',
       },
       {
+        key: 'push',
         header: '상태',
-        accessorKey: 'push',
-        cell: ({ row }) => PUSH_MAP[String(row.push)] || row.push || '-',
-        size: 80,
+        cell: (row) => PUSH_MAP[String(row.push)] || row.push || '-',
+        className: 'w-20',
       },
       {
+        key: 'endorseProcess',
         header: '배서처리',
-        accessorKey: 'endorseProcess',
-        cell: ({ row }) => row.endorseProcess || '-',
-        size: 100,
+        cell: (row) => row.endorseProcess || '-',
+        className: 'w-24',
       },
       {
+        key: 'insuranceCom',
         header: '보험사',
-        accessorKey: 'insuranceCom',
-        cell: ({ row }) => INSURER_MAP[Number(row.insuranceCom)] || row.insuranceCom || '-',
-        size: 80,
+        cell: (row) => INSURER_MAP[Number(row.insuranceCom)] || row.insuranceCom || '-',
+        className: 'w-20',
       },
       {
+        key: 'premium',
         header: '보험료',
-        accessorKey: 'premium',
-        cell: ({ row }) =>
+        cell: (row) =>
           row.premium ? row.premium.toLocaleString('ko-KR') : '-',
-        size: 120,
-        className: 'text-end',
+        className: 'w-28 text-end',
       },
       {
+        key: 'cPremium',
         header: 'C보험료',
-        accessorKey: 'cPremium',
-        cell: ({ row }) =>
+        cell: (row) =>
           row.cPremium ? row.cPremium.toLocaleString('ko-KR') : '-',
-        size: 120,
-        className: 'text-end',
+        className: 'w-28 text-end',
       },
       {
+        key: 'duplicate',
         header: '중복여부',
-        accessorKey: 'duplicate',
-        cell: ({ row }) => row.duplicate || '-',
-        size: 100,
+        cell: (row) => row.duplicate || '-',
+        className: 'w-24',
       },
     ],
-    [pagination]
+    [endorseList, pagination]
   )
 
   // 배서현황 버튼 클릭
@@ -470,53 +468,47 @@ export default function EndorseList() {
       <FilterBar
         actionButtons={
           <>
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleEndorseStatus}
-              className="h-[31px] text-xs"
+              className="h-[31px] px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1"
             >
-              <BarChart3 className="w-3.5 h-3.5 mr-1" />
+              <BarChart3 className="w-3.5 h-3.5" />
               배서현황
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
               onClick={handleDailyEndorseList}
-              className="h-[31px] text-xs"
+              className="h-[31px] px-3 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors flex items-center gap-1"
             >
-              <List className="w-3.5 h-3.5 mr-1" />
+              <List className="w-3.5 h-3.5" />
               일일배서리스트
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
               onClick={handleSmsList}
-              className="h-[31px] text-xs"
+              className="h-[31px] px-3 py-1 text-xs border border-info text-info rounded hover:bg-info hover:text-white transition-colors flex items-center gap-1"
             >
-              <MessageSquare className="w-3.5 h-3.5 mr-1" />
+              <MessageSquare className="w-3.5 h-3.5" />
               문자리스트
-            </Button>
+            </button>
           </>
         }
       >
-        <FilterBar.Select
+        <FilterSelect
           value={filters.push}
-          onChange={(e) => {
-            setFilters({ ...filters, push: e.target.value })
+          onChange={(value) => {
+            setFilters({ ...filters, push: value })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={PUSH_OPTIONS}
-          style={{ width: '90px' }}
+          className="w-[90px]"
         />
-        <FilterBar.Select
+        <FilterSelect
           value={filters.progress}
-          onChange={(e) => {
-            setFilters({ ...filters, progress: e.target.value })
+          onChange={(value) => {
+            setFilters({ ...filters, progress: value })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={PROGRESS_OPTIONS}
-          style={{ width: '110px' }}
+          className="w-[110px]"
         />
         <DatePicker
           value={filters.endorseDay}
@@ -525,56 +517,67 @@ export default function EndorseList() {
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
-          style={{ width: '140px' }}
+          className="w-[140px]"
         />
-        <FilterBar.Select
+        <FilterSelect
           value={filters.insuranceCom}
-          onChange={(e) => {
-            setFilters({ ...filters, insuranceCom: e.target.value })
+          onChange={(value) => {
+            setFilters({ ...filters, insuranceCom: value })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={insurerOptions}
-          style={{ width: '156px' }}
+          className="w-[156px]"
         />
-        <FilterBar.Select
+        <FilterSelect
           value={filters.policyNum}
-          onChange={(e) => {
-            setFilters({ ...filters, policyNum: e.target.value, companyNum: '' })
+          onChange={(value) => {
+            setFilters({ ...filters, policyNum: value, companyNum: '' })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={policySelectOptions}
-          style={{ width: '180px' }}
+          className="w-[180px]"
         />
-        <FilterBar.Select
+        <select
           value={filters.companyNum}
           onChange={(e) => {
             setFilters({ ...filters, companyNum: e.target.value })
             setPagination({ ...pagination, currentPage: 1 })
           }}
-          options={companySelectOptions}
           disabled={!filters.policyNum}
-          style={{ width: '182px' }}
-        />
-        <FilterBar.Select
+          className="h-10 px-3 py-0 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm leading-none font-normal appearance-none cursor-pointer w-[182px] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            fontFamily: 'inherit',
+            lineHeight: '1.5',
+            boxSizing: 'border-box',
+            minHeight: '40px',
+            height: '40px',
+          }}
+        >
+          {companySelectOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <FilterSelect
           value={filters.pageSize}
-          onChange={(e) => {
-            setFilters({ ...filters, pageSize: e.target.value })
-            setPagination({ ...pagination, pageSize: parseInt(e.target.value) })
-            loadEndorseList(pagination.currentPage, parseInt(e.target.value))
+          onChange={(value) => {
+            setFilters({ ...filters, pageSize: value })
+            const newPageSize = parseInt(value)
+            setPagination({ ...pagination, pageSize: newPageSize, currentPage: 1 })
+            loadEndorseList(1, newPageSize)
           }}
           options={PAGE_SIZE_OPTIONS}
-          style={{ width: '75px' }}
+          className="w-[75px]"
         />
-        <FilterBar.Stats>
-          <div className="flex items-center gap-1 text-xs bg-info/10 border border-info text-dark px-2 py-1 rounded h-[31px]">
-            <strong>청약:</strong>
-            <span>{stats.subscription.toLocaleString('ko-KR')}</span>,
-            <strong>해지:</strong>
-            <span>{stats.cancellation.toLocaleString('ko-KR')}</span>,
-            <strong>계:</strong>
-            <span>{stats.total.toLocaleString('ko-KR')}</span>
-          </div>
-        </FilterBar.Stats>
+        <div className="flex items-center gap-1 text-xs bg-info/10 border border-info text-dark px-2 py-1 rounded h-[31px] ml-auto">
+          <strong>청약:</strong>
+          <span>{stats.subscription.toLocaleString('ko-KR')}</span>,
+          <strong>해지:</strong>
+          <span>{stats.cancellation.toLocaleString('ko-KR')}</span>,
+          <strong>계:</strong>
+          <span>{stats.total.toLocaleString('ko-KR')}</span>
+        </div>
       </FilterBar>
 
       <DataTable
@@ -585,7 +588,6 @@ export default function EndorseList() {
           currentPage: pagination.currentPage,
           pageSize: pagination.pageSize,
           totalCount: pagination.totalCount,
-          totalPages: pagination.totalPages,
           onPageChange: (page) => {
             setPagination({ ...pagination, currentPage: page })
             loadEndorseList(page, pagination.pageSize)
