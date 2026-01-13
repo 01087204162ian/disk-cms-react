@@ -98,6 +98,9 @@ export default function CompanyDetailModal({
   } | null>(null)
   const [premiumModalOpen, setPremiumModalOpen] = useState(false)
   const [selectedPremiumCertiNum, setSelectedPremiumCertiNum] = useState<number | null>(null)
+  const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false)
+  const [editingBasicInfo, setEditingBasicInfo] = useState<Partial<CompanyDetail>>({})
+  const [savingBasicInfo, setSavingBasicInfo] = useState(false)
 
   useEffect(() => {
     if (isOpen && companyNum) {
@@ -105,9 +108,11 @@ export default function CompanyDetailModal({
     } else {
       setDetail(null)
       setEditingPolicies([])
-      setMemoData([])
-      setContentData([])
-      setSmsData([])
+        setMemoData([])
+        setContentData([])
+        setSmsData([])
+        setIsEditingBasicInfo(false)
+        setEditingBasicInfo({})
     }
   }, [isOpen, companyNum])
 
@@ -240,6 +245,66 @@ export default function CompanyDetailModal({
     return NA_STATE_COLORS[color] || 'text-gray-600'
   }
 
+  // 기본 정보 수정 모드 시작
+  const handleStartEditBasicInfo = () => {
+    if (!detail) return
+    setEditingBasicInfo({ ...detail })
+    setIsEditingBasicInfo(true)
+  }
+
+  // 기본 정보 수정 취소
+  const handleCancelEditBasicInfo = () => {
+    setEditingBasicInfo({})
+    setIsEditingBasicInfo(false)
+  }
+
+  // 기본 정보 저장
+  const handleSaveBasicInfo = async () => {
+    if (!companyNum || !detail) return
+
+    try {
+      setSavingBasicInfo(true)
+      const response = await api.post('/api/insurance/kj-company/store', {
+        dNum: companyNum,
+        jumin: editingBasicInfo.jumin || detail.jumin || '',
+        company: editingBasicInfo.company || detail.company || '',
+        Pname: editingBasicInfo.Pname || detail.Pname || '',
+        hphone: editingBasicInfo.hphone || detail.hphone || '',
+        cphone: editingBasicInfo.cphone || detail.cphone || '',
+        cNumber: editingBasicInfo.cNumber || detail.cNumber || '',
+        lNumber: editingBasicInfo.lNumber || detail.lNumber || '',
+        postNum: editingBasicInfo.postNum || detail.postNum || '',
+        address1: editingBasicInfo.address1 || detail.address1 || '',
+        address2: editingBasicInfo.address2 || detail.address2 || '',
+      })
+
+      if (response.data.success) {
+        toast.success('기본 정보가 저장되었습니다.')
+        setIsEditingBasicInfo(false)
+        setEditingBasicInfo({})
+        // 모달 재조회
+        setTimeout(() => {
+          loadDetail()
+        }, 300)
+      } else {
+        toast.error(response.data.error || '저장 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('기본 정보 저장 오류:', error)
+      toast.error(error.response?.data?.error || '저장 중 오류가 발생했습니다.')
+    } finally {
+      setSavingBasicInfo(false)
+    }
+  }
+
+  // 기본 정보 편집 상태 업데이트
+  const updateEditingBasicInfo = (field: keyof CompanyDetail, value: any) => {
+    setEditingBasicInfo((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // 표시할 기본 정보 (편집 중이면 editingBasicInfo, 아니면 detail)
+  const displayBasicInfo = isEditingBasicInfo ? editingBasicInfo : detail
+
   return (
     <Modal
       isOpen={isOpen}
@@ -256,49 +321,146 @@ export default function CompanyDetailModal({
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <h6 className="text-sm font-semibold mb-0">기본 정보</h6>
-              <button
-                type="button"
-                className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors flex items-center gap-1"
-                onClick={() => {
-                  // Phase 5: 수정 기능 구현 예정
-                  console.log('수정 버튼 클릭')
-                }}
-              >
-                <span>수정</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {isEditingBasicInfo ? (
+                  <>
+                    <button
+                      type="button"
+                      className="px-3 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                      onClick={handleCancelEditBasicInfo}
+                      disabled={savingBasicInfo}
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                      onClick={handleSaveBasicInfo}
+                      disabled={savingBasicInfo}
+                    >
+                      {savingBasicInfo ? '저장 중...' : '저장'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors flex items-center gap-1"
+                    onClick={handleStartEditBasicInfo}
+                  >
+                    <span>수정</span>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="border border-border rounded overflow-hidden">
               <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
                 <tbody>
                   <tr>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">주민번호</th>
-                    <td className="px-3 py-2 border border-border">{detail?.jumin || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.jumin || ''}
+                          onChange={(e) => updateEditingBasicInfo('jumin', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.jumin || '-'
+                      )}
+                    </td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">대리운전회사</th>
-                    <td className="px-3 py-2 border border-border">{detail?.company || companyName || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.company || companyName || ''}
+                          onChange={(e) => updateEditingBasicInfo('company', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.company || companyName || '-'
+                      )}
+                    </td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">성명</th>
-                    <td className="px-3 py-2 border border-border">{detail?.Pname || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.Pname || ''}
+                          onChange={(e) => updateEditingBasicInfo('Pname', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.Pname || '-'
+                      )}
+                    </td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">핸드폰번호</th>
-                    <td className="px-3 py-2 border border-border">{detail?.hphone || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.hphone || ''}
+                          onChange={(e) => updateEditingBasicInfo('hphone', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.hphone || '-'
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">전화번호</th>
-                    <td className="px-3 py-2 border border-border">{detail?.cphone || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.cphone || ''}
+                          onChange={(e) => updateEditingBasicInfo('cphone', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.cphone || '-'
+                      )}
+                    </td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">담당자</th>
-                    <td className="px-3 py-2 border border-border">{detail?.name || detail?.damdanga || '-'}</td>
+                    <td className="px-3 py-2 border border-border">{displayBasicInfo?.name || displayBasicInfo?.damdanga || '-'}</td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">팩스</th>
-                    <td className="px-3 py-2 border border-border">{detail?.fax || '-'}</td>
+                    <td className="px-3 py-2 border border-border">{displayBasicInfo?.fax || '-'}</td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">사업자번호</th>
-                    <td className="px-3 py-2 border border-border">{detail?.cNumber || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.cNumber || ''}
+                          onChange={(e) => updateEditingBasicInfo('cNumber', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.cNumber || '-'
+                      )}
+                    </td>
                   </tr>
                   <tr>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">법인번호</th>
-                    <td className="px-3 py-2 border border-border">{detail?.lNumber || '-'}</td>
+                    <td className="px-3 py-2 border border-border">
+                      {isEditingBasicInfo ? (
+                        <input
+                          type="text"
+                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          value={displayBasicInfo?.lNumber || ''}
+                          onChange={(e) => updateEditingBasicInfo('lNumber', e.target.value)}
+                        />
+                      ) : (
+                        displayBasicInfo?.lNumber || '-'
+                      )}
+                    </td>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">보험료 받는날</th>
                     <td className="px-3 py-2 border border-border">
                       <input
                         type="date"
                         className="w-full px-2 py-1 text-xs border-0 bg-transparent"
-                        value={detail?.FirstStart ? detail.FirstStart.substring(0, 10) : ''}
+                        value={displayBasicInfo?.FirstStart ? displayBasicInfo.FirstStart.substring(0, 10) : ''}
                         readOnly
                       />
                     </td>
@@ -312,15 +474,41 @@ export default function CompanyDetailModal({
                           console.log('업체 I.D 관리 모달 열기')
                         }}
                       >
-                        {detail?.mem_id || '클릭하여 관리'}
+                        {displayBasicInfo?.mem_id || '클릭하여 관리'}
                       </button>
-                      {String(detail?.permit) === '1' ? ' (허용)' : String(detail?.permit) === '2' ? ' (차단)' : ''}
+                      {String(displayBasicInfo?.permit) === '1' ? ' (허용)' : String(displayBasicInfo?.permit) === '2' ? ' (차단)' : ''}
                     </td>
                   </tr>
                   <tr>
                     <th className="bg-gray-100 px-3 py-2 text-left font-medium border border-border">주소</th>
                     <td colSpan={7} className="px-3 py-2 border border-border">
-                      {[detail?.postNum, detail?.address1, detail?.address2].filter(Boolean).join(' ') || '-'}
+                      {isEditingBasicInfo ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            className="w-24 px-2 py-1 text-xs border border-gray-300 rounded"
+                            placeholder="우편번호"
+                            value={displayBasicInfo?.postNum || ''}
+                            onChange={(e) => updateEditingBasicInfo('postNum', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+                            placeholder="주소1"
+                            value={displayBasicInfo?.address1 || ''}
+                            onChange={(e) => updateEditingBasicInfo('address1', e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+                            placeholder="주소2"
+                            value={displayBasicInfo?.address2 || ''}
+                            onChange={(e) => updateEditingBasicInfo('address2', e.target.value)}
+                          />
+                        </div>
+                      ) : (
+                        [displayBasicInfo?.postNum, displayBasicInfo?.address1, displayBasicInfo?.address2].filter(Boolean).join(' ') || '-'
+                      )}
                     </td>
                   </tr>
                 </tbody>
