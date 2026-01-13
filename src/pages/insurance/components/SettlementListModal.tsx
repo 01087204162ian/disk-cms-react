@@ -217,16 +217,27 @@ export default function SettlementListModal({
       'system'
 
     try {
-      const response = await api.post('/api/insurance/kj-company/settlement/list-save', {
-        id,
-        memo: memo || null,
+      // 원본과 동일하게 빈 문자열도 그대로 전송
+      const requestData = {
+        id: id,
+        memo: memo,
         receiveUser: userName,
+      }
+
+      const response = await fetch('/api/insurance/kj-company/settlement/list-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
       })
 
-      if (response.data.success) {
+      const data = await response.json()
+
+      if (data.success) {
         // 성공 (조용히 저장)
       } else {
-        toast.error(response.data.error || '저장에 실패했습니다.')
+        toast.error(data.message || data.error || '저장에 실패했습니다.')
       }
     } catch (error: any) {
       console.error('메모 저장 오류:', error)
