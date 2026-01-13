@@ -288,19 +288,18 @@ export default function SettlementModal({
         (typeof window !== 'undefined' && window.localStorage?.getItem('userName')) ||
         'system'
 
-      // 원본과 동일하게 FormData 사용
-      const formData = new URLSearchParams()
-      formData.append('jumin', jumin)
-      formData.append('memo', memo)
-      formData.append('memokind', '일반')
-      formData.append('userid', userName)
-
+      // 원본과 동일하게 JSON 사용
       const response = await fetch('/api/insurance/kj-company/settlement/memo-save', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: formData.toString(),
+        body: JSON.stringify({
+          jumin,
+          memo,
+          memokind: '일반',
+          userid: userName,
+        }),
       })
 
       const result = await response.json()
@@ -408,7 +407,6 @@ export default function SettlementModal({
           {/* 날짜 필터 */}
           <div className="mb-4 flex flex-wrap gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium mb-1">시작일</label>
               <input
                 type="date"
                 className="px-3 py-1.5 text-sm border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary"
@@ -417,7 +415,6 @@ export default function SettlementModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">종료일</label>
               <input
                 type="date"
                 className="px-3 py-1.5 text-sm border border-border rounded focus:outline-none focus:ring-2 focus:ring-primary"
@@ -435,6 +432,11 @@ export default function SettlementModal({
               >
                 배서리스트 조회
               </button>
+            </div>
+            {/* 업체에 통보할 보험료 - 검색 버튼 우측에 배치 */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">업체에 통보할 보험료:</span>
+              <span className="text-sm text-muted-foreground font-semibold">{formatNumber(totalPremium)}원</span>
             </div>
             <div className="ms-auto">
               <button
@@ -607,30 +609,24 @@ export default function SettlementModal({
             </div>
           </div>
 
-          {/* 업체에 통보할 보험료 */}
-          <div className="mb-4 p-3 bg-gray-50 rounded">
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="text-sm font-medium">업체에 통보할 보험료</h4>
-              <div className="flex gap-2">
-                <button
-                  className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
-                  onClick={() => {
-                    setConfirmPremiumModalOpen(true)
-                  }}
-                >
-                  확정보험료 입력
-                </button>
-                <button
-                  className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                  onClick={() => {
-                    setSettlementListModalOpen(true)
-                  }}
-                >
-                  정산리스트
-                </button>
-              </div>
-            </div>
-            <div className="text-sm text-muted-foreground">{formatNumber(totalPremium)}원</div>
+          {/* 업체에 통보할 보험료 버튼들 */}
+          <div className="mb-4 flex gap-2">
+            <button
+              className="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+              onClick={() => {
+                setConfirmPremiumModalOpen(true)
+              }}
+            >
+              확정보험료 입력
+            </button>
+            <button
+              className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              onClick={() => {
+                setSettlementListModalOpen(true)
+              }}
+            >
+              정산리스트
+            </button>
           </div>
 
           {/* 메모 입력 */}
