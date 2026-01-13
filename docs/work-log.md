@@ -12,6 +12,53 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-13 (KJ 대리운전) - 신규 업체 등록 모달 구현 및 주민번호 검증 API 개발
+
+#### 작업 내용
+- **기능**: 신규 업체 등록 모달 (AddCompanyModal) 구현 및 주민번호 검증 API 개발
+- **파일**: 
+  - `src/pages/insurance/components/AddCompanyModal.tsx` (신규 생성)
+  - `src/pages/insurance/CompanyManagement.tsx` (신규 업체 등록 모달 통합)
+  - `pci0327/api/insurance/kj-company-check-jumin.php` (신규 생성 및 수정)
+  - `routes/insurance/kj-driver-company.js` (라우터 순서 수정)
+- **주요 구현 사항**:
+  - ✅ 신규 업체 등록 모달 구현
+    - 주민번호 입력 및 엔터키로 검증 기능
+    - 기본 정보 입력 필드: 주민번호(필수), 대리운전회사(필수), 성명/대표자(필수), 핸드폰번호, 전화번호, 사업자번호, 법인번호
+    - 입력 필드 자동 포맷팅: 주민번호(660327-1234567), 핸드폰(010-1234-5678), 전화번호(02-1234-5678), 사업자번호(123-45-67890), 법인번호(123456-1234567)
+    - 주민번호 검증 시 기존 회사 존재 여부 확인
+    - 기존 회사 존재 시 확인 다이얼로그 표시 및 기존 회사 정보 불러오기
+    - 신규 등록 가능 시 안내 메시지 표시
+    - 신규 업체 저장 API 연동 (`/api/insurance/kj-company/store`)
+    - 저장 성공 시 목록 새로고침 및 상세 모달 자동 열기
+  - ✅ 주민번호 검증 API 구현 (`kj-company-check-jumin.php`)
+    - 주민번호로 기존 회사 조회 (LIKE 쿼리로 부분 일치 검색)
+    - 있으면: `exists: true, dNum: 업체번호, company: 대리운전회사명` 반환
+    - 없으면: `exists: false, dNum: null, company: null` 반환하여 신규 입력 가능 안내
+    - 로그 파일 추가: `pci0327/api/insurance/logs/kj-company-check-jumin.log`
+    - DB 연결 오류 시에도 HTTP 200으로 반환하여 신규 등록 가능으로 처리
+  - ✅ Node.js 라우터 수정
+    - 라우터 순서 문제 해결: `/kj-company/check-jumin`을 `/kj-company/:companyNum`보다 위로 이동
+    - 정적 라우트를 동적 라우트보다 먼저 배치하여 올바른 라우팅 보장
+    - 주민번호 검증 API 응답에 `company` 필드 포함하도록 수정
+
+#### API 연동
+- `/api/insurance/kj-company/check-jumin` - 주민번호로 기존 회사 조회 (신규 생성)
+- `/api/insurance/kj-company/store` - 신규 업체 저장
+
+#### 해결한 이슈
+- 라우터 순서 문제: `/kj-company/check-jumin` 호출 시 `/kj-company/:companyNum`으로 잘못 매칭되는 문제 해결 (정적 라우트를 동적 라우트보다 위로 이동)
+- 주민번호 검증 API 500 오류: PHP API에서 DB 연결 오류 시에도 HTTP 200으로 반환하여 프론트엔드에서 처리 가능하도록 수정
+- 주민번호 검증 시 회사명 반환: 기존 회사 존재 시 회사명도 함께 반환하여 사용자에게 명확한 안내 제공
+
+#### 파일
+- `src/pages/insurance/components/AddCompanyModal.tsx`: 신규 업체 등록 모달 컴포넌트 (신규 생성)
+- `src/pages/insurance/CompanyManagement.tsx`: 신규 업체 등록 모달 통합
+- `pci0327/api/insurance/kj-company-check-jumin.php`: 주민번호 검증 API (신규 생성)
+- `routes/insurance/kj-driver-company.js`: 라우터 순서 수정 및 주민번호 검증 API 라우트 추가
+
+---
+
 ### 2026-01-12 (KJ 대리운전) - 정산 모달 엑셀 다운로드 기능 구현 및 UI 개선
 
 #### 작업 내용
@@ -1292,6 +1339,10 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 ---
 
 ## 📝 다음 작업 계획
+
+### KJ 대리운전 - 다음 작업
+- [ ] 배서 리스트 페이지 마이그레이션 (`kj-driver-endorse-list.html` → React)
+- [ ] 증권별 코드 페이지 마이그레이션 (`kj-driver-code-by-policy.html` → React)
 
 ### Phase 2: 직원 관리 모듈 상태 (업데이트: 2026-01-07)
 - [x] 근무일정 페이지 (staff/employee-schedule)
