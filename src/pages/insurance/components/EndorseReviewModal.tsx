@@ -53,7 +53,6 @@ export default function EndorseReviewModal({
   const [loading, setLoading] = useState(false)
   const [date, setDate] = useState(initialDate || '')
   const [companyNum, setCompanyNum] = useState(initialCompanyNum || '')
-  const [companyName, setCompanyName] = useState(initialCompanyName || '')
   const [companyOptions, setCompanyOptions] = useState<{ value: string; label: string }[]>([])
   const [data, setData] = useState<EndorseReviewData | null>(null)
 

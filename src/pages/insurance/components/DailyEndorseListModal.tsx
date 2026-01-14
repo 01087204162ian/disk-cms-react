@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Modal, useToastHelpers, DatePicker, FilterSelect } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_MAP, PUSH_MAP, GITA_OPTIONS } from '../constants'
+import { INSURER_MAP, GITA_OPTIONS, PUSH_MAP } from '../constants'
 import { List, CheckCircle2 } from 'lucide-react'
 import EndorseReviewModal from './EndorseReviewModal'
 
@@ -295,7 +295,6 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       toast.error('날짜를 선택해주세요.')
       return
     }
-    const selectedCompany = companyOptions.find((opt) => opt.value === companyNum)
     setEndorseStatusModalOpen(true)
   }
 
@@ -435,15 +434,18 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 px-2 py-2 text-center" style={getStatusStyle(item.push)}>
                             {(() => {
                               const push = String(item.push)
-                              const pushType: Record<string, string> = {
-                                '1': '청약',
+                              // PUSH_MAP 사용, 없는 경우만 추가 매핑
+                              if (PUSH_MAP[push]) {
+                                return PUSH_MAP[push]
+                              }
+                              // PUSH_MAP에 없는 값들에 대한 추가 매핑
+                              const additionalMap: Record<string, string> = {
                                 '2': '해지',
                                 '3': '청약거절',
-                                '4': '정상',
                                 '5': '해지취소',
                                 '6': '청약취소',
                               }
-                              return pushType[push] || push || '-'
+                              return additionalMap[push] || push || '-'
                             })()}
                           </td>
                           <td className="border border-gray-300 px-2 py-2">{item.policyNum || '-'}</td>
