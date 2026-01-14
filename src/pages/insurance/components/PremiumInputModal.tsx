@@ -190,20 +190,20 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     // 콤마 제거 후 숫자로 변환
     let processedValue: string | number | null = value.replace(/,/g, '').trim()
 
-    // 나이 필드 (start_month, end_month)는 숫자만
+    // 나이 필드 (start_month, end_month)는 숫자만 (콤마 없음)
     if (field === 'start_month' || field === 'end_month') {
       if (processedValue === '') {
         processedValue = null
       } else {
-        // 숫자만 허용
+        // 숫자만 허용 (정수만)
         const num = Number(processedValue)
-        if (!Number.isFinite(num)) {
+        if (!Number.isFinite(num) || !Number.isInteger(num)) {
           return // 유효하지 않은 숫자는 무시
         }
         processedValue = num
       }
     } else {
-      // 보험료 필드는 숫자 또는 null
+      // 보험료 필드는 숫자 또는 null (콤마 포함)
       if (processedValue === '') {
         processedValue = null
       } else {
@@ -232,9 +232,14 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     }
   }
 
-  // 입력 필드 포맷팅 (콤마 추가)
-  const formatInputValue = (val: number | string | null | undefined): string => {
+  // 입력 필드 포맷팅 (나이는 콤마 없이, 보험료는 콤마 포함)
+  const formatInputValue = (val: number | string | null | undefined, isAge: boolean = false): string => {
     if (val === null || val === undefined || val === '' || val === 0 || val === '0') return ''
+    // 나이 필드는 콤마 없이 숫자만 표시
+    if (isAge) {
+      return String(val)
+    }
+    // 보험료 필드는 콤마 포함
     return addComma(val)
   }
 
@@ -306,15 +311,15 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      maxWidth="lg"
-      maxHeight="85vh"
+      maxWidth="4xl"
+      maxHeight="70vh"
       footer={
         <div className="flex justify-end gap-2">
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+            className="px-3 py-1.5 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2 text-sm"
           >
             {saving ? (
               <>
@@ -323,7 +328,9 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
               </>
             ) : (
               <>
-                <span>💾</span>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                </svg>
                 {hasData ? '수정' : '저장'}
               </>
             )}
@@ -336,74 +343,79 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
           <LoadingSpinner size="md" />
         </div>
       ) : (
-        <div className="overflow-x-auto" style={{ maxHeight: 'calc(85vh - 200px)', overflowY: 'auto' }}>
-          <table className="w-full border-collapse border border-gray-300 text-sm">
+        <div className="overflow-x-auto" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          <table className="w-full border-collapse border border-gray-300 text-sm" style={{ fontSize: '0.875rem' }}>
             <thead>
-              <tr className="bg-[#6f42c1] text-white">
-                <th className="border border-gray-300 px-3 py-2 text-center">순번</th>
-                <th className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>
+              <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>순번</th>
+                <th className="border border-gray-300 px-2 py-1 text-center" colSpan={2} style={{ fontSize: '0.875rem' }}>
                   나이
                 </th>
-                <th className="border border-gray-300 px-3 py-2 text-center" colSpan={3}>
+                <th className="border border-gray-300 px-2 py-1 text-center" colSpan={3} style={{ fontSize: '0.875rem' }}>
                   10회분납
                 </th>
               </tr>
-              <tr className="bg-[#6f42c1] text-white">
-                <th className="border border-gray-300 px-3 py-2"></th>
-                <th className="border border-gray-300 px-3 py-2 text-center">시작</th>
-                <th className="border border-gray-300 px-3 py-2 text-center">끝</th>
-                <th className="border border-gray-300 px-3 py-2 text-center">년기본</th>
-                <th className="border border-gray-300 px-3 py-2 text-center">년특약</th>
-                <th className="border border-gray-300 px-3 py-2 text-center">년계</th>
+              <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
+                <th className="border border-gray-300 px-2 py-1" style={{ fontSize: '0.875rem' }}></th>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>시작</th>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>끝</th>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년기본</th>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년특약</th>
+                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년계</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, index) => (
                 <tr key={row.rowNum}>
-                  <td className="border border-gray-300 px-3 py-2 text-center">{row.rowNum}</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    <FormInput
-                      value={formatInputValue(row.start_month)}
+                  <td className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>{row.rowNum}</td>
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={formatInputValue(row.start_month, true)}
                       onChange={(e) => handleFieldChange(index, 'start_month', e.target.value)}
-                      variant="modal"
-                      className="text-xs text-center"
-                      placeholder="시작"
+                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
+                      style={{ height: '31px', fontSize: '0.875rem' }}
+                      autoComplete="off"
                     />
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    <FormInput
-                      value={formatInputValue(row.end_month)}
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
+                      value={formatInputValue(row.end_month, true)}
                       onChange={(e) => handleFieldChange(index, 'end_month', e.target.value)}
-                      variant="modal"
-                      className="text-xs text-center"
-                      placeholder="끝"
+                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
+                      style={{ height: '31px', fontSize: '0.875rem' }}
+                      autoComplete="off"
                     />
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    <FormInput
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
                       value={formatInputValue(row.payment10_premium1)}
                       onChange={(e) => handleFieldChange(index, 'payment10_premium1', e.target.value)}
-                      variant="modal"
-                      className="text-xs text-end"
-                      placeholder="년기본"
+                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
+                      style={{ height: '31px', fontSize: '0.875rem' }}
+                      autoComplete="off"
                     />
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    <FormInput
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
                       value={formatInputValue(row.payment10_premium2)}
                       onChange={(e) => handleFieldChange(index, 'payment10_premium2', e.target.value)}
-                      variant="modal"
-                      className="text-xs text-end"
-                      placeholder="년특약"
+                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
+                      style={{ height: '31px', fontSize: '0.875rem' }}
+                      autoComplete="off"
                     />
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    <FormInput
+                  <td className="border border-gray-300 p-0">
+                    <input
+                      type="text"
                       value={formatInputValue(row.payment10_premium_total)}
                       readOnly
-                      variant="modal"
-                      className="text-xs text-end bg-gray-50"
-                      placeholder="년계"
+                      className="w-full px-2 py-1 text-xs border-0 bg-gray-50 focus:outline-none text-end"
+                      style={{ height: '31px', fontSize: '0.875rem' }}
+                      autoComplete="off"
                     />
                   </td>
                 </tr>
