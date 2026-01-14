@@ -167,7 +167,26 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
     {
       key: 'push',
       header: '상태',
-      cell: (row) => <div className="whitespace-nowrap text-center">{mapPushLabel(row.push)}</div>,
+      className: 'whitespace-nowrap',
+      cell: (row) => {
+        const push = Number(row.push)
+        const cancel = row.cancel != null ? String(row.cancel) : ''
+        const sangtae = row.sangtae != null ? String(row.sangtae) : ''
+
+        // push=4이고 cancel=42이고 sangtae=1이면 "해지중" 표시
+        const cancelNum = typeof cancel === 'string' ? Number(cancel) : cancel
+        const sangtaeNum = typeof sangtae === 'string' ? Number(sangtae) : sangtae
+        if (push === 4 && cancelNum === 42 && sangtaeNum === 1) {
+          return <span className="whitespace-nowrap">해지중</span>
+        }
+
+        // 정상일 때는 "정상" 표시 (인라인 편집은 제외)
+        if (push === 4) {
+          return <span className="whitespace-nowrap">정상</span>
+        }
+
+        return <span className="whitespace-nowrap">{mapPushLabel(push)}</span>
+      },
       className: 'w-20 text-center',
     },
     {
