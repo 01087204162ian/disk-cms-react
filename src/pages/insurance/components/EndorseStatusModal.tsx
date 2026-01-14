@@ -277,6 +277,11 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
     return `${dateStr}(${weekday})`
   }
 
+  // 일별 상세 데이터를 두 개로 분할 (좌우 배치)
+  const halfIndex = Math.ceil(data.length / 2)
+  const leftData = data.slice(0, halfIndex)
+  const rightData = data.slice(halfIndex)
+
   return (
     <Modal
       isOpen={isOpen}
@@ -288,6 +293,7 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
         </span>
       }
       maxWidth="6xl"
+      position="center"
     >
       <div className="space-y-4">
         {/* 필터 영역 - 한 행으로 표시 */}
@@ -396,36 +402,69 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
               </div>
             </div>
 
-            {/* 일별 상세 데이터 */}
+            {/* 일별 상세 데이터 - 좌우 배치 */}
             <div>
               <h6 className="text-sm font-semibold mb-2">일별 상세 데이터</h6>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-left font-medium">날짜</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">정상</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약거절</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약취소</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지취소</th>
-                      <th className="border border-gray-300 px-2 py-2 text-right font-medium">소계</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.map((item, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="border border-gray-300 px-2 py-2">{formatDateWithWeekday(item.date)}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right">{item.subscription.toLocaleString('ko-KR')}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right">{item.termination.toLocaleString('ko-KR')}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionReject.toLocaleString('ko-KR')}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionCancel.toLocaleString('ko-KR')}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right">{item.terminationCancel.toLocaleString('ko-KR')}</td>
-                        <td className="border border-gray-300 px-2 py-2 text-right font-semibold">{item.total.toLocaleString('ko-KR')}</td>
+              <div className="grid grid-cols-2 gap-4">
+                {/* 왼쪽 테이블 */}
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-2 py-2 text-left font-medium">날짜</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">정상</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약거절</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약취소</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지취소</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">소계</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {leftData.map((item, index) => (
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="border border-gray-300 px-2 py-2">{formatDateWithWeekday(item.date)}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscription.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.termination.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionReject.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionCancel.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.terminationCancel.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right font-semibold">{item.total.toLocaleString('ko-KR')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 오른쪽 테이블 */}
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-2 py-2 text-left font-medium">날짜</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">정상</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약거절</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">청약취소</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">해지취소</th>
+                        <th className="border border-gray-300 px-2 py-2 text-right font-medium">소계</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rightData.map((item, index) => (
+                        <tr key={halfIndex + index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="border border-gray-300 px-2 py-2">{formatDateWithWeekday(item.date)}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscription.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.termination.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionReject.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.subscriptionCancel.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right">{item.terminationCancel.toLocaleString('ko-KR')}</td>
+                          <td className="border border-gray-300 px-2 py-2 text-right font-semibold">{item.total.toLocaleString('ko-KR')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
