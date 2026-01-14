@@ -184,16 +184,11 @@ export default function EndorseList() {
     }
   }
 
-  // 대리운전회사 목록 로드
-  const loadCompanyOptions = async (policyNum?: string) => {
+  // 대리운전회사 목록 로드 (독립적으로 작동)
+  const loadCompanyOptions = async () => {
     try {
-      const params: any = {}
-      if (policyNum) {
-        params.policyNum = policyNum
-      }
       const res = await api.get<{ success: boolean; data: CompanyOption[] }>(
-        '/api/insurance/kj-endorse/company-list',
-        { params }
+        '/api/insurance/kj-endorse/company-list'
       )
       if (res.data.success && res.data.data) {
         setCompanyOptions(res.data.data)
@@ -261,14 +256,7 @@ export default function EndorseList() {
     }
   }
 
-  // 증권번호 선택 시 대리운전회사 목록 로드
-  useEffect(() => {
-    if (filters.policyNum) {
-      loadCompanyOptions(filters.policyNum)
-    } else {
-      loadCompanyOptions()
-    }
-  }, [filters.policyNum])
+  // 대리운전회사 목록은 독립적으로 로드 (필터 변경과 무관)
 
   // 초기 로드: 증권번호 목록 로드 및 배서 리스트 로드
   useEffect(() => {
@@ -815,7 +803,15 @@ export default function EndorseList() {
         <FilterBar.Select
           value={filters.push}
           onChange={(value) => {
-            setFilters({ ...filters, push: value })
+            setFilters({
+              push: value,
+              progress: '',
+              endorseDay: '',
+              insuranceCom: '',
+              policyNum: '',
+              companyNum: '',
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={PUSH_OPTIONS}
@@ -824,7 +820,15 @@ export default function EndorseList() {
         <FilterBar.Select
           value={filters.progress}
           onChange={(value) => {
-            setFilters({ ...filters, progress: value })
+            setFilters({
+              push: '',
+              progress: value,
+              endorseDay: '',
+              insuranceCom: '',
+              policyNum: '',
+              companyNum: '',
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={PROGRESS_OPTIONS}
@@ -833,7 +837,15 @@ export default function EndorseList() {
         <DatePicker
           value={filters.endorseDay}
           onChange={(value) => {
-            setFilters({ ...filters, endorseDay: value || '' })
+            setFilters({
+              push: '',
+              progress: '',
+              endorseDay: value || '',
+              insuranceCom: '',
+              policyNum: '',
+              companyNum: '',
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
@@ -842,7 +854,15 @@ export default function EndorseList() {
         <FilterBar.Select
           value={filters.insuranceCom}
           onChange={(value) => {
-            setFilters({ ...filters, insuranceCom: value })
+            setFilters({
+              push: '',
+              progress: '',
+              endorseDay: '',
+              insuranceCom: value,
+              policyNum: '',
+              companyNum: '',
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={insurerOptions}
@@ -851,7 +871,15 @@ export default function EndorseList() {
         <FilterBar.Select
           value={filters.policyNum}
           onChange={(value) => {
-            setFilters({ ...filters, policyNum: value, companyNum: '' })
+            setFilters({
+              push: '',
+              progress: '',
+              endorseDay: '',
+              insuranceCom: '',
+              policyNum: value,
+              companyNum: '',
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={policySelectOptions}
@@ -860,11 +888,18 @@ export default function EndorseList() {
         <FilterBar.Select
           value={filters.companyNum}
           onChange={(value) => {
-            setFilters({ ...filters, companyNum: value })
+            setFilters({
+              push: '',
+              progress: '',
+              endorseDay: '',
+              insuranceCom: '',
+              policyNum: '',
+              companyNum: value,
+              pageSize: filters.pageSize,
+            })
             setPagination({ ...pagination, currentPage: 1 })
           }}
           options={companySelectOptions}
-          disabled={!filters.policyNum}
           className="w-[182px]"
         />
         <FilterBar.Select
