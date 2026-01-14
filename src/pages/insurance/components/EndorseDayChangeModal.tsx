@@ -27,10 +27,35 @@ export default function EndorseDayChangeModal({
   const [newEndorseDay, setNewEndorseDay] = useState('')
   const [updateAll, setUpdateAll] = useState(true)
 
+  // 다음 영업일 계산 함수 (주말 제외)
+  const getNextBusinessDay = (dateStr: string): string => {
+    if (!dateStr) return ''
+    
+    const date = new Date(dateStr + 'T00:00:00')
+    date.setDate(date.getDate() + 1) // 다음날
+    
+    // 주말(토요일=6, 일요일=0)이면 다음 월요일로 이동
+    const dayOfWeek = date.getDay()
+    if (dayOfWeek === 0) {
+      // 일요일이면 +1일 (월요일)
+      date.setDate(date.getDate() + 1)
+    } else if (dayOfWeek === 6) {
+      // 토요일이면 +2일 (월요일)
+      date.setDate(date.getDate() + 2)
+    }
+    
+    // YYYY-MM-DD 형식으로 변환
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   useEffect(() => {
-    if (isOpen) {
-      // 현재 기준일을 기본값으로 설정
-      setNewEndorseDay(currentEndorseDay || '')
+    if (isOpen && currentEndorseDay) {
+      // 현재 기준일의 다음 영업일을 기본값으로 설정
+      const nextBusinessDay = getNextBusinessDay(currentEndorseDay)
+      setNewEndorseDay(nextBusinessDay)
       setUpdateAll(true)
     }
   }, [isOpen, currentEndorseDay])
