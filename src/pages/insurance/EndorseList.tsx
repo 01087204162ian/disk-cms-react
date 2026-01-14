@@ -911,13 +911,13 @@ export default function EndorseList() {
         {/* 통계 현황 */}
         <div className="flex items-center gap-4 text-xs px-4 py-2 bg-card rounded-xl border border-border">
           <span className="text-foreground">
-            청약: <strong>{stats.subscription.toLocaleString('ko-KR')}</strong>건
+            청약: <strong>{stats.subscription.toLocaleString('ko-KR')}</strong>
           </span>
           <span className="text-foreground">
-            해지: <strong>{stats.cancellation.toLocaleString('ko-KR')}</strong>건
+            해지: <strong>{stats.cancellation.toLocaleString('ko-KR')}</strong>
           </span>
           <span className="text-foreground">
-            계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>건
+            계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>
           </span>
         </div>
         <button
