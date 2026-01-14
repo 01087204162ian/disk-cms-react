@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal, useToastHelpers, DatePicker } from '../../../components'
 import api from '../../../lib/api'
-import { Search, ChartLine } from 'lucide-react'
+import { Search, LineChart } from 'lucide-react'
 
 interface EndorseStatusModalProps {
   isOpen: boolean
@@ -85,7 +85,7 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
       onClose={onClose}
       title={
         <span className="inline-flex items-center gap-2">
-          <ChartLine className="w-5 h-5" />
+          <LineChart className="w-5 h-5" />
           일일배서현황
         </span>
       }
