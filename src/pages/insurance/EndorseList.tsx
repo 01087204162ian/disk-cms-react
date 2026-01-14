@@ -24,6 +24,7 @@ import EndorseStatusModal from './components/EndorseStatusModal'
 import DailyEndorseListModal from './components/DailyEndorseListModal'
 import SmsListModal from './components/SmsListModal'
 import CompanyDetailModal from './components/CompanyDetailModal'
+import EndorseDayChangeModal from './components/EndorseDayChangeModal'
 
 interface EndorseItem {
   num: number
@@ -139,6 +140,17 @@ export default function EndorseList() {
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
+
+  // 배서기준일 변경 모달 상태
+  const [endorseDayChangeModalOpen, setEndorseDayChangeModalOpen] = useState(false)
+  const [selectedEndorseDayData, setSelectedEndorseDayData] = useState<{
+    currentEndorseDay: string
+    num: number | string
+    certiTableNum?: number | string
+    companyNum?: number | string
+    policyNum?: string
+    companyName?: string
+  } | null>(null)
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -328,6 +340,26 @@ export default function EndorseList() {
     setDetailModalOpen(true)
   }
 
+  // 배서기준일 변경 모달 열기
+  const handleOpenEndorseDayChangeModal = (
+    currentEndorseDay: string,
+    num: number | string,
+    certiTableNum?: number | string,
+    companyNum?: number | string,
+    policyNum?: string,
+    companyName?: string
+  ) => {
+    setSelectedEndorseDayData({
+      currentEndorseDay,
+      num,
+      certiTableNum,
+      companyNum,
+      policyNum,
+      companyName,
+    })
+    setEndorseDayChangeModalOpen(true)
+  }
+
   // 테이블 컬럼 정의
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
@@ -433,7 +465,30 @@ export default function EndorseList() {
       {
         key: 'standardDate',
         header: '기준일',
-        cell: (row) => row.standardDate || '-',
+        cell: (row) => {
+          const standardDate = row.standardDate || '-'
+          if (standardDate !== '-' && row.num && row.standardDate) {
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleOpenEndorseDayChangeModal(
+                    row.standardDate || '',
+                    row.num,
+                    row.cNum,
+                    row.companyNum,
+                    row.policyNum,
+                    row.companyName
+                  )
+                }}
+                className="text-primary hover:underline"
+              >
+                {standardDate}
+              </button>
+            )
+          }
+          return <div>{standardDate}</div>
+        },
         className: 'w-28',
       },
       {
@@ -879,6 +934,27 @@ export default function EndorseList() {
         companyNum={selectedCompanyNum}
         companyName={selectedCompanyName}
       />
+
+      {/* 배서기준일 변경 모달 */}
+      {selectedEndorseDayData && (
+        <EndorseDayChangeModal
+          isOpen={endorseDayChangeModalOpen}
+          onClose={() => {
+            setEndorseDayChangeModalOpen(false)
+            setSelectedEndorseDayData(null)
+          }}
+          currentEndorseDay={selectedEndorseDayData.currentEndorseDay}
+          num={selectedEndorseDayData.num}
+          certiTableNum={selectedEndorseDayData.certiTableNum}
+          companyNum={selectedEndorseDayData.companyNum}
+          policyNum={selectedEndorseDayData.policyNum}
+          companyName={selectedEndorseDayData.companyName}
+          onSuccess={() => {
+            // 배서기준일 변경 성공 시 리스트 새로고침
+            loadEndorseList(pagination.currentPage, pagination.pageSize)
+          }}
+        />
+      )}
     </div>
   )
 }

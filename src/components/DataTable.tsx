@@ -47,7 +47,7 @@ export default function DataTable<T extends Record<string, any>>({
         {columns.map((column) => (
           <th
             key={column.key}
-            className={`px-2 py-2 text-left text-xs font-medium text-foreground ${column.className || ''}`}
+            className={`px-2 py-2 text-left text-xs font-medium text-foreground border border-border ${column.className || ''}`}
             style={{ fontSize: '0.75rem' }}
           >
             {column.header}
@@ -72,7 +72,7 @@ export default function DataTable<T extends Record<string, any>>({
             return (
               <td 
                 key={column.key} 
-                className={`${defaultPadding} text-xs ${column.className || ''}`}
+                className={`${defaultPadding} text-xs border border-border ${column.className || ''}`}
                 style={{ fontSize: '0.75rem' }}
               >
                 {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
@@ -161,7 +161,7 @@ export default function DataTable<T extends Record<string, any>>({
         <>
           {/* 데스크톱 테이블 */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full border-collapse">
               {renderTableHeader()}
               {renderTableBody()}
             </table>
