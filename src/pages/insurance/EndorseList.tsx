@@ -451,13 +451,13 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-24',
+        className: 'w-28',
       },
       {
         key: 'manager',
         header: 'manager',
         cell: (row) => row.manager || '-',
-        className: 'w-24',
+        className: 'w-20',
       },
       {
         key: 'standardDate',
@@ -570,7 +570,7 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-24',
+        className: 'w-32',
       },
       {
         key: 'insuranceCom',
@@ -581,16 +581,74 @@ export default function EndorseList() {
       {
         key: 'premium',
         header: '보험료',
-        cell: (row) =>
-          row.premium ? row.premium.toLocaleString('ko-KR') : '-',
-        className: 'w-28 text-end',
+        cell: (row) => {
+          const formatAmount = (value: number | undefined): string => {
+            if (!value) return ''
+            return value.toLocaleString('ko-KR')
+          }
+
+          const handlePremiumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            e.stopPropagation()
+            // TODO: 보험료 업데이트 API 구현
+          }
+
+          const handlePremiumKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              e.currentTarget.blur()
+              // TODO: 보험료 업데이트 API 구현
+            }
+          }
+
+          return (
+            <input
+              type="text"
+              className="w-full text-xs px-1 py-0.5 text-right border border-transparent bg-transparent focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              value={formatAmount(row.premium)}
+              onChange={handlePremiumChange}
+              onKeyPress={handlePremiumKeyPress}
+              onClick={(e) => e.stopPropagation()}
+              style={{ fontSize: '13px' }}
+            />
+          )
+        },
+        className: 'w-24 text-end',
       },
       {
         key: 'cPremium',
         header: 'C보험료',
-        cell: (row) =>
-          row.cPremium ? row.cPremium.toLocaleString('ko-KR') : '-',
-        className: 'w-28 text-end',
+        cell: (row) => {
+          const formatAmount = (value: number | undefined): string => {
+            if (!value) return ''
+            return value.toLocaleString('ko-KR')
+          }
+
+          const handleCPremiumChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            e.stopPropagation()
+            // TODO: c보험료 업데이트 API 구현
+          }
+
+          const handleCPremiumKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              e.currentTarget.blur()
+              // TODO: c보험료 업데이트 API 구현
+            }
+          }
+
+          return (
+            <input
+              type="text"
+              className="w-full text-xs px-1 py-0.5 text-right border border-transparent bg-transparent focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              value={formatAmount(row.cPremium)}
+              onChange={handleCPremiumChange}
+              onKeyPress={handleCPremiumKeyPress}
+              onClick={(e) => e.stopPropagation()}
+              style={{ fontSize: '13px' }}
+            />
+          )
+        },
+        className: 'w-24 text-end',
       },
       {
         key: 'duplicate',
