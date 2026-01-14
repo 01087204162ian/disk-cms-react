@@ -12,6 +12,45 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-14 (KJ 대리운전) - 배서 리스트 페이지 UI/UX 개선 및 중복 리스트 모달 구현
+
+#### 작업 내용
+- **기능**: 배서 리스트 페이지 UI/UX 개선, 중복 리스트 모달 구현, Modal 드래그 기능 추가
+- **파일**: 
+  - `src/pages/insurance/EndorseList.tsx` (버튼 스타일 통일, 중복 모달 통합)
+  - `src/pages/insurance/components/DuplicateListModal.tsx` (신규 생성)
+  - `src/components/DataTable.tsx` (hover 효과 개선)
+  - `src/components/Modal.tsx` (드래그 기능 및 위치 옵션 추가)
+- **주요 구현 사항**:
+  - ✅ DataTable 컴포넌트 hover 효과 개선
+    - 테이블 행에 마우스 오버 시 배경색 변경 (`#dee2e6`)
+    - `onMouseEnter`/`onMouseLeave` 이벤트로 구현하여 시각적 피드백 제공
+  - ✅ 배서현황, 일일배서리스트, 문자리스트 버튼 스타일 통일
+    - 버튼 크기를 2/3 사이즈로 축소 (h-7, px-2, py-0.5)
+    - 아이콘 크기 조정 (w-3 h-3)
+    - 모든 버튼을 primary 색상으로 통일 (hover 시 텍스트가 흰색으로 변경)
+  - ✅ 중복 리스트 모달 구현 (`DuplicateListModal.tsx`)
+    - 중복여부 컬럼에서 "중복" 텍스트 클릭 시 모달 열기
+    - 해당 주민번호로 정상 상태(status='4') 가입 리스트 조회
+    - 기사찾기와 동일한 API 사용 (`/api/insurance/kj-driver/list`)
+    - 대리운전회사, 증권번호 표시
+    - 대리운전회사 클릭 시 업체 상세 모달 열기
+  - ✅ Modal 컴포넌트 기능 개선
+    - `position` prop 추가 (center, top-left, top-right, bottom-left, bottom-right)
+    - 모달 드래그 기능 추가 (헤더를 드래그하여 이동)
+    - 드래그 시 화면 경계 체크로 모달이 화면 밖으로 나가지 않도록 제한
+    - 중복 리스트 모달은 좌측 상단(`top-left`) 위치에 표시
+- **해결한 이슈**:
+  - DataTable hover 효과가 작동하지 않던 문제 해결 (Tailwind CSS 클래스 대신 이벤트 핸들러 사용)
+  - 버튼 hover 시 글씨가 안보이던 문제 해결 (모든 버튼을 primary 색상으로 통일)
+  - `success`, `info` 색상이 Tailwind config에 정의되지 않아 발생한 스타일 문제 해결
+
+#### 참고 사항
+- 중복 리스트 모달은 기사찾기(DriverSearch)와 동일한 API 및 데이터 구조 사용
+- Modal 드래그 기능은 모든 모달에 적용되며, 헤더를 드래그하여 위치 변경 가능
+
+---
+
 ### 2026-01-13 (KJ 대리운전) - 배서 리스트 페이지 마이그레이션 및 선택상자 기능 구현
 
 #### 작업 내용

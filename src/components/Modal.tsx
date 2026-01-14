@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState, useRef, useEffect } from 'react'
 
 interface ModalProps {
   isOpen: boolean
@@ -33,6 +33,65 @@ export default function Modal({
   footer,
   position = 'center',
 }: ModalProps) {
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [modalPosition, setModalPosition] = useState<{ x: number; y: number } | null>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) {
+      setModalPosition(null)
+      setIsDragging(false)
+    }
+  }, [isOpen])
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!modalRef.current) return
+    
+    setIsDragging(true)
+    const rect = modalRef.current.getBoundingClientRect()
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    })
+    
+    if (modalPosition === null) {
+      setModalPosition({
+        x: rect.left,
+        y: rect.top,
+      })
+    }
+  }
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || modalPosition === null) return
+
+      const newX = e.clientX - dragOffset.x
+      const newY = e.clientY - dragOffset.y
+
+      setModalPosition({
+        x: Math.max(0, Math.min(newX, window.innerWidth - (modalRef.current?.offsetWidth || 0))),
+        y: Math.max(0, Math.min(newY, window.innerHeight - (modalRef.current?.offsetHeight || 0))),
+      })
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, dragOffset, modalPosition])
+
   if (!isOpen) return null
 
   const positionClasses = {
@@ -43,14 +102,29 @@ export default function Modal({
     'bottom-right': 'items-end justify-end',
   }
 
+  const modalStyle: React.CSSProperties = {
+    ...(maxHeight ? { maxHeight } : {}),
+    ...(modalPosition ? {
+      position: 'fixed',
+      left: `${modalPosition.x}px`,
+      top: `${modalPosition.y}px`,
+      margin: 0,
+    } : {}),
+  }
+
   return (
-    <div className={`fixed inset-0 z-50 flex ${positionClasses[position]} bg-black/50 p-4`}>
+    <div className={`fixed inset-0 z-50 flex ${modalPosition ? 'items-start justify-start' : positionClasses[position]} bg-black/50 p-4`}>
       <div
+        ref={modalRef}
         className={`w-full ${maxWidthClasses[maxWidth]} ${maxHeight ? `max-h-[${maxHeight}]` : ''} rounded-xl bg-background border border-border overflow-hidden flex flex-col`}
-        style={maxHeight ? { maxHeight } : undefined}
+        style={modalStyle}
       >
         {/* 헤더 */}
-        <div className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <div
+          ref={headerRef}
+          className="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-6 py-4 flex items-center justify-between flex-shrink-0 cursor-move select-none"
+          onMouseDown={handleMouseDown}
+        >
           <div>
             <h5 className="text-lg font-semibold text-white m-0">{title}</h5>
             {subtitle && <small className="block mt-1 text-sm font-normal text-white/85">{subtitle}</small>}
