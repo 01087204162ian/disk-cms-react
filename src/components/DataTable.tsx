@@ -4,7 +4,7 @@ import LoadingSpinner from './LoadingSpinner'
 
 export interface Column<T> {
   key: string
-  header: string
+  header: string | ReactNode
   cell?: (row: T) => ReactNode
   sortable?: boolean
   className?: string

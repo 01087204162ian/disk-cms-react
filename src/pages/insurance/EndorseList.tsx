@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { BarChart3, List, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
 import {
@@ -18,6 +18,16 @@ import {
   PUSH_MAP,
   PROGRESS_OPTIONS,
 } from './constants'
+
+// 배서리스트 페이지 전용 상태 매핑 (4=해지, 1=청약)
+const ENDORSE_LIST_PUSH_MAP: Record<string, string> = {
+  '1': '청약',
+  '4': '해지',
+  '2': '해지', // 처리 완료 시 push=2
+  '3': '청약거절',
+  '5': '해지취소',
+  '6': '청약취소',
+}
 import { useAuthStore } from '../../store/authStore'
 import EndorseModal from './components/EndorseModal'
 import EndorseStatusModal from './components/EndorseStatusModal'
@@ -719,7 +729,7 @@ export default function EndorseList() {
       {
         key: 'push',
         header: '상태',
-        cell: (row) => PUSH_MAP[String(row.push)] || row.push || '-',
+        cell: (row) => ENDORSE_LIST_PUSH_MAP[String(row.push)] || row.push || '-',
         className: 'w-20',
       },
       {
