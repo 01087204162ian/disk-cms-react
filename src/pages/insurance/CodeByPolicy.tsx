@@ -165,7 +165,6 @@ export default function CodeByPolicy() {
   ]
 
   // 페이지네이션 계산
-  const totalPages = Math.ceil(policies.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = Math.min(startIndex + itemsPerPage, policies.length)
   const currentPolicies = policies.slice(startIndex, endIndex)
