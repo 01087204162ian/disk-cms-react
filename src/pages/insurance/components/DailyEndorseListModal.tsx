@@ -344,7 +344,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
         }
         maxWidth="7xl"
         maxHeight="90vh"
-        position="center"
+        position="top-left"
       >
         <div className="space-y-4">
           {/* 필터 영역 - 이전 버전과 동일한 레이아웃 */}

@@ -10,6 +10,11 @@ interface ModalProps {
   maxHeight?: string
   footer?: ReactNode
   position?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  sideBySide?: {
+    enabled: boolean
+    offsetX?: number
+    offsetY?: number
+  }
 }
 
 const maxWidthClasses = {
@@ -34,6 +39,7 @@ export default function Modal({
   maxHeight,
   footer,
   position = 'center',
+  sideBySide,
 }: ModalProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -144,10 +150,20 @@ export default function Modal({
       top: `${modalPosition.y}px`,
       margin: 0,
     } : {}),
+    ...(sideBySide?.enabled && !modalPosition ? {
+      position: 'fixed',
+      left: sideBySide.offsetX ? `${sideBySide.offsetX}px` : undefined,
+      top: sideBySide.offsetY ? `${sideBySide.offsetY}px` : undefined,
+      margin: 0,
+    } : {}),
   }
 
+  const containerClasses = sideBySide?.enabled && !modalPosition
+    ? 'fixed inset-0 z-50 flex items-start justify-start bg-black/50 p-4'
+    : `fixed inset-0 z-50 flex ${modalPosition ? 'items-start justify-start' : positionClasses[position]} bg-black/50 p-4`
+
   return (
-    <div className={`fixed inset-0 z-50 flex ${modalPosition ? 'items-start justify-start' : positionClasses[position]} bg-black/50 p-4`}>
+    <div className={containerClasses}>
       <div
         ref={modalRef}
         className={`w-full ${maxWidthClasses[maxWidth]} ${maxHeight ? `max-h-[${maxHeight}]` : 'max-h-[90vh]'} rounded-xl bg-background border border-border overflow-hidden flex flex-col`}

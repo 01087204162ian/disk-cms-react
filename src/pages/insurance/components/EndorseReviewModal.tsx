@@ -305,7 +305,12 @@ export default function EndorseReviewModal({
       }
       maxWidth="xl"
       maxHeight="90vh"
-      position="center"
+      position="top-left"
+      sideBySide={{
+        enabled: true,
+        offsetX: 1280 + 16, // max-w-7xl (1280px) + gap (16px) = 일일배서리스트 모달 오른쪽에 배치
+        offsetY: 1.75 * 16, // 1.75rem = 28px
+      }}
     >
       <div className="space-y-4">
         {/* 필터 영역 - 숨김 처리 (이전 버전과 동일) */}
