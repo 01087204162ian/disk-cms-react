@@ -73,7 +73,7 @@ export default function DataTable<T extends Record<string, any>>({
             className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
             style={{ backgroundColor: baseBgColor }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f3f5'
+              e.currentTarget.style.backgroundColor = '#dee2e6'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = baseBgColor
