@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Modal, useToastHelpers, FormInput, LoadingSpinner } from '../../../components'
+import { Modal, useToastHelpers, LoadingSpinner } from '../../../components'
 import api from '../../../lib/api'
 import { getInsurerName } from '../constants'
 
