@@ -171,6 +171,16 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
       className: 'w-20 text-center',
     },
     {
+      key: 'discount',
+      header: '할인할증',
+      cell: (row) => {
+        const rateText = row.personRateFactor != null ? String(row.personRateFactor) : ''
+        const nameText = row.personRateName ? ` (${row.personRateName})` : ''
+        return <div className="whitespace-nowrap">{rateText + nameText}</div>
+      },
+      className: 'w-40',
+    },
+    {
       key: 'policyNum',
       header: '증권번호',
       cell: (row) => <div className="whitespace-nowrap">{row.policyNum || ''}</div>,
