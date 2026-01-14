@@ -922,23 +922,23 @@ export default function EndorseList() {
         </div>
         <button
           onClick={handleEndorseStatus}
-          className="h-10 px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
         >
-          <BarChart3 className="w-3.5 h-3.5" />
+          <BarChart3 className="w-3 h-3" />
           배서현황
         </button>
         <button
           onClick={handleDailyEndorseList}
-          className="h-10 px-3 py-1 text-xs border border-success text-success rounded hover:bg-success hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+          className="h-7 px-2 py-0.5 text-xs border border-success text-success bg-background rounded-md hover:bg-success hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
         >
-          <List className="w-3.5 h-3.5" />
+          <List className="w-3 h-3" />
           일일배서리스트
         </button>
         <button
           onClick={handleSmsList}
-          className="h-10 px-3 py-1 text-xs border border-info text-info rounded hover:bg-info hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+          className="h-7 px-2 py-0.5 text-xs border border-info text-info bg-background rounded-md hover:bg-info hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
         >
-          <MessageSquare className="w-3.5 h-3.5" />
+          <MessageSquare className="w-3 h-3" />
           문자리스트
         </button>
       </FilterBar>
