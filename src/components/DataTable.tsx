@@ -42,13 +42,17 @@ export default function DataTable<T extends Record<string, any>>({
 
   // 데스크톱 테이블 헤더
   const renderTableHeader = () => (
-    <thead className="bg-accent">
+    <thead>
       <tr>
         {columns.map((column) => (
           <th
             key={column.key}
-            className={`px-2 py-2 text-left text-xs font-medium text-foreground border border-border ${column.className || ''}`}
-            style={{ fontSize: '0.75rem' }}
+            className={`px-2 py-2 text-center text-xs font-medium text-white border border-white ${column.className || ''}`}
+            style={{ 
+              fontSize: '12px',
+              backgroundColor: '#8E6C9D',
+              fontWeight: 500
+            }}
           >
             {column.header}
           </th>
@@ -59,28 +63,46 @@ export default function DataTable<T extends Record<string, any>>({
 
   // 데스크톱 테이블 본문
   const renderTableBody = () => (
-    <tbody className="divide-y divide-border">
-      {data.map((row, index) => (
-        <tr
-          key={index}
-          className={`hover:bg-accent/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
-          onClick={() => onRowClick?.(row)}
-        >
-          {columns.map((column) => {
-            const hasZeroPadding = column.className?.includes('p-0')
-            const defaultPadding = hasZeroPadding ? '' : 'px-2 py-2'
-            return (
-              <td 
-                key={column.key} 
-                className={`${defaultPadding} text-xs border border-border ${column.className || ''}`}
-                style={{ fontSize: '0.75rem' }}
-              >
-                {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
-              </td>
-            )
-          })}
-        </tr>
-      ))}
+    <tbody>
+      {data.map((row, index) => {
+        const isEven = index % 2 === 1 // 0-based index, so index 1, 3, 5... are even rows
+        return (
+          <tr
+            key={index}
+            className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+            style={{
+              backgroundColor: isEven ? '#f8f9fa' : '#ffffff'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f3f5'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isEven ? '#f8f9fa' : '#ffffff'
+            }}
+            onClick={() => onRowClick?.(row)}
+          >
+            {columns.map((column) => {
+              const hasZeroPadding = column.className?.includes('p-0')
+              const defaultPadding = hasZeroPadding ? '' : 'px-1 py-0.5'
+              return (
+                <td 
+                  key={column.key} 
+                  className={`${defaultPadding} text-center border border-[#e9ecef] ${column.className || ''}`}
+                  style={{ 
+                    fontSize: '13px',
+                    padding: hasZeroPadding ? '0' : '2px 4px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {column.cell ? column.cell(row) : (row[column.key] as ReactNode)}
+                </td>
+              )
+            })}
+          </tr>
+        )
+      })}
     </tbody>
   )
 
