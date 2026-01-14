@@ -245,7 +245,7 @@ export default function SmsListModal({
           문자리스트
         </span>
       }
-      maxWidth="xl"
+      maxWidth="2xl"
       maxHeight="90vh"
       position="center"
     >
