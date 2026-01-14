@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal, useToastHelpers, FilterSelect } from '../../../components'
 import api from '../../../lib/api'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Copy, Check } from 'lucide-react'
 
 interface EndorseReviewModalProps {
   isOpen: boolean
@@ -39,6 +39,8 @@ interface EndorseReviewData {
   taksongTermPremium: number
   haldungCount: number
   company: string
+  reportDate: string
+  dayOfWeek: string
 }
 
 export default function EndorseReviewModal({
@@ -53,6 +55,7 @@ export default function EndorseReviewModal({
   const [companyNum, setCompanyNum] = useState(initialCompanyNum || '')
   const [companyOptions, setCompanyOptions] = useState<{ value: string; label: string }[]>([])
   const [data, setData] = useState<EndorseReviewData | null>(null)
+  const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -118,6 +121,11 @@ export default function EndorseReviewModal({
         const items = res.data.data
         const company = items[0]?.company || ''
 
+        // 날짜 포맷팅
+        const reportDate = new Date(selectedDate)
+        const formattedDate = `${reportDate.getFullYear()}.${String(reportDate.getMonth() + 1).padStart(2, '0')}.${String(reportDate.getDate()).padStart(2, '0')}`
+        const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][reportDate.getDay()]
+
         // 데이터 분류
         const daeriRegistrations: EndorseReviewItem[] = []
         const daeriTerminations: EndorseReviewItem[] = []
@@ -162,6 +170,10 @@ export default function EndorseReviewModal({
           }
         })
 
+        const daeriTotal = daeriRegPremium + daeriTermPremium
+        const taksongTotal = taksongRegPremium + taksongTermPremium
+        const overallTotal = daeriTotal + taksongTotal
+
         setData({
           daeriRegistrations,
           daeriTerminations,
@@ -173,6 +185,8 @@ export default function EndorseReviewModal({
           taksongTermPremium,
           haldungCount,
           company,
+          reportDate: formattedDate,
+          dayOfWeek,
         })
       } else {
         toast.error(res.data.error || '데이터를 불러오는 중 오류가 발생했습니다.')
@@ -205,6 +219,84 @@ export default function EndorseReviewModal({
     }
   }, [date])
 
+  const formatCurrency = (number: number) => {
+    if (number === null || number === undefined || isNaN(number)) {
+      return '0'
+    }
+    return Math.abs(number).toLocaleString('ko-KR')
+  }
+
+  const handleCopy = async () => {
+    if (!data) return
+
+    try {
+      let copyText = `${data.reportDate} (${data.dayOfWeek}) 배서현황\n\n`
+
+      // 대리 가입자
+      copyText += '*대리 가입자\n\n'
+      data.daeriRegistrations.forEach((item) => {
+        copyText += `${item.name}\n`
+      })
+      if (data.daeriRegistrations.length > 0) {
+        copyText += '\n'
+      }
+      copyText += `총 ${data.daeriRegistrations.length}명\n\n`
+
+      // 대리 해지자
+      copyText += '*대리 해지자\n\n'
+      data.daeriTerminations.forEach((item) => {
+        copyText += `${item.name}\n`
+      })
+      if (data.daeriTerminations.length > 0) {
+        copyText += '\n'
+      }
+      copyText += `총 ${data.daeriTerminations.length}명\n\n`
+
+      // 탁송 가입자
+      copyText += '*탁송 가입자\n\n'
+      data.taksongRegistrations.forEach((item) => {
+        copyText += `${item.name}\n`
+      })
+      if (data.taksongRegistrations.length > 0) {
+        copyText += '\n'
+      }
+      copyText += `총 ${data.taksongRegistrations.length}명\n\n`
+
+      // 탁송 해지자
+      copyText += '*탁송 해지자\n\n'
+      data.taksongTerminations.forEach((item) => {
+        copyText += `${item.name}\n`
+      })
+      if (data.taksongTerminations.length > 0) {
+        copyText += '\n'
+      }
+      copyText += `총 ${data.taksongTerminations.length}명\n\n`
+
+      // 영수보험료
+      const daeriTotal = data.daeriRegPremium + data.daeriTermPremium
+      const taksongTotal = data.taksongRegPremium + data.taksongTermPremium
+      const overallTotal = daeriTotal + taksongTotal
+
+      copyText += '영수보험료 (+추징/-환급)\n'
+      copyText += `대리 : ${formatCurrency(daeriTotal)}원 ${daeriTotal >= 0 ? '추징' : '환급'}\n`
+      copyText += `탁송 : ${formatCurrency(taksongTotal)}원 ${taksongTotal >= 0 ? '추징' : '환급'}\n`
+      copyText += `합계 : ${formatCurrency(overallTotal)}원 ${overallTotal >= 0 ? '추징' : '환급'}\n\n`
+
+      // 할증자 정보
+      copyText += `보험료 파일은 할증 관련 내용 정리하여 메일로 발송하겠습니다.`
+
+      // 연속된 빈 줄 정리
+      copyText = copyText.replace(/\n{3,}/g, '\n\n').trim()
+
+      await navigator.clipboard.writeText(copyText)
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch (error) {
+      console.error('복사 실패:', error)
+      toast.error('복사에 실패했습니다. 브라우저가 클립보드 접근을 지원하지 않을 수 있습니다.')
+    }
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -220,31 +312,33 @@ export default function EndorseReviewModal({
       position="center"
     >
       <div className="space-y-4">
-        {/* 필터 영역 */}
-        <div className="grid grid-cols-12 gap-3 items-end">
-          <div className="col-span-4">
-            <FilterSelect
-              value={companyNum}
-              onChange={handleCompanyChange}
-              options={companyOptions}
-              className="w-full"
-            />
-          </div>
-          <div className="col-span-3">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full h-10 px-3 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-          </div>
-          <div className="col-span-2">
-            <button
-              onClick={handleSearch}
-              className="w-full h-10 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
-            >
-              조회
-            </button>
+        {/* 필터 영역 - 숨김 처리 (이전 버전과 동일) */}
+        <div className="hidden">
+          <div className="grid grid-cols-12 gap-3 items-end">
+            <div className="col-span-4">
+              <FilterSelect
+                value={companyNum}
+                onChange={handleCompanyChange}
+                options={companyOptions}
+                className="w-full"
+              />
+            </div>
+            <div className="col-span-3">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full h-10 px-3 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+            </div>
+            <div className="col-span-2">
+              <button
+                onClick={handleSearch}
+                className="w-full h-10 px-4 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
+              >
+                조회
+              </button>
+            </div>
           </div>
         </div>
 
@@ -261,203 +355,112 @@ export default function EndorseReviewModal({
             조회 조건을 선택하고 조회 버튼을 클릭하세요.
           </div>
         ) : (
-          <div className="space-y-6">
-            {/* 회사명 표시 */}
-            <div className="text-lg font-semibold">
-              대리운전회사: {data.company}
+          <div className="report-container">
+            {/* 제목 및 복사 버튼 */}
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="mb-0 text-lg font-semibold">
+                {data.reportDate} ({data.dayOfWeek}) 배서현황
+              </h3>
+              <button
+                onClick={handleCopy}
+                className="px-3 py-1.5 text-sm border rounded hover:bg-accent transition-colors inline-flex items-center gap-1"
+                title="배서현황 내용을 클립보드에 복사합니다"
+              >
+                {copySuccess ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    복사됨
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    복사
+                  </>
+                )}
+              </button>
             </div>
 
-            {/* 대리운전 청약 */}
-            <div>
-              <h6 className="text-sm font-semibold mb-2">대리운전 청약</h6>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-center">No</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">성명</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">주민번호</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">보험료</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.daeriRegistrations.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="border border-gray-300 px-2 py-2 text-center text-muted-foreground">
-                          데이터가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      data.daeriRegistrations.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-2 py-2 text-center">{index + 1}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.name || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2 text-right">
-                            {((item.c_preminum || item.preminum) || 0).toLocaleString('ko-KR')}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                    <tr className="bg-gray-100 font-semibold">
-                      <td colSpan={3} className="border border-gray-300 px-2 py-2 text-right">합계</td>
-                      <td className="border border-gray-300 px-2 py-2 text-right">
-                        {data.daeriRegPremium.toLocaleString('ko-KR')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* 대리 가입자 */}
+            <div className="report-section mb-4">
+              <h4 className="text-base font-semibold mb-2">*대리 가입자</h4>
+              <ul className="list-disc list-inside mb-2">
+                {data.daeriRegistrations.map((item, index) => (
+                  <li key={index}>{item.name}</li>
+                ))}
+              </ul>
+              <p className="mt-2">총 {data.daeriRegistrations.length}명</p>
             </div>
 
-            {/* 대리운전 해지 */}
-            <div>
-              <h6 className="text-sm font-semibold mb-2">대리운전 해지</h6>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-center">No</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">성명</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">주민번호</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">보험료</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.daeriTerminations.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="border border-gray-300 px-2 py-2 text-center text-muted-foreground">
-                          데이터가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      data.daeriTerminations.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-2 py-2 text-center">{index + 1}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.name || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2 text-right">
-                            {((item.c_preminum || item.preminum) || 0).toLocaleString('ko-KR')}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                    <tr className="bg-gray-100 font-semibold">
-                      <td colSpan={3} className="border border-gray-300 px-2 py-2 text-right">합계</td>
-                      <td className="border border-gray-300 px-2 py-2 text-right">
-                        {data.daeriTermPremium.toLocaleString('ko-KR')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* 대리 해지자 */}
+            <div className="report-section mb-4">
+              <h4 className="text-base font-semibold mb-2">*대리 해지자</h4>
+              <ul className="list-disc list-inside mb-2">
+                {data.daeriTerminations.map((item, index) => (
+                  <li key={index}>{item.name}</li>
+                ))}
+              </ul>
+              <p className="mt-2">총 {data.daeriTerminations.length}명</p>
             </div>
 
-            {/* 탁송 청약 */}
-            <div>
-              <h6 className="text-sm font-semibold mb-2">탁송 청약</h6>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-center">No</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">성명</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">주민번호</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">보험료</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.taksongRegistrations.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="border border-gray-300 px-2 py-2 text-center text-muted-foreground">
-                          데이터가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      data.taksongRegistrations.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-2 py-2 text-center">{index + 1}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.name || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2 text-right">
-                            {((item.c_preminum || item.preminum) || 0).toLocaleString('ko-KR')}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                    <tr className="bg-gray-100 font-semibold">
-                      <td colSpan={3} className="border border-gray-300 px-2 py-2 text-right">합계</td>
-                      <td className="border border-gray-300 px-2 py-2 text-right">
-                        {data.taksongRegPremium.toLocaleString('ko-KR')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* 탁송 가입자 */}
+            <div className="report-section mb-4">
+              <h4 className="text-base font-semibold mb-2">*탁송 가입자</h4>
+              <ul className="list-disc list-inside mb-2">
+                {data.taksongRegistrations.map((item, index) => (
+                  <li key={index}>{item.name}</li>
+                ))}
+              </ul>
+              <p className="mt-2">총 {data.taksongRegistrations.length}명</p>
             </div>
 
-            {/* 탁송 해지 */}
-            <div>
-              <h6 className="text-sm font-semibold mb-2">탁송 해지</h6>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300" style={{ fontSize: '0.75rem' }}>
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-2 py-2 text-center">No</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">성명</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">주민번호</th>
-                      <th className="border border-gray-300 px-2 py-2 text-center">보험료</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.taksongTerminations.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="border border-gray-300 px-2 py-2 text-center text-muted-foreground">
-                          데이터가 없습니다.
-                        </td>
-                      </tr>
-                    ) : (
-                      data.taksongTerminations.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-2 py-2 text-center">{index + 1}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.name || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
-                          <td className="border border-gray-300 px-2 py-2 text-right">
-                            {((item.c_preminum || item.preminum) || 0).toLocaleString('ko-KR')}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                    <tr className="bg-gray-100 font-semibold">
-                      <td colSpan={3} className="border border-gray-300 px-2 py-2 text-right">합계</td>
-                      <td className="border border-gray-300 px-2 py-2 text-right">
-                        {data.taksongTermPremium.toLocaleString('ko-KR')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* 탁송 해지자 */}
+            <div className="report-section mb-4">
+              <h4 className="text-base font-semibold mb-2">*탁송 해지자</h4>
+              <ul className="list-disc list-inside mb-2">
+                {data.taksongTerminations.map((item, index) => (
+                  <li key={index}>{item.name}</li>
+                ))}
+              </ul>
+              <p className="mt-2">총 {data.taksongTerminations.length}명</p>
             </div>
 
-            {/* 요약 정보 */}
-            <div className="bg-gray-50 p-4 rounded">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <strong>대리운전 청약 합계:</strong> {data.daeriRegPremium.toLocaleString('ko-KR')}원
-                </div>
-                <div>
-                  <strong>대리운전 해지 합계:</strong> {data.daeriTermPremium.toLocaleString('ko-KR')}원
-                </div>
-                <div>
-                  <strong>탁송 청약 합계:</strong> {data.taksongRegPremium.toLocaleString('ko-KR')}원
-                </div>
-                <div>
-                  <strong>탁송 해지 합계:</strong> {data.taksongTermPremium.toLocaleString('ko-KR')}원
-                </div>
-                <div className="col-span-2">
-                  <strong>할등 건수:</strong> {data.haldungCount}건
-                </div>
-              </div>
+            {/* 영수보험료 (+추징/-환급) */}
+            <div
+              id="premium-settlement-section"
+              className="report-section mb-4 p-4 rounded"
+              style={{
+                border: '2px solid #007bff',
+                backgroundColor: '#f8f9fa',
+              }}
+            >
+              <h4 className="text-base font-bold mb-2" style={{ color: '#007bff' }}>
+                영수보험료 (+추징/-환급)
+              </h4>
+              {(() => {
+                const daeriTotal = data.daeriRegPremium + data.daeriTermPremium
+                const taksongTotal = data.taksongRegPremium + data.taksongTermPremium
+                const overallTotal = daeriTotal + taksongTotal
+
+                return (
+                  <>
+                    <p className="text-base my-1">
+                      <strong>대리:</strong> {formatCurrency(daeriTotal)}원 {daeriTotal >= 0 ? '추징' : '환급'}
+                    </p>
+                    <p className="text-base my-1">
+                      <strong>탁송:</strong> {formatCurrency(taksongTotal)}원 {taksongTotal >= 0 ? '추징' : '환급'}
+                    </p>
+                    <p className="text-lg my-2 font-bold" style={{ color: '#28a745' }}>
+                      <strong>합계:</strong> {formatCurrency(overallTotal)}원 {overallTotal >= 0 ? '추징' : '환급'}
+                    </p>
+                  </>
+                )
+              })()}
+            </div>
+
+            {/* 할증자 정보 및 메일 발송 문구 */}
+            <div className="report-section">
+              <p className="mb-1">금일 가입자 중 할증자는 {data.haldungCount} 명입니다.</p>
+              <p>보험료 파일은 정리하여 메일로 발송하겠습니다.</p>
             </div>
           </div>
         )}
