@@ -894,14 +894,20 @@ export default function EndorseList() {
           <MessageSquare className="w-3.5 h-3.5" />
           문자리스트
         </button>
-        <FilterBar.Stats
-          stats={[
-            { label: '청약:', value: stats.subscription },
-            { label: '해지:', value: stats.cancellation },
-            { label: '계:', value: stats.total },
-          ]}
-        />
       </FilterBar>
+
+      {/* 통계 현황 */}
+      <div className="flex items-center gap-4 text-xs px-4 py-2 bg-card rounded-xl border border-border">
+        <span className="text-foreground">
+          청약: <strong>{stats.subscription.toLocaleString('ko-KR')}</strong>건
+        </span>
+        <span className="text-foreground">
+          해지: <strong>{stats.cancellation.toLocaleString('ko-KR')}</strong>건
+        </span>
+        <span className="text-foreground">
+          계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>건
+        </span>
+      </div>
 
       <DataTable
         data={endorseList}
