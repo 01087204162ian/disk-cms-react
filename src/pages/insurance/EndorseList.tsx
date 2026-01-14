@@ -402,8 +402,15 @@ export default function EndorseList() {
             <select
               value={currentProgress}
               onChange={(e) => handleProgressChange(row, e.target.value)}
-              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
-              style={{ fontSize: '0.75rem' }}
+              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+              style={{
+                fontSize: '0.75rem',
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               <option value="-1">선택</option>
@@ -456,8 +463,15 @@ export default function EndorseList() {
             <select
               value={currentRate}
               onChange={(e) => handleRateChange(row, e.target.value)}
-              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
-              style={{ fontSize: '0.75rem' }}
+              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+              style={{
+                fontSize: '0.75rem',
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {RATE_OPTIONS.map((opt) => (
@@ -486,8 +500,15 @@ export default function EndorseList() {
             <select
               value={currentStatus}
               onChange={(e) => handleStatusChange(row, e.target.value)}
-              className="h-8 px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-xs leading-none font-normal appearance-none cursor-pointer w-full"
-              style={{ fontSize: '0.75rem' }}
+              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+              style={{
+                fontSize: '0.75rem',
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {ENDORSE_PROCESS_OPTIONS.map((opt) => (
