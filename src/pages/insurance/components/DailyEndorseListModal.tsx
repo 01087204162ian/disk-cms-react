@@ -342,7 +342,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
             일일배서리스트
           </span>
         }
-        maxWidth="6xl"
+        maxWidth="7xl"
         maxHeight="90vh"
         position="center"
       >

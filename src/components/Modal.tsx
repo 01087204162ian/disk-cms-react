@@ -6,7 +6,7 @@ interface ModalProps {
   title: string | ReactNode
   children: ReactNode
   subtitle?: string | ReactNode
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl'
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl' | '7xl' | '8xl'
   maxHeight?: string
   footer?: ReactNode
   position?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
@@ -20,6 +20,8 @@ const maxWidthClasses = {
   '2xl': 'max-w-2xl',
   '4xl': 'max-w-4xl',
   '6xl': 'max-w-6xl',
+  '7xl': 'max-w-7xl',
+  '8xl': 'max-w-8xl',
 }
 
 export default function Modal({
