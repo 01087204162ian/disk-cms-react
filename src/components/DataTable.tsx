@@ -69,16 +69,9 @@ export default function DataTable<T extends Record<string, any>>({
         return (
           <tr
             key={index}
-            className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
-            style={{
-              backgroundColor: isEven ? '#f8f9fa' : '#ffffff'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f1f3f5'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isEven ? '#f8f9fa' : '#ffffff'
-            }}
+            className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''} ${
+              isEven ? 'bg-[#f8f9fa]' : 'bg-white'
+            } hover:bg-[#f1f3f5]`}
             onClick={() => onRowClick?.(row)}
           >
             {columns.map((column) => {
