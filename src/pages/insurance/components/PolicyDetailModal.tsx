@@ -245,7 +245,7 @@ export default function PolicyDetailModal({ isOpen, onClose, certi, onUpdate }: 
         isOpen={isOpen}
         onClose={onClose}
         title="증권 상세 정보"
-        maxWidth="xl"
+        maxWidth="6xl"
         maxHeight="85vh"
         footer={
           <div className="flex justify-end gap-2">
