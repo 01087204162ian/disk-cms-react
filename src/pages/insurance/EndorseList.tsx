@@ -23,6 +23,7 @@ import EndorseModal from './components/EndorseModal'
 import EndorseStatusModal from './components/EndorseStatusModal'
 import DailyEndorseListModal from './components/DailyEndorseListModal'
 import SmsListModal from './components/SmsListModal'
+import CompanyDetailModal from './components/CompanyDetailModal'
 
 interface EndorseItem {
   num: number
@@ -133,6 +134,11 @@ export default function EndorseList() {
     companyNum?: string | number
     sort?: string
   }>({})
+
+  // 업체 상세 모달 상태
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
+  const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -315,6 +321,13 @@ export default function EndorseList() {
     ]
   }, [])
 
+  // 업체 상세 모달 열기
+  const handleOpenCompanyModal = (companyNum: number | string, companyName: string) => {
+    setSelectedCompanyNum(typeof companyNum === 'string' ? Number(companyNum) : companyNum)
+    setSelectedCompanyName(companyName)
+    setDetailModalOpen(true)
+  }
+
   // 테이블 컬럼 정의
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
@@ -338,7 +351,24 @@ export default function EndorseList() {
       {
         key: 'companyName',
         header: '대리운전회사명',
-        cell: (row) => row.companyName || '-',
+        cell: (row) => {
+          const companyName = row.companyName || '-'
+          const companyNum = row.companyNum
+          if (companyNum && companyName !== '-') {
+            return (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleOpenCompanyModal(companyNum, companyName)
+                }}
+                className="text-primary hover:underline"
+              >
+                {companyName}
+              </button>
+            )
+          }
+          return <div>{companyName}</div>
+        },
         className: 'w-36',
       },
       {
@@ -815,6 +845,18 @@ export default function EndorseList() {
         initialPhone={smsListInitialData.phone}
         initialCompanyNum={smsListInitialData.companyNum}
         initialSort={smsListInitialData.sort}
+      />
+
+      {/* 업체 상세 모달 */}
+      <CompanyDetailModal
+        isOpen={detailModalOpen}
+        onClose={() => {
+          setDetailModalOpen(false)
+          setSelectedCompanyNum(null)
+          setSelectedCompanyName('')
+        }}
+        companyNum={selectedCompanyNum}
+        companyName={selectedCompanyName}
       />
     </div>
   )
