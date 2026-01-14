@@ -837,7 +837,7 @@ export default function EndorseList() {
             setPagination({ ...pagination, currentPage: 1 })
           }}
           variant="filter"
-          className="w-[120px]"
+          className="w-[144px]"
         />
         <FilterBar.Select
           value={filters.insuranceCom}
@@ -873,6 +873,18 @@ export default function EndorseList() {
           options={PAGE_SIZE_OPTIONS}
           className="w-[75px]"
         />
+        {/* 통계 현황 */}
+        <div className="flex items-center gap-4 text-xs px-4 py-2 bg-card rounded-xl border border-border">
+          <span className="text-foreground">
+            청약: <strong>{stats.subscription.toLocaleString('ko-KR')}</strong>건
+          </span>
+          <span className="text-foreground">
+            해지: <strong>{stats.cancellation.toLocaleString('ko-KR')}</strong>건
+          </span>
+          <span className="text-foreground">
+            계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>건
+          </span>
+        </div>
         <button
           onClick={handleEndorseStatus}
           className="h-10 px-3 py-1 text-xs border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
@@ -895,19 +907,6 @@ export default function EndorseList() {
           문자리스트
         </button>
       </FilterBar>
-
-      {/* 통계 현황 */}
-      <div className="flex items-center gap-4 text-xs px-4 py-2 bg-card rounded-xl border border-border">
-        <span className="text-foreground">
-          청약: <strong>{stats.subscription.toLocaleString('ko-KR')}</strong>건
-        </span>
-        <span className="text-foreground">
-          해지: <strong>{stats.cancellation.toLocaleString('ko-KR')}</strong>건
-        </span>
-        <span className="text-foreground">
-          계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>건
-        </span>
-      </div>
 
       <DataTable
         data={endorseList}
