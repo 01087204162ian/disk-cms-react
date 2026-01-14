@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import api from '../../lib/api'
 import {
   FilterBar,
@@ -117,10 +117,40 @@ export default function CodeByPolicy() {
       setIsDirectInput(false)
       setSelectedPolicyNum(value)
       setPolicyNumInput('')
-      // Select에서 증권번호 선택 시 자동 검색
+      // Select에서 증권번호 선택 시 자동 검색 (상태 업데이트 전에 직접 검색)
       if (value && value !== '') {
-        searchPolicies()
+        // 상태 업데이트가 비동기이므로 직접 value를 사용하여 검색
+        handleSearchWithCerti(value)
       }
+    }
+  }
+
+  // 특정 증권번호로 검색 (상태 업데이트와 독립적으로 작동)
+  const handleSearchWithCerti = async (certi: string) => {
+    if (loading) return
+    setLoading(true)
+
+    try {
+      const params: any = {
+        sj: 'policy_',
+      }
+      if (certi && certi.trim() !== '') {
+        params.certi = certi.trim()
+      }
+
+      const response = await api.get<PolicySearchResponse>('/api/insurance/kj-code/policy-search', { params })
+      
+      if (response.data.success) {
+        setPolicies(response.data.data || [])
+        setCurrentPage(1)
+      } else {
+        toast.error(response.data.error || '데이터를 불러오는 중 오류가 발생했습니다.')
+      }
+    } catch (error: any) {
+      console.error('증권 리스트 검색 오류:', error)
+      toast.error('데이터를 불러오는 중 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -154,15 +184,25 @@ export default function CodeByPolicy() {
     searchPolicies()
   }, [])
 
-  // 증권번호 옵션 생성
-  const policyNumOptions = [
-    { value: '', label: '증권번호' },
-    ...certiList.map((item) => ({
-      value: item.certi,
-      label: item.certi,
-    })),
-    { value: '__DIRECT_INPUT__', label: '직접 입력' },
-  ]
+  // 증권번호 옵션 생성 (useMemo로 최적화, 중복 제거)
+  const policyNumOptions = useMemo(() => {
+    // certiList에서 중복 제거 (같은 certi 값이 여러 번 나타나지 않도록)
+    const uniqueCertiList = certiList.reduce((acc, item) => {
+      if (item.certi && !acc.find((existing) => existing.certi === item.certi)) {
+        acc.push(item)
+      }
+      return acc
+    }, [] as CertiListItem[])
+
+    return [
+      // 빈 값 옵션은 제거 (placeholder 사용)
+      ...uniqueCertiList.map((item) => ({
+        value: item.certi,
+        label: item.certi,
+      })),
+      { value: '__DIRECT_INPUT__', label: '직접 입력' },
+    ]
+  }, [certiList])
 
   // 페이지네이션 계산
   const startIndex = (currentPage - 1) * itemsPerPage
@@ -295,7 +335,7 @@ export default function CodeByPolicy() {
     <div className="space-y-4">
       {/* 검색 필터 영역 */}
       <div className="flex flex-wrap items-end gap-3">
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-[30%] min-w-[200px]">
           <Select
             value={isDirectInput ? '__DIRECT_INPUT__' : selectedPolicyNum}
             onChange={(e) => handlePolicyNumChange(e.target.value)}
@@ -315,43 +355,30 @@ export default function CodeByPolicy() {
           )}
         </div>
         <FilterBar.SearchButton onClick={searchPolicies} />
-        <div className="ml-auto text-sm text-muted-foreground">
-          총 {policies.length}개의 증권이 검색되었습니다. ({startIndex + 1}-{endIndex}/{policies.length})
+        <div className="ml-auto flex items-center gap-4 text-sm">
+          <span className="text-muted-foreground">
+            총 {policies.length}개의 증권이 검색되었습니다. ({startIndex + 1}-{endIndex}/{policies.length})
+          </span>
+          {policies.length > 0 && (
+            <span className="text-foreground font-medium">
+              인원 합계: <strong className="text-primary">{totalInwon.toLocaleString('ko-KR')}</strong>
+            </span>
+          )}
         </div>
       </div>
 
       {/* 데이터 테이블 */}
-      <div className="relative">
-        <DataTable
-          data={currentPolicies}
-          columns={columns}
-          loading={loading}
-          pagination={{
-            currentPage,
-            pageSize: itemsPerPage,
-            totalCount: policies.length,
-            onPageChange: handlePageChange,
-          }}
-        />
-        {/* 합계 행 */}
-        {currentPolicies.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr className="bg-gray-100 font-bold">
-                  <td colSpan={9} className="text-right px-4 py-2 border border-gray-300">
-                    인원 합계:
-                  </td>
-                  <td className="text-end px-4 py-2 border border-gray-300">
-                    {totalInwon.toLocaleString('ko-KR')}
-                  </td>
-                  <td colSpan={6} className="border border-gray-300"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      <DataTable
+        data={currentPolicies}
+        columns={columns}
+        loading={loading}
+        pagination={{
+          currentPage,
+          pageSize: itemsPerPage,
+          totalCount: policies.length,
+          onPageChange: handlePageChange,
+        }}
+      />
 
       {/* 증권 상세 모달 */}
       <PolicyDetailModal
