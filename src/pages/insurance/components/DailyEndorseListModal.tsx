@@ -3,7 +3,7 @@ import { Modal, useToastHelpers, DatePicker, FilterSelect } from '../../../compo
 import api from '../../../lib/api'
 import { INSURER_MAP, PUSH_MAP, GITA_OPTIONS } from '../constants'
 import { List, CheckCircle2 } from 'lucide-react'
-import EndorseStatusModal from './EndorseStatusModal'
+import EndorseReviewModal from './EndorseReviewModal'
 
 interface DailyEndorseListModalProps {
   isOpen: boolean
@@ -295,6 +295,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       toast.error('날짜를 선택해주세요.')
       return
     }
+    const selectedCompany = companyOptions.find((opt) => opt.value === companyNum)
     setEndorseStatusModalOpen(true)
   }
 
@@ -432,7 +433,18 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2">{item.hphone || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2 text-center" style={getStatusStyle(item.push)}>
-                            {PUSH_MAP[String(item.push)] || item.push || '-'}
+                            {(() => {
+                              const push = String(item.push)
+                              const pushType: Record<string, string> = {
+                                '1': '청약',
+                                '2': '해지',
+                                '3': '청약거절',
+                                '4': '정상',
+                                '5': '해지취소',
+                                '6': '청약취소',
+                              }
+                              return pushType[push] || push || '-'
+                            })()}
                           </td>
                           <td className="border border-gray-300 px-2 py-2">{item.policyNum || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2 text-center">
@@ -552,12 +564,13 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       </Modal>
 
       {/* 배서현황 모달 - 검토 버튼 클릭 시 열림 */}
-      {endorseStatusModalOpen && (
-        <EndorseStatusModal
-          isOpen={endorseStatusModalOpen}
-          onClose={() => setEndorseStatusModalOpen(false)}
-        />
-      )}
+      <EndorseReviewModal
+        isOpen={endorseStatusModalOpen}
+        onClose={() => setEndorseStatusModalOpen(false)}
+        date={date}
+        companyNum={companyNum}
+        companyName={companyOptions.find((opt) => opt.value === companyNum)?.label || ''}
+      />
     </>
   )
 }
