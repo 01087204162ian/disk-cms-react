@@ -385,13 +385,13 @@ export default function EndorseList() {
           const age = row.age ? `(${row.age})` : ''
           return jumin ? `${jumin} ${age}` : '-'
         },
-        className: 'w-36',
+        className: 'w-44',
       },
       {
         key: 'phone',
         header: '핸드폰',
         cell: (row) => (row.phone ? addPhoneHyphen(row.phone) : '-'),
-        className: 'w-28',
+        className: 'w-36',
       },
       {
         key: 'progressStep',
@@ -504,7 +504,7 @@ export default function EndorseList() {
         key: 'insuranceCom',
         header: '보험사',
         cell: (row) => INSURER_MAP[Number(row.insuranceCom)] || row.insuranceCom || '-',
-        className: 'w-20',
+        className: 'w-10',
       },
       {
         key: 'premium',
@@ -524,7 +524,7 @@ export default function EndorseList() {
         key: 'duplicate',
         header: '중복여부',
         cell: (row) => row.duplicate || '-',
-        className: 'w-24',
+        className: 'w-12',
       },
     ],
     [endorseList, pagination]
