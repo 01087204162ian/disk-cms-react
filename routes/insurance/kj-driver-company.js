@@ -661,25 +661,27 @@ router.post('/kj-endorse/save', async (req, res) => {
   }
 });
 
-// 배서처리 상태 업데이트 API (changeEndorse.php 사용)
+// 배서처리 상태 업데이트 API (kj-endorse-update-status.php 사용)
 router.post('/kj-endorse/update-status', async (req, res) => {
   try {
-    // PHP API 경로: kj/api/kjDaeri/changeEndorse.php
-    const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeEndorse.php`;
+    // PHP API 경로: api/insurance/kj-endorse-update-status.php
+    const apiUrl = `${PHP_API_BASE_URL}/kj-endorse-update-status.php`;
     
-    // FormData 형식으로 데이터 준비 (URLSearchParams 사용)
-    const params = new URLSearchParams();
-    if (req.body.num) params.append('num', req.body.num);
-    if (req.body.status) params.append('status', req.body.status);
-    if (req.body.push) params.append('push', req.body.push);
-    if (req.body.rate) params.append('rate', req.body.rate);
-    if (req.body.userName) params.append('userName', req.body.userName);
-    if (req.body.reasion) params.append('reasion', req.body.reasion);
-    if (req.body.smsContents) params.append('smsContents', req.body.smsContents);
+    // JSON 형식으로 데이터 준비 (status를 sangtae로 변환)
+    // 프론트엔드에서 form-data 형식으로 보내지만, Express의 urlencoded 미들웨어가 파싱
+    // 프론트엔드는 status 필드를 보내지만, 백엔드는 sangtae 필드를 기대
+    const requestData = {
+      num: req.body.num,
+      sangtae: req.body.status, // status를 sangtae로 변환
+      endorseProcess: req.body.endorseProcess || '청약',
+      manager: req.body.userName || req.body.manager || null,
+      reasion: req.body.reasion || null,
+      smsContents: req.body.smsContents || null,
+    };
 
-    const response = await axios.post(apiUrl, params.toString(), {
+    const response = await axios.post(apiUrl, requestData, {
       timeout: DEFAULT_TIMEOUT,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/json' },
     });
 
     res.json(response.data);
