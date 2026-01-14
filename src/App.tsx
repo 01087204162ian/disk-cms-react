@@ -23,6 +23,7 @@ const DriverSearch = lazy(() => import('./pages/insurance/DriverSearch'))
 const PolicySearch = lazy(() => import('./pages/insurance/PolicySearch'))
 const CompanyManagement = lazy(() => import('./pages/insurance/CompanyManagement'))
 const EndorseList = lazy(() => import('./pages/insurance/EndorseList'))
+const CodeByPolicy = lazy(() => import('./pages/insurance/CodeByPolicy'))
 
 // 로딩 컴포넌트
 const PageLoader = () => (
@@ -69,6 +70,7 @@ function App() {
                       <Route path="/insurance/kj-driver-policy-search" element={<PolicySearch />} />
                       <Route path="/insurance/kj-driver-company" element={<CompanyManagement />} />
                       <Route path="/insurance/kj-driver-endorse-list" element={<EndorseList />} />
+                      <Route path="/insurance/kj-driver-code-by-policy" element={<CodeByPolicy />} />
                       {/* 이전 경로 호환 */}
                       <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
                       {/* 추가 라우트는 여기에 추가 */}
