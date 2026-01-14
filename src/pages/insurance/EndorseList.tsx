@@ -25,6 +25,7 @@ import DailyEndorseListModal from './components/DailyEndorseListModal'
 import SmsListModal from './components/SmsListModal'
 import CompanyDetailModal from './components/CompanyDetailModal'
 import EndorseDayChangeModal from './components/EndorseDayChangeModal'
+import DuplicateListModal from './components/DuplicateListModal'
 
 interface EndorseItem {
   num: number
@@ -150,6 +151,10 @@ export default function EndorseList() {
     policyNum?: string
     companyName?: string
   } | null>(null)
+
+  // 중복 리스트 모달 상태
+  const [duplicateListModalOpen, setDuplicateListModalOpen] = useState(false)
+  const [selectedJumin, setSelectedJumin] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -641,7 +646,26 @@ export default function EndorseList() {
       {
         key: 'duplicate',
         header: '중복여부',
-        cell: (row) => row.duplicate || '-',
+        cell: (row) => {
+          const duplicateText = row.duplicate || '-'
+          if (duplicateText === '중복' && row.jumin) {
+            return (
+              <button
+                type="button"
+                className="text-primary hover:underline cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setSelectedJumin(row.jumin)
+                  setDuplicateListModalOpen(true)
+                }}
+              >
+                {duplicateText}
+              </button>
+            )
+          }
+          return <span>{duplicateText}</span>
+        },
         className: 'w-12',
       },
     ],
@@ -1048,6 +1072,16 @@ export default function EndorseList() {
           }}
         />
       )}
+
+      {/* 중복 리스트 모달 */}
+      <DuplicateListModal
+        isOpen={duplicateListModalOpen}
+        onClose={() => {
+          setDuplicateListModalOpen(false)
+          setSelectedJumin('')
+        }}
+        jumin={selectedJumin}
+      />
     </div>
   )
 }
