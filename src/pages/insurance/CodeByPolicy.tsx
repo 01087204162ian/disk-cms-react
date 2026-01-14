@@ -232,7 +232,7 @@ export default function CodeByPolicy() {
       header: '보험사',
       cell: (row: PolicyItem) => {
         const insurerCode = String(row.insurance || '')
-        return INSURER_MAP[insurerCode as keyof typeof INSURER_MAP] || insurerCode
+        return (INSURER_MAP as Record<string, string>)[insurerCode] || insurerCode
       },
       className: 'w-20',
     },
@@ -331,7 +331,6 @@ export default function CodeByPolicy() {
             currentPage,
             pageSize: itemsPerPage,
             totalCount: policies.length,
-            totalPages,
             onPageChange: handlePageChange,
           }}
         />
