@@ -60,13 +60,12 @@ export default function EndorseReviewModal({
     if (isOpen) {
       if (initialDate) setDate(initialDate)
       if (initialCompanyNum) setCompanyNum(initialCompanyNum)
-      if (initialCompanyName) setCompanyName(initialCompanyName)
       
       if (initialDate && initialCompanyNum) {
         loadData(initialDate, initialCompanyNum)
       }
     }
-  }, [isOpen, initialDate, initialCompanyNum, initialCompanyName])
+  }, [isOpen, initialDate, initialCompanyNum])
 
   const loadCompanyOptions = async (endorseDay: string) => {
     try {
@@ -200,8 +199,6 @@ export default function EndorseReviewModal({
 
   const handleCompanyChange = (value: string) => {
     setCompanyNum(value)
-    const selected = companyOptions.find((opt) => opt.value === value)
-    setCompanyName(selected?.label || '')
   }
 
   useEffect(() => {
