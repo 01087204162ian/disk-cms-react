@@ -167,7 +167,6 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
     {
       key: 'push',
       header: '상태',
-      className: 'whitespace-nowrap',
       cell: (row) => {
         const push = Number(row.push)
         const cancel = row.cancel != null ? String(row.cancel) : ''
@@ -187,7 +186,7 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
 
         return <span className="whitespace-nowrap">{mapPushLabel(push)}</span>
       },
-      className: 'w-20 text-center',
+      className: 'w-20 text-center whitespace-nowrap',
     },
     {
       key: 'discount',
