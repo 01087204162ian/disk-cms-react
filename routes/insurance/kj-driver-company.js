@@ -666,8 +666,18 @@ router.post('/kj-endorse/update-status', async (req, res) => {
   try {
     // PHP API 경로: kj/api/kjDaeri/changeEndorse.php
     const apiUrl = `https://pcikorea.com/kj/api/kjDaeri/changeEndorse.php`;
+    
+    // FormData 형식으로 데이터 준비 (URLSearchParams 사용)
+    const params = new URLSearchParams();
+    if (req.body.num) params.append('num', req.body.num);
+    if (req.body.status) params.append('status', req.body.status);
+    if (req.body.push) params.append('push', req.body.push);
+    if (req.body.rate) params.append('rate', req.body.rate);
+    if (req.body.userName) params.append('userName', req.body.userName);
+    if (req.body.reasion) params.append('reasion', req.body.reasion);
+    if (req.body.smsContents) params.append('smsContents', req.body.smsContents);
 
-    const response = await axios.post(apiUrl, req.body, {
+    const response = await axios.post(apiUrl, params.toString(), {
       timeout: DEFAULT_TIMEOUT,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
