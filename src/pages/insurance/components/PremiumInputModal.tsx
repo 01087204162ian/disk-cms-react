@@ -7,7 +7,7 @@ interface PremiumInputModalProps {
   onUpdate?: () => void
 }
 
-export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: PremiumInputModalProps) {
+export default function PremiumInputModal({ isOpen, onClose }: PremiumInputModalProps) {
   return (
     <Modal
       isOpen={isOpen}

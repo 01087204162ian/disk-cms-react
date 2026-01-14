@@ -4,6 +4,8 @@ import {
   FilterBar,
   useToastHelpers,
   Select,
+  DataTable,
+  type Column,
 } from '../../components'
 import { INSURER_MAP } from './constants'
 import PolicyDetailModal from './components/PolicyDetailModal'
@@ -177,109 +179,115 @@ export default function CodeByPolicy() {
   // 테이블 컬럼 정의
   const columns: Column<PolicyItem>[] = [
     {
+      key: 'num',
       header: '#',
-      accessorKey: 'certi',
-      cell: ({ row, index }) => (
-        <button
-          onClick={() => handleOpenDetail(row.certi)}
-          className="text-primary hover:underline"
-        >
-          {index + 1 + startIndex}
-        </button>
-      ),
+      cell: (row: PolicyItem) => {
+        const index = policies.findIndex((p) => p.certi === row.certi)
+        return (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              handleOpenDetail(row.certi)
+            }}
+            className="text-primary hover:underline"
+          >
+            {index + 1 + startIndex}
+          </button>
+        )
+      },
       className: 'w-12 text-center',
     },
     {
       key: 'certi',
       header: '증권번호',
-      cell: (row) => row.certi,
+      cell: (row: PolicyItem) => row.certi,
       className: 'w-32',
     },
     {
       key: 'company',
       header: '회사명',
-      cell: (row) => row.company,
+      cell: (row: PolicyItem) => row.company,
       className: 'w-32',
     },
     {
       key: 'name',
       header: '계약자',
-      cell: (row) => row.name,
+      cell: (row: PolicyItem) => row.name,
       className: 'w-24',
     },
     {
       key: 'owner',
       header: '소유자',
-      cell: (row) => row.owner,
+      cell: (row: PolicyItem) => row.owner,
       className: 'w-24',
     },
     {
       key: 'jumin',
       header: '주민번호',
-      cell: (row) => row.jumin,
+      cell: (row: PolicyItem) => row.jumin,
       className: 'w-36',
     },
     {
       key: 'insurance',
       header: '보험사',
-      cell: (row) => {
+      cell: (row: PolicyItem) => {
         const insurerCode = String(row.insurance || '')
-        return INSURER_MAP[insurerCode] || insurerCode
+        return INSURER_MAP[insurerCode as keyof typeof INSURER_MAP] || insurerCode
       },
       className: 'w-20',
     },
     {
       key: 'sigi',
       header: '계약일',
-      cell: (row) => row.sigi,
+      cell: (row: PolicyItem) => row.sigi,
       className: 'w-24',
     },
     {
       key: 'nab',
       header: '회차',
-      cell: (row) => row.nab,
+      cell: (row: PolicyItem) => row.nab,
       className: 'w-16 text-center',
     },
     {
       key: 'inwon',
       header: '인원',
-      cell: (row) => (row.inwon || 0).toLocaleString('ko-KR'),
+      cell: (row: PolicyItem) => (row.inwon || 0).toLocaleString('ko-KR'),
       className: 'w-20 text-end',
     },
     {
       key: 'maxInwon',
       header: 'max',
-      cell: (row) => (row.maxInwon || 0).toLocaleString('ko-KR'),
+      cell: (row: PolicyItem) => (row.maxInwon || 0).toLocaleString('ko-KR'),
       className: 'w-20 text-end',
     },
     {
       key: 'cord',
       header: '코드',
-      cell: (row) => row.cord,
+      cell: (row: PolicyItem) => row.cord,
       className: 'w-24',
     },
     {
       key: 'cordPass',
       header: '비밀번호',
-      cell: (row) => row.cordPass,
+      cell: (row: PolicyItem) => row.cordPass,
       className: 'w-24',
     },
     {
       key: 'cordCerti',
       header: '인증번호',
-      cell: (row) => row.cordCerti,
+      cell: (row: PolicyItem) => row.cordCerti,
       className: 'w-28',
     },
     {
       key: 'yearRate',
       header: '단체율',
-      cell: (row) => `${row.yearRate || 0}%`,
+      cell: (row: PolicyItem) => `${row.yearRate || 0}%`,
       className: 'w-20 text-center',
     },
     {
       key: 'harinRate',
       header: '할인율',
-      cell: (row) => `${row.harinRate || 0}%`,
+      cell: (row: PolicyItem) => `${row.harinRate || 0}%`,
       className: 'w-20 text-center',
     },
   ]
@@ -291,7 +299,7 @@ export default function CodeByPolicy() {
         <div className="flex-1 min-w-[200px]">
           <Select
             value={isDirectInput ? '__DIRECT_INPUT__' : selectedPolicyNum}
-            onChange={(value) => handlePolicyNumChange(value)}
+            onChange={(e) => handlePolicyNumChange(e.target.value)}
             options={policyNumOptions}
             placeholder="증권번호"
             variant="filter"
