@@ -8,7 +8,6 @@ interface EndorseReviewModalProps {
   onClose: () => void
   date?: string
   companyNum?: string
-  companyName?: string
 }
 
 interface EndorseReviewItem {
@@ -47,7 +46,6 @@ export default function EndorseReviewModal({
   onClose,
   date: initialDate,
   companyNum: initialCompanyNum,
-  companyName: initialCompanyName,
 }: EndorseReviewModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)

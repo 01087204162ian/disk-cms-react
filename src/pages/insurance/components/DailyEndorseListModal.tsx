@@ -571,7 +571,6 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
         onClose={() => setEndorseStatusModalOpen(false)}
         date={date}
         companyNum={companyNum}
-        companyName={companyOptions.find((opt) => opt.value === companyNum)?.label || ''}
       />
     </>
   )
