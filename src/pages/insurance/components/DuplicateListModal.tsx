@@ -3,6 +3,7 @@ import { Modal, useToastHelpers, DataTable, type Column } from '../../../compone
 import api from '../../../lib/api'
 import CompanyDetailModal from './CompanyDetailModal'
 import { GITA_OPTIONS } from '../constants'
+import { mapPushLabel } from '../constants'
 
 interface DuplicateListModalProps {
   isOpen: boolean
@@ -56,6 +57,7 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
   const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [selectedCompanyNum, setSelectedCompanyNum] = useState<number | null>(null)
   const [selectedCompanyName, setSelectedCompanyName] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<'4' | '1'>('4') // 4=정상, 1=청약중
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 20,
@@ -66,6 +68,7 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
   // 모달이 열릴 때 데이터 로드
   useEffect(() => {
     if (isOpen && jumin) {
+      setStatusFilter('4')
       loadData(1, 20)
     }
   }, [isOpen, jumin])
@@ -79,7 +82,7 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
         page,
         limit: pageSize,
         jumin: jumin,
-        status: '4', // 정상 상태만 조회
+        status: statusFilter, // 4=정상, 1=청약중
       }
 
       const res = await api.get<DriverSearchResponse>('/api/insurance/kj-driver/list', { params })
@@ -162,6 +165,12 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
       },
     },
     {
+      key: 'push',
+      header: '상태',
+      cell: (row) => <div className="whitespace-nowrap text-center">{mapPushLabel(row.push)}</div>,
+      className: 'w-20 text-center',
+    },
+    {
       key: 'policyNum',
       header: '증권번호',
       cell: (row) => <div className="whitespace-nowrap">{row.policyNum || ''}</div>,
@@ -187,6 +196,39 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
         position="top-left"
       >
         <div className="space-y-4">
+          {/* 상태 필터 */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter('4')
+                loadData(1, pagination.pageSize)
+              }}
+              className={[
+                'h-8 px-3 rounded border text-sm whitespace-nowrap transition-colors',
+                statusFilter === '4'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background hover:bg-accent border-border',
+              ].join(' ')}
+            >
+              정상
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFilter('1')
+                loadData(1, pagination.pageSize)
+              }}
+              className={[
+                'h-8 px-3 rounded border text-sm whitespace-nowrap transition-colors',
+                statusFilter === '1'
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background hover:bg-accent border-border',
+              ].join(' ')}
+            >
+              청약
+            </button>
+          </div>
           <DataTable
             data={data}
             columns={columns}

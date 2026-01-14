@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal, useToastHelpers, DatePicker } from '../../../components'
 import api from '../../../lib/api'
+import { Search, ChartLine } from 'lucide-react'
 
 interface EndorseStatusModalProps {
   isOpen: boolean
@@ -23,27 +24,6 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [data, setData] = useState<EndorseStatusData[]>([])
-
-  const setPrevMonthRange = () => {
-    const today = new Date()
-    const prevMonthFirst = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-    const prevMonthLast = new Date(today.getFullYear(), today.getMonth(), 0)
-    const from = prevMonthFirst.toISOString().split('T')[0]
-    const to = prevMonthLast.toISOString().split('T')[0]
-    setFromDate(from)
-    setToDate(to)
-    loadData(from, to)
-  }
-
-  const setCurrentMonthRange = () => {
-    const today = new Date()
-    const currentMonthFirst = new Date(today.getFullYear(), today.getMonth(), 1)
-    const from = currentMonthFirst.toISOString().split('T')[0]
-    const to = today.toISOString().split('T')[0]
-    setFromDate(from)
-    setToDate(to)
-    loadData(from, to)
-  }
 
   // 초기 날짜 설정 (1개월 전 첫날 ~ 오늘)
   useEffect(() => {
@@ -103,8 +83,13 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="배서현황"
-      maxWidth="6xl"
+      title={
+        <span className="inline-flex items-center gap-2">
+          <ChartLine className="w-5 h-5" />
+          일일배서현황
+        </span>
+      }
+      maxWidth="xl"
     >
       <div className="space-y-4">
         {/* 필터 영역 */}
@@ -121,27 +106,11 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
             label="종료일"
             className="w-40"
           />
-          {/* 빠른 날짜 선택 */}
-          <div className="flex items-end gap-2">
-            <button
-              type="button"
-              onClick={setPrevMonthRange}
-              className="h-10 px-4 min-w-[92px] whitespace-nowrap rounded-lg border border-border bg-background hover:bg-accent transition-colors text-sm"
-            >
-              이전달
-            </button>
-            <button
-              type="button"
-              onClick={setCurrentMonthRange}
-              className="h-10 px-4 min-w-[92px] whitespace-nowrap rounded-lg border border-border bg-background hover:bg-accent transition-colors text-sm"
-            >
-              현재달
-            </button>
-          </div>
           <button
             onClick={handleSearch}
-            className="h-10 px-6 min-w-[92px] whitespace-nowrap bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            className="h-10 px-4 min-w-[120px] whitespace-nowrap bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
           >
+            <Search className="w-4 h-4" />
             조회
           </button>
         </div>
