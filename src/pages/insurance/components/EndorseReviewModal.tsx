@@ -170,10 +170,6 @@ export default function EndorseReviewModal({
           }
         })
 
-        const daeriTotal = daeriRegPremium + daeriTermPremium
-        const taksongTotal = taksongRegPremium + taksongTermPremium
-        const overallTotal = daeriTotal + taksongTotal
-
         setData({
           daeriRegistrations,
           daeriTerminations,
