@@ -156,6 +156,9 @@ export default function EndorseList() {
   const [duplicateListModalOpen, setDuplicateListModalOpen] = useState(false)
   const [selectedJumin, setSelectedJumin] = useState<string>('')
 
+  // 테이블 행 선택(체크 표시) 상태
+  const [selectedRowNums, setSelectedRowNums] = useState<Set<number>>(new Set())
+
   // 필터 상태
   const [filters, setFilters] = useState({
     push: '', // 상태 (청약/해지)
@@ -281,6 +284,19 @@ export default function EndorseList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.push, filters.progress, filters.endorseDay, filters.insuranceCom, filters.policyNum, filters.companyNum, filters.pageSize])
 
+  // 리스트가 바뀌면(검색/페이징) 현재 페이지에 존재하는 행만 선택 유지
+  useEffect(() => {
+    setSelectedRowNums((prev) => {
+      if (prev.size === 0) return prev
+      const currentNums = new Set(endorseList.map((r) => r.num))
+      const next = new Set<number>()
+      prev.forEach((num) => {
+        if (currentNums.has(num)) next.add(num)
+      })
+      return next
+    })
+  }, [endorseList])
+
   // 증권번호 옵션 생성
   const policySelectOptions = useMemo(() => {
     const options = [
@@ -350,9 +366,32 @@ export default function EndorseList() {
     setEndorseDayChangeModalOpen(true)
   }
 
+  const toggleRowSelected = (num: number) => {
+    setSelectedRowNums((prev) => {
+      const next = new Set(prev)
+      if (next.has(num)) next.delete(num)
+      else next.add(num)
+      return next
+    })
+  }
+
   // 테이블 컬럼 정의
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
+      {
+        key: '__select__',
+        header: '✓',
+        cell: (row) => (
+          <input
+            type="checkbox"
+            checked={selectedRowNums.has(row.num)}
+            onChange={() => toggleRowSelected(row.num)}
+            onClick={(e) => e.stopPropagation()}
+            className="h-4 w-4 cursor-pointer"
+          />
+        ),
+        className: 'w-10 text-center',
+      },
       {
         key: 'num',
         header: 'No',
@@ -669,7 +708,7 @@ export default function EndorseList() {
         className: 'w-12',
       },
     ],
-    [endorseList, pagination]
+    [endorseList, pagination, selectedRowNums]
   )
 
   // 배서현황 버튼 클릭
