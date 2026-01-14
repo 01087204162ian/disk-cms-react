@@ -287,37 +287,39 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
       isOpen={isOpen}
       onClose={onClose}
       title={
-        <span className="inline-flex items-center gap-2">
-          <LineChart className="w-5 h-5" />
-          일일배서현황
-        </span>
+        <div className="flex items-center justify-between w-full gap-4">
+          <span className="inline-flex items-center gap-2">
+            <LineChart className="w-5 h-5" />
+            일일배서현황
+          </span>
+          {/* 필터 영역 - 헤더에 배치 */}
+          <div className="flex items-center gap-2 flex-nowrap">
+            <DatePicker
+              value={fromDate}
+              onChange={(value) => setFromDate(value || '')}
+              className="w-32 h-8"
+              variant="filter"
+            />
+            <DatePicker
+              value={toDate}
+              onChange={(value) => setToDate(value || '')}
+              className="w-32 h-8"
+              variant="filter"
+            />
+            <button
+              onClick={handleSearch}
+              className="h-8 px-3 min-w-[80px] whitespace-nowrap bg-white text-[#667eea] rounded hover:bg-white/90 transition-colors inline-flex items-center justify-center gap-1 text-sm font-medium"
+            >
+              <Search className="w-4 h-4" />
+              조회
+            </button>
+          </div>
+        </div>
       }
       maxWidth="6xl"
       position="center"
     >
       <div className="space-y-4">
-        {/* 필터 영역 - 한 행으로 표시 */}
-        <div className="flex items-end gap-3 flex-nowrap">
-          <DatePicker
-            value={fromDate}
-            onChange={(value) => setFromDate(value || '')}
-            label="시작일"
-            className="w-40"
-          />
-          <DatePicker
-            value={toDate}
-            onChange={(value) => setToDate(value || '')}
-            label="종료일"
-            className="w-40"
-          />
-          <button
-            onClick={handleSearch}
-            className="h-10 px-4 min-w-[120px] whitespace-nowrap bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center justify-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            조회
-          </button>
-        </div>
 
         {/* 데이터 표시 영역 */}
         {loading ? (

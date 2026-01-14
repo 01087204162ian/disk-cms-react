@@ -47,7 +47,24 @@ export default function Modal({
   }, [isOpen])
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 입력 필드, 버튼, 링크 등은 드래그 대상에서 제외
+    const target = e.target as HTMLElement
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'SELECT' ||
+      target.closest('input') ||
+      target.closest('button') ||
+      target.closest('select') ||
+      target.closest('[role="button"]')
+    ) {
+      return
+    }
+
     if (!modalRef.current) return
+    
+    e.preventDefault()
+    e.stopPropagation()
     
     setIsDragging(true)
     const rect = modalRef.current.getBoundingClientRect()
@@ -68,6 +85,9 @@ export default function Modal({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || modalPosition === null) return
 
+      e.preventDefault()
+      e.stopPropagation()
+
       const newX = e.clientX - dragOffset.x
       const newY = e.clientY - dragOffset.y
 
@@ -77,18 +97,25 @@ export default function Modal({
       })
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
       setIsDragging(false)
     }
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mousemove', handleMouseMove, { passive: false })
+      document.addEventListener('mouseup', handleMouseUp, { passive: false })
+      // 드래그 중 텍스트 선택 방지
+      document.body.style.userSelect = 'none'
+      document.body.style.cursor = 'move'
     }
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
+      document.body.style.userSelect = ''
+      document.body.style.cursor = ''
     }
   }, [isDragging, dragOffset, modalPosition])
 
