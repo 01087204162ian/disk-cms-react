@@ -9,6 +9,7 @@ interface ModalProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '6xl'
   maxHeight?: string
   footer?: ReactNode
+  position?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 }
 
 const maxWidthClasses = {
@@ -30,11 +31,20 @@ export default function Modal({
   maxWidth = 'lg',
   maxHeight,
   footer,
+  position = 'center',
 }: ModalProps) {
   if (!isOpen) return null
 
+  const positionClasses = {
+    center: 'items-center justify-center',
+    'top-left': 'items-start justify-start',
+    'top-right': 'items-start justify-end',
+    'bottom-left': 'items-end justify-start',
+    'bottom-right': 'items-end justify-end',
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className={`fixed inset-0 z-50 flex ${positionClasses[position]} bg-black/50 p-4`}>
       <div
         className={`w-full ${maxWidthClasses[maxWidth]} ${maxHeight ? `max-h-[${maxHeight}]` : ''} rounded-xl bg-background border border-border overflow-hidden flex flex-col`}
         style={maxHeight ? { maxHeight } : undefined}

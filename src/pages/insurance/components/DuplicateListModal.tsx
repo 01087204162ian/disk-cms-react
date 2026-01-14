@@ -174,6 +174,7 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
         onClose={onClose}
         title="중복 리스트"
         maxWidth="6xl"
+        position="top-left"
       >
         <div className="space-y-4">
           <DataTable
