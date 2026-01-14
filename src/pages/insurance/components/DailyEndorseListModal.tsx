@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Modal, useToastHelpers, DatePicker, FilterSelect } from '../../../components'
 import api from '../../../lib/api'
-import { INSURER_MAP, GITA_MAP, PUSH_MAP, GITA_OPTIONS } from '../constants'
+import { INSURER_MAP, PUSH_MAP, GITA_OPTIONS } from '../constants'
 import { List, CheckCircle2 } from 'lucide-react'
 import EndorseStatusModal from './EndorseStatusModal'
 
@@ -77,7 +77,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       loadPolicyOptions(todayStr, '', '')
       // 모달 열 때 자동 조회
       setTimeout(() => {
-        loadData(1, todayStr, '', '', 1)
+        loadData(1, todayStr, '', '', '1')
       }, 100)
     }
   }, [isOpen])
@@ -88,7 +88,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
       loadCompanyOptions(date)
       loadPolicyOptions(date, companyNum, policyNum)
       const sort = policyNum ? '3' : companyNum ? '2' : '1'
-      loadData(1, date, companyNum, policyNum, sort)
+      loadData(1, date, companyNum, policyNum, sort as '1' | '2' | '3')
     }
   }, [date])
 
@@ -97,18 +97,18 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
     if (isOpen && date && companyNum) {
       loadPolicyOptions(date, companyNum, '')
       setPolicyNum('')
-      loadData(1, date, companyNum, '', 2)
+      loadData(1, date, companyNum, '', '2')
     } else if (isOpen && date && !companyNum) {
       loadPolicyOptions(date, '', '')
       setPolicyNum('')
-      loadData(1, date, '', '', 1)
+      loadData(1, date, '', '', '1')
     }
   }, [companyNum])
 
   // 증권 변경 시 자동 조회
   useEffect(() => {
     if (isOpen && date && companyNum && policyNum) {
-      loadData(1, date, companyNum, policyNum, 3)
+      loadData(1, date, companyNum, policyNum, '3')
     }
   }, [policyNum])
 
