@@ -133,7 +133,11 @@ export const PUSH_OPTIONS = [
 // 배서 상태(push) 매핑
 export const PUSH_MAP: Record<string, string> = {
   '1': '청약',
-  '4': '해지',
+  '2': '해지',
+  '3': '청약거절',
+  '4': '정상',
+  '5': '해지취소',
+  '6': '청약취소',
 }
 
 // 배서 진행단계 옵션

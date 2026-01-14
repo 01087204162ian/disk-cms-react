@@ -432,21 +432,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 px-2 py-2">{item.Jumin || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2">{item.hphone || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2 text-center" style={getStatusStyle(item.push)}>
-                            {(() => {
-                              const push = String(item.push)
-                              // PUSH_MAP 사용, 없는 경우만 추가 매핑
-                              if (PUSH_MAP[push]) {
-                                return PUSH_MAP[push]
-                              }
-                              // PUSH_MAP에 없는 값들에 대한 추가 매핑
-                              const additionalMap: Record<string, string> = {
-                                '2': '해지',
-                                '3': '청약거절',
-                                '5': '해지취소',
-                                '6': '청약취소',
-                              }
-                              return additionalMap[push] || push || '-'
-                            })()}
+                            {PUSH_MAP[String(item.push)] || String(item.push) || '-'}
                           </td>
                           <td className="border border-gray-300 px-2 py-2">{item.policyNum || '-'}</td>
                           <td className="border border-gray-300 px-2 py-2 text-center">
