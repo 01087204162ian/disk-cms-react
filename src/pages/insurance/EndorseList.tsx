@@ -953,14 +953,14 @@ export default function EndorseList() {
         </button>
         <button
           onClick={handleDailyEndorseList}
-          className="h-7 px-2 py-0.5 text-xs border border-success text-success bg-background rounded-md hover:bg-success hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
         >
           <List className="w-3 h-3" />
           일일배서리스트
         </button>
         <button
           onClick={handleSmsList}
-          className="h-7 px-2 py-0.5 text-xs border border-info text-info bg-background rounded-md hover:bg-info hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
         >
           <MessageSquare className="w-3 h-3" />
           문자리스트
