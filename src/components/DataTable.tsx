@@ -66,12 +66,18 @@ export default function DataTable<T extends Record<string, any>>({
     <tbody>
       {data.map((row, index) => {
         const isEven = index % 2 === 1 // 0-based index, so index 1, 3, 5... are even rows
+        const baseBgColor = isEven ? '#f8f9fa' : '#ffffff'
         return (
           <tr
             key={index}
-            className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''} ${
-              isEven ? 'bg-[#f8f9fa]' : 'bg-white'
-            } hover:bg-[#f1f3f5]`}
+            className={`transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+            style={{ backgroundColor: baseBgColor }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#f1f3f5'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = baseBgColor
+            }}
             onClick={() => onRowClick?.(row)}
           >
             {columns.map((column) => {
