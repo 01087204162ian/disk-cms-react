@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Modal, useToastHelpers, DataTable, type Column } from '../../../components'
 import api from '../../../lib/api'
 import CompanyDetailModal from './CompanyDetailModal'
+import { GITA_OPTIONS } from '../constants'
 
 interface DuplicateListModalProps {
   isOpen: boolean
@@ -164,6 +165,15 @@ export default function DuplicateListModal({ isOpen, onClose, jumin }: Duplicate
       key: 'policyNum',
       header: '증권번호',
       cell: (row) => <div className="whitespace-nowrap">{row.policyNum || ''}</div>,
+    },
+    {
+      key: 'etag',
+      header: '증권성격',
+      cell: (row) => {
+        const label = GITA_OPTIONS.find((opt) => String(opt.value) === String(row.etag))?.label
+        return <div className="whitespace-nowrap">{label || '-'}</div>
+      },
+      className: 'w-28 text-center',
     },
   ], [data, pagination])
 

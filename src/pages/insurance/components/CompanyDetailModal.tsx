@@ -623,8 +623,23 @@ export default function CompanyDetailModal({
                       const isSaving = savingPolicyIndex === idx
                       
                       return (
-                        <tr key={policy.num || `new-${idx}`} className={idx % 2 === 0 ? 'bg-gray-50' : ''}>
-                          <td className="px-2 py-2 text-center border border-border">{idx + 1}</td>
+                        <tr
+                          key={policy.num || `new-${idx}`}
+                          className={[
+                            idx % 2 === 0 ? 'bg-gray-50' : '',
+                            isNew ? 'bg-amber-50 outline outline-1 outline-dashed outline-amber-300' : '',
+                          ].join(' ').trim()}
+                        >
+                          <td className="px-2 py-2 text-center border border-border">
+                            <div className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              <span>{idx + 1}</span>
+                              {isNew && (
+                                <span className="px-1.5 py-0.5 text-[10px] leading-none rounded bg-amber-200 text-amber-900 border border-amber-300">
+                                  추가중
+                                </span>
+                              )}
+                            </div>
+                          </td>
                           <td className="px-2 py-2 border border-border">
                             <Select
                               value={policy.InsuraneCompany || 0}
