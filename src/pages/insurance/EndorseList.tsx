@@ -1142,75 +1142,6 @@ export default function EndorseList() {
           </span>
         </div>
 
-        {/* 일괄 처리(선택된 항목) */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs whitespace-nowrap">
-            선택 <strong>{selectedRowNums.size}</strong>건
-          </span>
-          <select
-            value={bulkProgress}
-            onChange={(e) => setBulkProgress(e.target.value)}
-            className="h-7 text-xs px-2 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
-            style={{
-              fontSize: '0.75rem',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '1.5em 1.5em',
-              paddingRight: '2.5rem',
-              width: '140px',
-            }}
-            disabled={selectedRowNums.size === 0}
-            title="진행단계 일괄 변경"
-          >
-            <option value="-1">진행단계(일괄)</option>
-            {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={bulkUpdateProgress}
-            disabled={selectedRowNums.size === 0}
-            className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            진행단계 일괄변경
-          </button>
-
-          <select
-            value={bulkEndorseProcess}
-            onChange={(e) => setBulkEndorseProcess(e.target.value)}
-            className="h-7 text-xs px-2 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
-            style={{
-              fontSize: '0.75rem',
-              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-              backgroundPosition: 'right 0.5rem center',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: '1.5em 1.5em',
-              paddingRight: '2.5rem',
-              width: '130px',
-            }}
-            disabled={selectedRowNums.size === 0}
-            title="배서처리 일괄 변경"
-          >
-            <option value="">배서처리(일괄)</option>
-            {ENDORSE_PROCESS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={bulkUpdateEndorseProcess}
-            disabled={selectedRowNums.size === 0}
-            className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            배서처리 일괄변경
-          </button>
-        </div>
 
         <button
           onClick={handleEndorseStatus}
@@ -1234,6 +1165,77 @@ export default function EndorseList() {
           문자리스트
         </button>
       </FilterBar>
+
+      {/* 일괄 처리 영역 (테이블 위) */}
+      {selectedRowNums.size > 0 && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg border border-border">
+          <span className="text-xs font-medium text-foreground whitespace-nowrap">
+            선택 <strong className="text-primary">{selectedRowNums.size}</strong>건
+          </span>
+          <div className="h-4 w-px bg-border" />
+          <select
+            value={bulkProgress}
+            onChange={(e) => setBulkProgress(e.target.value)}
+            className="h-6 text-xs px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+            style={{
+              fontSize: '0.7rem',
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.4rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.2em 1.2em',
+              paddingRight: '2rem',
+              width: '110px',
+            }}
+            title="진행단계 일괄 변경"
+          >
+            <option value="-1">진행단계</option>
+            {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={bulkUpdateProgress}
+            className="h-6 px-2 text-xs border border-primary text-primary bg-background rounded hover:bg-primary hover:text-white transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontSize: '0.7rem' }}
+          >
+            변경
+          </button>
+          <div className="h-4 w-px bg-border" />
+          <select
+            value={bulkEndorseProcess}
+            onChange={(e) => setBulkEndorseProcess(e.target.value)}
+            className="h-6 text-xs px-2 py-0 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+            style={{
+              fontSize: '0.7rem',
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.4rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.2em 1.2em',
+              paddingRight: '2rem',
+              width: '100px',
+            }}
+            title="배서처리 일괄 변경"
+          >
+            <option value="">배서처리</option>
+            {ENDORSE_PROCESS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={bulkUpdateEndorseProcess}
+            className="h-6 px-2 text-xs border border-primary text-primary bg-background rounded hover:bg-primary hover:text-white transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontSize: '0.7rem' }}
+          >
+            변경
+          </button>
+        </div>
+      )}
 
       <DataTable
         data={endorseList}
