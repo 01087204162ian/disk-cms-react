@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { BarChart3, List, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
 import {
@@ -158,6 +158,8 @@ export default function EndorseList() {
 
   // 테이블 행 선택(체크 표시) 상태
   const [selectedRowNums, setSelectedRowNums] = useState<Set<number>>(new Set())
+  const [bulkProgress, setBulkProgress] = useState<string>('-1')
+  const [bulkEndorseProcess, setBulkEndorseProcess] = useState<string>('')
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -375,12 +377,159 @@ export default function EndorseList() {
     })
   }
 
+  // 현재 페이지의 모든 행이 선택되어 있는지 확인
+  const isAllSelected = useMemo(() => {
+    if (endorseList.length === 0) return false
+    return endorseList.every((row) => selectedRowNums.has(row.num))
+  }, [endorseList, selectedRowNums])
+
+  // 현재 페이지의 일부만 선택되어 있는지 확인 (indeterminate 상태용)
+  const isIndeterminate = useMemo(() => {
+    if (endorseList.length === 0) return false
+    const selectedCount = endorseList.filter((row) => selectedRowNums.has(row.num)).length
+    return selectedCount > 0 && selectedCount < endorseList.length
+  }, [endorseList, selectedRowNums])
+
+  // 전체선택/해제 핸들러
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      // 현재 페이지의 모든 행 해제
+      setSelectedRowNums((prev) => {
+        const next = new Set(prev)
+        endorseList.forEach((row) => next.delete(row.num))
+        return next
+      })
+    } else {
+      // 현재 페이지의 모든 행 선택
+      setSelectedRowNums((prev) => {
+        const next = new Set(prev)
+        endorseList.forEach((row) => next.add(row.num))
+        return next
+      })
+    }
+  }
+
+  const selectedRows = useMemo(() => {
+    if (selectedRowNums.size === 0) return []
+    const numSet = selectedRowNums
+    return endorseList.filter((r) => numSet.has(r.num))
+  }, [endorseList, selectedRowNums])
+
+  const bulkUpdateProgress = async () => {
+    const newProgress = bulkProgress
+    if (!newProgress || newProgress === '-1') {
+      toast.error('진행단계를 선택해주세요.')
+      return
+    }
+    if (selectedRows.length === 0) {
+      toast.error('선택된 항목이 없습니다.')
+      return
+    }
+    if (!confirm(`선택 ${selectedRows.length}건의 진행단계를 변경하시겠습니까?`)) {
+      return
+    }
+
+    let successCount = 0
+    let failCount = 0
+    for (const row of selectedRows) {
+      try {
+        const formData = new URLSearchParams()
+        formData.append('num', String(row.num))
+        formData.append('progress', newProgress)
+        formData.append('userName', user?.name || '')
+
+        const res = await api.post<{ success: boolean }>(
+          '/api/insurance/kj-endorse/update-progress',
+          formData.toString(),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        )
+
+        if (res.data.success) successCount++
+        else failCount++
+      } catch (e) {
+        failCount++
+      }
+    }
+
+    toast.success(`진행단계 변경 완료: 성공 ${successCount}건, 실패 ${failCount}건`)
+    setSelectedRowNums(new Set())
+    setBulkProgress('-1')
+    loadEndorseList(pagination.currentPage, pagination.pageSize)
+  }
+
+  const bulkUpdateEndorseProcess = async () => {
+    const newStatus = bulkEndorseProcess
+    if (!newStatus) {
+      toast.error('배서처리를 선택해주세요.')
+      return
+    }
+    if (selectedRows.length === 0) {
+      toast.error('선택된 항목이 없습니다.')
+      return
+    }
+
+    const statusText = newStatus === '2' ? '처리' : '미처리'
+    if (!confirm(`선택 ${selectedRows.length}건을 "${statusText}"로 일괄 변경하시겠습니까?`)) {
+      return
+    }
+
+    let successCount = 0
+    let failCount = 0
+    let skippedCount = 0
+
+    for (const row of selectedRows) {
+      // 기존 단건 로직과 동일: 요율이 먼저 입력되어야 함
+      if (!row.rate || row.rate === '-1' || Number(row.rate) < 0) {
+        skippedCount++
+        continue
+      }
+
+      try {
+        const formData = new URLSearchParams()
+        formData.append('num', String(row.num))
+        formData.append('status', newStatus)
+        formData.append('push', String(row.push))
+        formData.append('rate', String(row.rate))
+        formData.append('userName', user?.name || '')
+
+        const res = await api.post<{ success: boolean }>(
+          '/api/insurance/kj-endorse/update-status',
+          formData.toString(),
+          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+        )
+
+        if (res.data.success) successCount++
+        else failCount++
+      } catch (e) {
+        failCount++
+      }
+    }
+
+    toast.success(
+      `배서처리 일괄 변경 완료: 성공 ${successCount}건, 실패 ${failCount}건, 스킵(요율 미입력) ${skippedCount}건`
+    )
+    setSelectedRowNums(new Set())
+    setBulkEndorseProcess('')
+    loadEndorseList(pagination.currentPage, pagination.pageSize)
+  }
+
   // 테이블 컬럼 정의
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
       {
         key: '__select__',
-        header: '✓',
+        header: (
+          <input
+            type="checkbox"
+            checked={isAllSelected}
+            ref={(input) => {
+              if (input) input.indeterminate = isIndeterminate
+            }}
+            onChange={toggleSelectAll}
+            className="h-4 w-4 cursor-pointer"
+            title={isAllSelected ? '전체 해제' : '전체 선택'}
+          />
+        ),
         cell: (row) => (
           <input
             type="checkbox"
@@ -708,7 +857,7 @@ export default function EndorseList() {
         className: 'w-12',
       },
     ],
-    [endorseList, pagination, selectedRowNums]
+    [endorseList, pagination, selectedRowNums, isAllSelected, isIndeterminate, toggleSelectAll]
   )
 
   // 배서현황 버튼 클릭
@@ -983,6 +1132,77 @@ export default function EndorseList() {
             계: <strong>{stats.total.toLocaleString('ko-KR')}</strong>
           </span>
         </div>
+
+        {/* 일괄 처리(선택된 항목) */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs whitespace-nowrap">
+            선택 <strong>{selectedRowNums.size}</strong>건
+          </span>
+          <select
+            value={bulkProgress}
+            onChange={(e) => setBulkProgress(e.target.value)}
+            className="h-7 text-xs px-2 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+            style={{
+              fontSize: '0.75rem',
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.5rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.5em 1.5em',
+              paddingRight: '2.5rem',
+              width: '140px',
+            }}
+            disabled={selectedRowNums.size === 0}
+            title="진행단계 일괄 변경"
+          >
+            <option value="-1">진행단계(일괄)</option>
+            {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={bulkUpdateProgress}
+            disabled={selectedRowNums.size === 0}
+            className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            진행단계 일괄변경
+          </button>
+
+          <select
+            value={bulkEndorseProcess}
+            onChange={(e) => setBulkEndorseProcess(e.target.value)}
+            className="h-7 text-xs px-2 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+            style={{
+              fontSize: '0.75rem',
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.5rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.5em 1.5em',
+              paddingRight: '2.5rem',
+              width: '130px',
+            }}
+            disabled={selectedRowNums.size === 0}
+            title="배서처리 일괄 변경"
+          >
+            <option value="">배서처리(일괄)</option>
+            {ENDORSE_PROCESS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={bulkUpdateEndorseProcess}
+            disabled={selectedRowNums.size === 0}
+            className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            배서처리 일괄변경
+          </button>
+        </div>
+
         <button
           onClick={handleEndorseStatus}
           className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
