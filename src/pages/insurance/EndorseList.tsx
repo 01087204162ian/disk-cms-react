@@ -15,7 +15,6 @@ import {
   RATE_OPTIONS,
   addPhoneHyphen,
   PUSH_OPTIONS,
-  PUSH_MAP,
   PROGRESS_OPTIONS,
 } from './constants'
 
