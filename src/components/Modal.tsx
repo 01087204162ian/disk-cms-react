@@ -148,7 +148,7 @@ export default function Modal({
     <div className={`fixed inset-0 z-50 flex ${modalPosition ? 'items-start justify-start' : positionClasses[position]} bg-black/50 p-4`}>
       <div
         ref={modalRef}
-        className={`w-full ${maxWidthClasses[maxWidth]} ${maxHeight ? `max-h-[${maxHeight}]` : ''} rounded-xl bg-background border border-border overflow-hidden flex flex-col`}
+        className={`w-full ${maxWidthClasses[maxWidth]} ${maxHeight ? `max-h-[${maxHeight}]` : 'max-h-[90vh]'} rounded-xl bg-background border border-border overflow-hidden flex flex-col`}
         style={modalStyle}
       >
         {/* 헤더 */}

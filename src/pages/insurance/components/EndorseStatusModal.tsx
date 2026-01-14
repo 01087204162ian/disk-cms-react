@@ -317,6 +317,7 @@ export default function EndorseStatusModal({ isOpen, onClose }: EndorseStatusMod
         </div>
       }
       maxWidth="6xl"
+      maxHeight="90vh"
       position="center"
     >
       <div className="space-y-4">
