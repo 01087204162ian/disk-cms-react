@@ -146,7 +146,6 @@ export default function EndorseList() {
   const [selectedEndorseDayData, setSelectedEndorseDayData] = useState<{
     currentEndorseDay: string
     num: number | string
-    certiTableNum?: number | string
     companyNum?: number | string
     policyNum?: string
     companyName?: string
@@ -344,7 +343,6 @@ export default function EndorseList() {
   const handleOpenEndorseDayChangeModal = (
     currentEndorseDay: string,
     num: number | string,
-    certiTableNum?: number | string,
     companyNum?: number | string,
     policyNum?: string,
     companyName?: string
@@ -352,7 +350,6 @@ export default function EndorseList() {
     setSelectedEndorseDayData({
       currentEndorseDay,
       num,
-      certiTableNum,
       companyNum,
       policyNum,
       companyName,
@@ -475,7 +472,6 @@ export default function EndorseList() {
                   handleOpenEndorseDayChangeModal(
                     row.standardDate || '',
                     row.num,
-                    row.cNum,
                     row.companyNum,
                     row.policyNum,
                     row.companyName
@@ -945,7 +941,6 @@ export default function EndorseList() {
           }}
           currentEndorseDay={selectedEndorseDayData.currentEndorseDay}
           num={selectedEndorseDayData.num}
-          certiTableNum={selectedEndorseDayData.certiTableNum}
           companyNum={selectedEndorseDayData.companyNum}
           policyNum={selectedEndorseDayData.policyNum}
           companyName={selectedEndorseDayData.companyName}

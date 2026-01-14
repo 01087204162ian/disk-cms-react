@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Modal, useToastHelpers } from '../../../components'
-import { useAuthStore } from '../../../store/authStore'
 
 interface EndorseDayChangeModalProps {
   isOpen: boolean
   onClose: () => void
   currentEndorseDay: string
   num: number | string // 배서 번호 (EndorsePnum)
-  certiTableNum?: number | string // 증권 테이블 번호 (cNum)
   companyNum?: number | string // 대리운전회사 번호 (dNum)
   policyNum?: string
   companyName?: string
@@ -19,14 +17,12 @@ export default function EndorseDayChangeModal({
   onClose,
   currentEndorseDay,
   num,
-  certiTableNum,
   companyNum,
   policyNum,
   companyName,
   onSuccess,
 }: EndorseDayChangeModalProps) {
   const toast = useToastHelpers()
-  const { user } = useAuthStore()
   const [saving, setSaving] = useState(false)
   const [newEndorseDay, setNewEndorseDay] = useState('')
   const [updateAll, setUpdateAll] = useState(true)
@@ -57,10 +53,6 @@ export default function EndorseDayChangeModal({
 
     try {
       setSaving(true)
-      const userName = user?.name || 
-        (typeof window !== 'undefined' && window.sessionStorage?.getItem('userName')) ||
-        (typeof window !== 'undefined' && window.localStorage?.getItem('userName')) ||
-        'system'
 
       const response = await fetch('/api/insurance/kj-endorse/update-endorse-day', {
         method: 'POST',
