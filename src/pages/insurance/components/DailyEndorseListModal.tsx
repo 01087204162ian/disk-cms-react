@@ -456,12 +456,12 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                               {item.rate || '1'}
                             </button>
                           </td>
-                          <td className="border border-gray-300 px-2 py-2" style={{ padding: 0 }}>
+                          <td className="border border-gray-300 p-0">
                             <input
                               type="text"
                               value={(item.preminum || 0).toLocaleString('ko-KR')}
-                              className="w-full text-xs px-1 py-0.5 text-right border border-transparent bg-transparent focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                              style={{ fontSize: '0.75rem' }}
+                              className="w-full text-xs border-0 rounded-none text-right"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
                                   // TODO: 보험료 업데이트
@@ -471,12 +471,12 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                               readOnly
                             />
                           </td>
-                          <td className="border border-gray-300 px-2 py-2" style={{ padding: 0 }}>
+                          <td className="border border-gray-300 p-0">
                             <input
                               type="text"
                               value={(item.c_preminum || 0).toLocaleString('ko-KR')}
-                              className="w-full text-xs px-1 py-0.5 text-right border border-transparent bg-transparent focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-                              style={{ fontSize: '0.75rem' }}
+                              className="w-full text-xs border-0 rounded-none text-right"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
                                   // TODO: C보험료 업데이트
