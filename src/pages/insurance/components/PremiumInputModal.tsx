@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Modal, useToastHelpers, LoadingSpinner } from '../../../components'
+import { useState, useEffect } from 'react'
+import { Modal, LoadingSpinner, useToastHelpers } from '../../../components'
 import api from '../../../lib/api'
 import { getInsurerName } from '../constants'
 
@@ -35,50 +35,49 @@ interface PolicyDetailResponse {
   error?: string
 }
 
-// 숫자에 콤마 추가 함수
-const addComma = (val: number | string | null | undefined): string => {
-  if (val === null || val === undefined || val === '') return ''
-  const cleaned = String(val).replace(/,/g, '').trim()
-  if (cleaned === '') return ''
-  const num = Number(cleaned)
-  if (!Number.isFinite(num)) return cleaned
-  return num.toLocaleString('ko-KR')
+const formatNumber = (value: any): string => {
+  if (!value && value !== 0) return ''
+  const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value
+  return isNaN(num) ? '' : num.toLocaleString()
+}
+
+const removeComma = (value: string | number | undefined): string => {
+  if (!value && value !== 0) return ''
+  return String(value).replace(/,/g, '')
 }
 
 export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: PremiumInputModalProps) {
   const toast = useToastHelpers()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [rows, setRows] = useState<PremiumRow[]>(Array(7).fill(null).map((_, i) => ({
+    rowNum: i + 1,
+    start_month: null,
+    end_month: null,
+    payment10_premium1: null,
+    payment10_premium2: null,
+    payment10_premium_total: null,
+  })))
   const [title, setTitle] = useState('보험료 입력')
-  const [rows, setRows] = useState<PremiumRow[]>([])
   const [hasData, setHasData] = useState(false)
 
-  // 초기 7개 행 생성
-  useEffect(() => {
-    if (isOpen) {
-      setRows(
-        Array.from({ length: 7 }, (_, i) => ({
-          rowNum: i + 1,
-          start_month: null,
-          end_month: null,
-          payment10_premium1: null,
-          payment10_premium2: null,
-          payment10_premium_total: null,
-        }))
-      )
-      setHasData(false)
-      setTitle('보험료 입력')
-    }
-  }, [isOpen])
-
-  // 모달 열릴 때 데이터 로드
   useEffect(() => {
     if (isOpen && certi) {
       loadPremiumData()
+    } else {
+      setRows(Array(7).fill(null).map((_, i) => ({
+        rowNum: i + 1,
+        start_month: null,
+        end_month: null,
+        payment10_premium1: null,
+        payment10_premium2: null,
+        payment10_premium_total: null,
+      })))
+      setTitle('보험료 입력')
+      setHasData(false)
     }
   }, [isOpen, certi])
 
-  // 보험료 데이터 로드
   const loadPremiumData = async () => {
     if (!certi) return
 
@@ -124,18 +123,27 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
       })
 
       // 7개 행 생성 (기존 데이터 있으면 채우기)
-      const newRows: PremiumRow[] = []
-      for (let i = 1; i <= 7; i++) {
-        const rowData = dataMap[i] || {}
-        newRows.push({
-          rowNum: i,
-          start_month: rowData.start_month || null,
-          end_month: rowData.end_month || null,
-          payment10_premium1: rowData.payment10_premium1 || null,
-          payment10_premium2: rowData.payment10_premium2 || null,
-          payment10_premium_total: rowData.payment10_premium_total || null,
-        })
-      }
+      const newRows: PremiumRow[] = Array(7).fill(null).map((_, idx) => {
+        const rowData = dataMap[idx + 1]
+        if (rowData) {
+          return {
+            rowNum: idx + 1,
+            start_month: rowData.start_month || null,
+            end_month: rowData.end_month || null,
+            payment10_premium1: formatNumber(rowData.payment10_premium1),
+            payment10_premium2: formatNumber(rowData.payment10_premium2),
+            payment10_premium_total: formatNumber(rowData.payment10_premium_total),
+          }
+        }
+        return {
+          rowNum: idx + 1,
+          start_month: null,
+          end_month: null,
+          payment10_premium1: null,
+          payment10_premium2: null,
+          payment10_premium_total: null,
+        }
+      })
       setRows(newRows)
     } catch (error: any) {
       console.error('보험료 데이터 조회 오류:', error)
@@ -145,181 +153,103 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     }
   }
 
-  // 년계 자동 계산: (년기본 + 년특약) × 10 (PremiumModal과 동일한 로직)
-  const calculateYearTotal = (rowIndex: number) => {
+  const handleRowChange = (index: number, field: keyof PremiumRow, value: string | number) => {
     const newRows = [...rows]
-    const row = newRows[rowIndex]
     
-    // 콤마 제거 후 숫자로 변환
-    const yearBasic = parseFloat(String(row.payment10_premium1 || '').replace(/,/g, '')) || 0
-    const yearSpecial = parseFloat(String(row.payment10_premium2 || '').replace(/,/g, '')) || 0
-    const sum = yearBasic + yearSpecial
-    const yearTotal = sum === 0 ? null : sum * 10
-
-    newRows[rowIndex] = {
-      ...row,
-      payment10_premium_total: yearTotal ? addComma(yearTotal) : null,
+    // 숫자 입력 필드의 경우 천단위 컴마 자동 포맷팅 (PremiumModal과 동일한 로직)
+    if (field === 'payment10_premium1' || field === 'payment10_premium2') {
+      if (typeof value === 'string') {
+        const numValue = removeComma(value)
+        if (numValue) {
+          const num = parseFloat(numValue)
+          if (!isNaN(num)) {
+            value = formatNumber(num)
+          }
+        }
+      }
     }
+    
+    newRows[index] = { ...newRows[index], [field]: value }
     setRows(newRows)
-  }
 
-  // 다음 행 시작나이 자동 채우기 (PremiumModal과 동일한 로직)
-  const autoFillNextRow = (rowIndex: number, endMonthValue: number | null) => {
-    if (rowIndex >= 6) return // 마지막 행이면 종료
-
-    const newRows = [...rows]
-    const nextRow = newRows[rowIndex + 1]
-    const currentStart = newRows[rowIndex].start_month
+    // 년계 자동 계산: (년기본 + 년특약) × 10
+    if (field === 'payment10_premium1' || field === 'payment10_premium2') {
+      const yearBasic = removeComma(newRows[index].payment10_premium1 as string) || '0'
+      const yearSpecial = removeComma(newRows[index].payment10_premium2 as string) || '0'
+      const sum = parseFloat(yearBasic) + parseFloat(yearSpecial)
+      const yearTotal = sum === 0 ? null : sum * 10
+      newRows[index].payment10_premium_total = yearTotal ? formatNumber(yearTotal) : null
+      setRows(newRows)
+    }
 
     // 나이 끝 입력 시 다음 행의 시작 자동 설정 (PremiumModal과 동일한 로직)
-    if (endMonthValue && typeof endMonthValue === 'number' && endMonthValue > 0) {
-      const expectedNextStart = endMonthValue + 1
+    if (field === 'end_month' && typeof value === 'number' && value && index < 6) {
+      const nextRow = newRows[index + 1]
       const nextAgeStart = nextRow.start_month
+      const expectedNextStart = value + 1
       // 다음 행의 시작이 비어있거나 현재 행의 끝+1과 다르면 자동 설정
       if (!nextAgeStart || nextAgeStart !== expectedNextStart) {
-        newRows[rowIndex + 1] = {
-          ...nextRow,
-          start_month: expectedNextStart,
-        }
+        newRows[index + 1] = { ...nextRow, start_month: expectedNextStart }
         setRows(newRows)
       }
-    } else if (!endMonthValue || endMonthValue === 0) {
-      // 나이 끝이 비어있거나 유효하지 않으면 다음 행의 시작도 비우기 (PremiumModal과 동일)
+    } else if (field === 'end_month' && (!value || value === 0) && index < 6) {
+      // 나이 끝이 비어있거나 유효하지 않으면 다음 행의 시작도 비우기
+      const nextRow = newRows[index + 1]
+      const currentStart = newRows[index].start_month
       if (currentStart && nextRow.start_month === Number(currentStart) + 1) {
-        newRows[rowIndex + 1] = {
-          ...nextRow,
-          start_month: null,
-        }
+        newRows[index + 1] = { ...nextRow, start_month: null }
         setRows(newRows)
       }
     }
-  }
-
-  // 입력 필드 값 변경 핸들러 (PremiumModal과 동일한 로직)
-  const handleFieldChange = (rowIndex: number, field: keyof PremiumRow, value: string) => {
-    const newRows = [...rows]
-    const row = newRows[rowIndex]
-
-    // 나이 필드 (start_month, end_month)는 숫자만 (콤마 없음)
-    if (field === 'start_month' || field === 'end_month') {
-      const processedValue = value.replace(/,/g, '').trim()
-      if (processedValue === '') {
-        newRows[rowIndex] = {
-          ...row,
-          [field]: null,
-        }
-        setRows(newRows)
-        return
-      } else {
-        // 숫자만 허용 (정수만)
-        const num = Number(processedValue)
-        if (!Number.isFinite(num) || !Number.isInteger(num)) {
-          return // 유효하지 않은 숫자는 무시
-        }
-        newRows[rowIndex] = {
-          ...row,
-          [field]: num,
-        }
-        setRows(newRows)
-        return
-      }
-    }
-
-    // 보험료 필드는 문자열로 저장 (콤마 포함, PremiumModal과 동일한 로직)
-    if (field === 'payment10_premium1' || field === 'payment10_premium2') {
-      // PremiumModal과 동일한 로직
-      const numValue = value.replace(/,/g, '').trim()
-      
-      // numValue가 있으면 포맷팅 시도
-      if (numValue) {
-        const num = parseFloat(numValue)
-        if (!isNaN(num)) {
-          // 콤마가 포함된 문자열로 저장 (formatNumber와 동일)
-          value = addComma(num)
-        }
-        // parseFloat가 실패하면 원본 value를 그대로 사용 (PremiumModal과 동일)
-      } else {
-        // 빈 값이면 빈 문자열로 저장
-        value = ''
-      }
-      
-      // 항상 저장 (PremiumModal과 동일)
-      newRows[rowIndex] = {
-        ...row,
-        [field]: value,
-      }
-      setRows(newRows)
-      calculateYearTotal(rowIndex)
-      return
-    }
-
-    // 기타 필드는 그대로 저장
-    newRows[rowIndex] = {
-      ...row,
-      [field]: value,
-    }
-    setRows(newRows)
   }
 
   // 끝나이 입력 완료 시 다음 행 시작나이 자동 채우기
-  const handleEndMonthBlur = (rowIndex: number) => {
-    const row = rows[rowIndex]
+  const handleEndMonthBlur = (index: number) => {
+    const row = rows[index]
     const endMonthValue = typeof row.end_month === 'number' ? row.end_month : null
-    autoFillNextRow(rowIndex, endMonthValue)
+    if (endMonthValue && endMonthValue > 0 && index < 6) {
+      const newRows = [...rows]
+      const nextRow = newRows[index + 1]
+      const expectedNextStart = endMonthValue + 1
+      if (!nextRow.start_month || nextRow.start_month !== expectedNextStart) {
+        newRows[index + 1] = { ...nextRow, start_month: expectedNextStart }
+        setRows(newRows)
+      }
+    }
   }
 
-  // 입력 필드 포맷팅 (나이는 콤마 없이, 보험료는 이미 콤마 포함된 문자열)
-  const formatInputValue = (val: number | string | null | undefined, isAge: boolean = false): string => {
-    if (val === null || val === undefined || val === '' || val === 0 || val === '0') return ''
-    // 나이 필드는 콤마 없이 숫자만 표시
-    if (isAge) {
-      return String(val)
-    }
-    // 보험료 필드는 이미 콤마가 포함된 문자열이거나 숫자일 수 있음
-    if (typeof val === 'string') {
-      return val // 이미 콤마가 포함된 문자열
-    }
-    // 숫자인 경우 콤마 추가
-    return addComma(val)
-  }
-
-  // 저장
   const handleSave = async () => {
-    const premiumData: PremiumRow[] = []
-
-    // 검증: 시작 나이가 없는데 보험료가 있는 경우 체크
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i]
-      const startMonth = row.start_month
-      const payment10Premium1 = row.payment10_premium1
-      const payment10Premium2 = row.payment10_premium2
-
-      // 시작 나이가 없는데 보험료가 있는 경우 검증
-      if (!startMonth && (payment10Premium1 || payment10Premium2)) {
-        toast.error(`${i + 1}번째 행: 시작 나이를 입력하세요.`)
-        return
-      }
-
-      // 하나라도 입력되어 있으면 저장 대상에 포함
-      if (startMonth || row.end_month || payment10Premium1 || payment10Premium2) {
-        premiumData.push({
-          rowNum: row.rowNum,
-          start_month: startMonth || null,
-          end_month: row.end_month || null,
-          payment10_premium1: payment10Premium1 || null,
-          payment10_premium2: payment10Premium2 || null,
-          payment10_premium_total: row.payment10_premium_total || null,
-        })
-      }
-    }
-
-    if (premiumData.length === 0) {
-      toast.error('저장할 데이터가 없습니다.')
+    if (!certi) {
+      toast.error('증권번호가 없습니다.')
       return
     }
 
-    setSaving(true)
+    if (!window.confirm(hasData ? '보험료 정보를 수정하시겠습니까?' : '보험료 정보를 저장하시겠습니까?')) {
+      return
+    }
+
+    const premiumData: PremiumRow[] = []
+    rows.forEach((row, idx) => {
+      // 나이 또는 보험료 중 하나라도 있으면 저장
+      if (row.start_month || row.end_month || row.payment10_premium1 || row.payment10_premium2) {
+        premiumData.push({
+          rowNum: row.rowNum,
+          start_month: row.start_month || null,
+          end_month: row.end_month || null,
+          payment10_premium1: removeComma(row.payment10_premium1) || null,
+          payment10_premium2: removeComma(row.payment10_premium2) || null,
+          payment10_premium_total: removeComma(row.payment10_premium_total) || null,
+        })
+      }
+    })
+
+    if (premiumData.length === 0) {
+      toast.error('입력된 보험료 정보가 없습니다.')
+      return
+    }
+
     try {
+      setSaving(true)
       const response = await api.post('/api/insurance/kj-insurance-premium-data', {
         policyNum: certi,
         data: premiumData,
@@ -354,109 +284,108 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
       maxWidth="4xl"
       maxHeight="70vh"
       footer={
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2 text-sm"
+            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? (
-              <>
-                <LoadingSpinner size="sm" />
-                저장 중...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
-                </svg>
-                {hasData ? '수정' : '저장'}
-              </>
-            )}
+            {saving ? '저장 중...' : hasData ? '수정' : '저장'}
           </button>
         </div>
       }
     >
       {loading ? (
-        <div className="flex justify-center py-8">
-          <LoadingSpinner size="md" />
+        <div className="flex items-center justify-center py-8">
+          <LoadingSpinner />
         </div>
       ) : (
-        <div className="overflow-x-auto" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-          <table className="w-full border-collapse border border-gray-300 text-sm" style={{ fontSize: '0.875rem' }}>
+        <div className="overflow-x-auto border border-border rounded" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+          <table className="w-full text-xs border-collapse" style={{ fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>순번</th>
-                <th className="border border-gray-300 px-2 py-1 text-center" colSpan={2} style={{ fontSize: '0.875rem' }}>
+                <th rowSpan={2} className="px-2 py-2 text-center font-medium border border-border" style={{ width: '5%', verticalAlign: 'middle' }}>
+                  순번
+                </th>
+                <th colSpan={2} className="px-2 py-2 text-center font-medium border border-border">
                   나이
                 </th>
-                <th className="border border-gray-300 px-2 py-1 text-center" colSpan={3} style={{ fontSize: '0.875rem' }}>
+                <th colSpan={3} className="px-2 py-2 text-center font-medium border border-border">
                   10회분납
                 </th>
               </tr>
               <tr style={{ backgroundColor: '#6f42c1', color: 'white' }}>
-                <th className="border border-gray-300 px-2 py-1" style={{ fontSize: '0.875rem' }}></th>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>시작</th>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>끝</th>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년기본</th>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년특약</th>
-                <th className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>년계</th>
+                <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
+                  시작
+                </th>
+                <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '8%' }}>
+                  끝
+                </th>
+                <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '10%' }}>
+                  년기본
+                </th>
+                <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '10%' }}>
+                  년특약
+                </th>
+                <th className="px-2 py-2 text-center font-medium border border-border" style={{ width: '10%' }}>
+                  년계
+                </th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
-                <tr key={row.rowNum}>
-                  <td className="border border-gray-300 px-2 py-1 text-center" style={{ fontSize: '0.875rem' }}>{row.rowNum}</td>
-                  <td className="border border-gray-300 p-0">
+              {rows.map((row, idx) => (
+                <tr key={row.rowNum} style={{ backgroundColor: '#ffffff' }}>
+                  <td className="px-2 py-2 text-center border border-border">{row.rowNum}</td>
+                  <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
                     <input
-                      type="text"
-                      value={formatInputValue(row.start_month, true)}
-                      onChange={(e) => handleFieldChange(index, 'start_month', e.target.value)}
-                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
-                      style={{ height: '31px', fontSize: '0.875rem' }}
-                      autoComplete="off"
+                      type="number"
+                      value={row.start_month || ''}
+                      onChange={(e) => handleRowChange(idx, 'start_month', parseInt(e.target.value) || 0)}
+                      placeholder="시작"
+                      className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none text-right"
+                      style={{ backgroundColor: '#ffffff' }}
                     />
                   </td>
-                  <td className="border border-gray-300 p-0">
+                  <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
                     <input
-                      type="text"
-                      value={formatInputValue(row.end_month, true)}
-                      onChange={(e) => handleFieldChange(index, 'end_month', e.target.value)}
-                      onBlur={() => handleEndMonthBlur(index)}
-                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
-                      style={{ height: '31px', fontSize: '0.875rem' }}
-                      autoComplete="off"
+                      type="number"
+                      value={row.end_month || ''}
+                      onChange={(e) => handleRowChange(idx, 'end_month', parseInt(e.target.value) || 0)}
+                      onBlur={() => handleEndMonthBlur(idx)}
+                      placeholder="끝"
+                      className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none text-right"
+                      style={{ backgroundColor: '#ffffff' }}
                     />
                   </td>
-                  <td className="border border-gray-300 p-0">
+                  <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
                     <input
                       type="text"
                       value={row.payment10_premium1 || ''}
-                      onChange={(e) => handleFieldChange(index, 'payment10_premium1', e.target.value)}
-                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
-                      style={{ height: '31px', fontSize: '0.875rem' }}
-                      autoComplete="off"
+                      onChange={(e) => handleRowChange(idx, 'payment10_premium1', e.target.value)}
+                      placeholder="년기본"
+                      className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none text-right"
+                      style={{ backgroundColor: '#ffffff' }}
                     />
                   </td>
-                  <td className="border border-gray-300 p-0">
+                  <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
                     <input
                       type="text"
                       value={row.payment10_premium2 || ''}
-                      onChange={(e) => handleFieldChange(index, 'payment10_premium2', e.target.value)}
-                      className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
-                      style={{ height: '31px', fontSize: '0.875rem' }}
-                      autoComplete="off"
+                      onChange={(e) => handleRowChange(idx, 'payment10_premium2', e.target.value)}
+                      placeholder="년특약"
+                      className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none text-right"
+                      style={{ backgroundColor: '#ffffff' }}
                     />
                   </td>
-                  <td className="border border-gray-300 p-0">
+                  <td className="px-2 py-2 border border-border" style={{ padding: 0 }}>
                     <input
                       type="text"
-                      value={formatInputValue(row.payment10_premium_total)}
+                      value={row.payment10_premium_total || ''}
                       readOnly
-                      className="w-full px-2 py-1 text-xs border-0 bg-gray-50 focus:outline-none text-end"
-                      style={{ height: '31px', fontSize: '0.875rem' }}
-                      autoComplete="off"
+                      placeholder="년계"
+                      className="w-full px-2 py-1 text-xs border-0 bg-transparent outline-none text-right"
+                      style={{ backgroundColor: '#ffffff' }}
                     />
                   </td>
                 </tr>
