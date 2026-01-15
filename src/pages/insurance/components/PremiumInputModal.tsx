@@ -161,21 +161,32 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     setRows(newRows)
   }
 
-  // 다음 행 시작나이 자동 채우기
-  const autoFillNextRow = (rowIndex: number) => {
+  // 다음 행 시작나이 자동 채우기 (PremiumModal과 동일한 로직)
+  const autoFillNextRow = (rowIndex: number, endMonthValue: number | null) => {
     if (rowIndex >= 6) return // 마지막 행이면 종료
 
-    const currentRow = rows[rowIndex]
-    const endMonth = Number(String(currentRow.end_month || '').replace(/,/g, '')) || 0
+    const newRows = [...rows]
+    const nextRow = newRows[rowIndex + 1]
+    const currentStart = newRows[rowIndex].start_month
 
-    if (endMonth > 0) {
-      const newRows = [...rows]
-      const nextRow = newRows[rowIndex + 1]
-      // 다음 행의 시작나이가 비어있을 때만 자동 채우기
-      if (!nextRow.start_month || nextRow.start_month === null || nextRow.start_month === '') {
+    // 나이 끝 입력 시 다음 행의 시작 자동 설정 (PremiumModal과 동일한 로직)
+    if (endMonthValue && typeof endMonthValue === 'number' && endMonthValue > 0) {
+      const expectedNextStart = endMonthValue + 1
+      const nextAgeStart = nextRow.start_month
+      // 다음 행의 시작이 비어있거나 현재 행의 끝+1과 다르면 자동 설정
+      if (!nextAgeStart || nextAgeStart !== expectedNextStart) {
         newRows[rowIndex + 1] = {
           ...nextRow,
-          start_month: endMonth + 1,
+          start_month: expectedNextStart,
+        }
+        setRows(newRows)
+      }
+    } else if (!endMonthValue || endMonthValue === 0) {
+      // 나이 끝이 비어있거나 유효하지 않으면 다음 행의 시작도 비우기 (PremiumModal과 동일)
+      if (currentStart && nextRow.start_month === Number(currentStart) + 1) {
+        newRows[rowIndex + 1] = {
+          ...nextRow,
+          start_month: null,
         }
         setRows(newRows)
       }
@@ -226,9 +237,10 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
       calculateYearTotal(rowIndex)
     }
 
-    // 끝나이 변경 시 다음 행 시작나이 자동 채우기
+    // 끝나이 변경 시 다음 행 시작나이 자동 채우기 (PremiumModal과 동일한 로직)
     if (field === 'end_month') {
-      autoFillNextRow(rowIndex)
+      const endMonthValue = typeof processedValue === 'number' ? processedValue : null
+      autoFillNextRow(rowIndex, endMonthValue)
     }
   }
 
