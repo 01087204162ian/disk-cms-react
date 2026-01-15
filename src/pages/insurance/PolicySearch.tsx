@@ -93,7 +93,7 @@ export default function PolicySearch() {
   ]
 
   // 증권번호 선택 변경
-  const handlePolicyNumChange = (value: string) => {
+  const handlePolicyNumChange = async (value: string) => {
     if (value === '__DIRECT_INPUT__') {
       setFilters((prev) => ({
         ...prev,
@@ -103,26 +103,41 @@ export default function PolicySearch() {
       }))
     } else {
       const selectedItem = certiList.find((item) => item.certi === value)
+      const newStartyDay = selectedItem?.sigi || ''
+      
       setFilters((prev) => ({
         ...prev,
         policyNum: value,
         isDirectInput: false,
         policyNumInput: '',
-        startyDay: selectedItem?.sigi || '',
+        startyDay: newStartyDay,
       }))
+
+      // 증권번호 선택 시 자동 검색 실행
+      if (value && newStartyDay) {
+        // 상태 업데이트 후 검색 실행을 위해 약간의 지연
+        setTimeout(() => {
+          handleSearch(value, newStartyDay)
+        }, 0)
+      }
     }
   }
 
   // 검색 실행
-  const handleSearch = async () => {
-    const policyNum = filters.isDirectInput ? filters.policyNumInput.trim() : filters.policyNum.trim()
+  const handleSearch = async (policyNumOverride?: string, startyDayOverride?: string) => {
+    const policyNum = policyNumOverride !== undefined 
+      ? policyNumOverride 
+      : (filters.isDirectInput ? filters.policyNumInput.trim() : filters.policyNum.trim())
+    const startyDay = startyDayOverride !== undefined 
+      ? startyDayOverride 
+      : filters.startyDay
 
     if (!policyNum) {
       toast.error('증권번호를 선택하거나 입력하세요.')
       return
     }
 
-    if (!filters.startyDay) {
+    if (!startyDay) {
       toast.error('시작일을 선택하세요.')
       return
     }
@@ -131,7 +146,7 @@ export default function PolicySearch() {
       setLoading(true)
       const response = await api.post<PolicySearchResponse>('/api/insurance/kj-certi/change-policy-search', {
         oldPolicyNum: policyNum,
-        oldStartyDay: filters.startyDay,
+        oldStartyDay: startyDay,
       })
 
       if (response.data.success) {
@@ -377,7 +392,7 @@ export default function PolicySearch() {
         <DatePicker
           value={filters.startyDay}
           onChange={(value) => setFilters((prev) => ({ ...prev, startyDay: value }))}
-          className="w-[102.4px]"
+          className="w-[204.8px]"
           fullWidth={false}
         />
         <FilterBar.SearchButton onClick={handleSearch} />
