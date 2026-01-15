@@ -377,7 +377,7 @@ export default function PolicySearch() {
         <DatePicker
           value={filters.startyDay}
           onChange={(value) => setFilters((prev) => ({ ...prev, startyDay: value }))}
-          className="w-32"
+          className="w-[102.4px]"
         />
         <FilterBar.SearchButton onClick={handleSearch} />
         {statistics && (
@@ -419,12 +419,28 @@ export default function PolicySearch() {
         )}
       </FilterBar>
 
-      <DataTable
-        columns={columns}
-        data={searchResults}
-        loading={loading}
-        emptyMessage="증권번호를 선택하고 시작일을 입력한 후 검색 버튼을 클릭하세요."
-      />
+      {searchResults.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4">
+          {/* 왼쪽 테이블 */}
+          <DataTable
+            columns={columns}
+            data={searchResults.slice(0, Math.ceil(searchResults.length / 2))}
+            loading={loading}
+            emptyMessage=""
+          />
+          {/* 오른쪽 테이블 */}
+          <DataTable
+            columns={columns}
+            data={searchResults.slice(Math.ceil(searchResults.length / 2))}
+            loading={loading}
+            emptyMessage=""
+          />
+        </div>
+      ) : (
+        <div className="text-center text-muted-foreground py-8">
+          증권번호를 선택하고 시작일을 입력한 후 검색 버튼을 클릭하세요.
+        </div>
+      )}
 
       {/* 증권번호 변경 모달 */}
       <Modal
