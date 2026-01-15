@@ -236,12 +236,14 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     if (field === 'payment10_premium1' || field === 'payment10_premium2') {
       calculateYearTotal(rowIndex)
     }
+    // 끝나이 변경 시 자동 채우기는 onBlur에서 처리 (입력 완료 후에만 실행)
+  }
 
-    // 끝나이 변경 시 다음 행 시작나이 자동 채우기 (PremiumModal과 동일한 로직)
-    if (field === 'end_month') {
-      const endMonthValue = typeof processedValue === 'number' ? processedValue : null
-      autoFillNextRow(rowIndex, endMonthValue)
-    }
+  // 끝나이 입력 완료 시 다음 행 시작나이 자동 채우기
+  const handleEndMonthBlur = (rowIndex: number) => {
+    const row = rows[rowIndex]
+    const endMonthValue = typeof row.end_month === 'number' ? row.end_month : null
+    autoFillNextRow(rowIndex, endMonthValue)
   }
 
   // 입력 필드 포맷팅 (나이는 콤마 없이, 보험료는 콤마 포함)
@@ -395,6 +397,7 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
                       type="text"
                       value={formatInputValue(row.end_month, true)}
                       onChange={(e) => handleFieldChange(index, 'end_month', e.target.value)}
+                      onBlur={() => handleEndMonthBlur(index)}
                       className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-center"
                       style={{ height: '31px', fontSize: '0.875rem' }}
                       autoComplete="off"
