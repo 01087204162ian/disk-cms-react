@@ -302,71 +302,79 @@ export default function PolicyDetailModal({ isOpen, onClose, certi, onUpdate }: 
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={policyDetail.certi}
                         readOnly
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.company}
                         onChange={(e) => setEditData({ ...editData, company: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.name}
                         onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.jumin}
                         onChange={(e) => setEditData({ ...editData, jumin: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <DatePicker
                         value={editData.sigi}
                         onChange={(value) => setEditData({ ...editData, sigi: value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px', paddingLeft: '40px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.nab}
                         onChange={(e) => setEditData({ ...editData, nab: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-center">
                       {policyDetail.inwon || 0}
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.yearRate}
                         onChange={(e) => setEditData({ ...editData, yearRate: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
-                    <td className="border border-gray-300 px-3 py-2">
+                    <td className="border border-gray-300 p-0">
                       <FormInput
                         value={editData.harinRate}
                         onChange={(e) => setEditData({ ...editData, harinRate: e.target.value })}
                         variant="modal"
-                        className="text-xs"
+                        className="text-xs border-0 rounded-none"
+                        style={{ width: '100%', padding: '8px 12px' }}
                       />
                     </td>
                   </tr>
