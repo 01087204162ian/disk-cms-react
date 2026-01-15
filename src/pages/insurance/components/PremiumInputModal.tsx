@@ -195,7 +195,7 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     }
   }
 
-  // 입력 필드 값 변경 핸들러
+  // 입력 필드 값 변경 핸들러 (PremiumModal과 동일한 로직)
   const handleFieldChange = (rowIndex: number, field: keyof PremiumRow, value: string) => {
     const newRows = [...rows]
     const row = newRows[rowIndex]
@@ -227,33 +227,31 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
 
     // 보험료 필드는 문자열로 저장 (콤마 포함, PremiumModal과 동일한 로직)
     if (field === 'payment10_premium1' || field === 'payment10_premium2') {
-      // 콤마 제거
+      // PremiumModal과 동일: removeComma와 동일한 로직
       const numValue = value.replace(/,/g, '').trim()
       
-      // 빈 값이면 null로 저장
-      if (numValue === '') {
+      // PremiumModal과 동일: numValue가 있으면 처리
+      if (numValue) {
+        const num = parseFloat(numValue)
+        if (!isNaN(num)) {
+          // 콤마가 포함된 문자열로 저장 (formatNumber와 동일)
+          const formattedValue = addComma(num)
+          newRows[rowIndex] = {
+            ...row,
+            [field]: formattedValue,
+          }
+          setRows(newRows)
+          calculateYearTotal(rowIndex)
+        }
+      } else {
+        // 빈 값이면 null로 저장
         newRows[rowIndex] = {
           ...row,
           [field]: null,
         }
         setRows(newRows)
         calculateYearTotal(rowIndex)
-        return
       }
-      
-      // 숫자로 변환 시도 (PremiumModal과 동일한 로직)
-      const num = parseFloat(numValue)
-      if (!isNaN(num)) {
-        // 콤마가 포함된 문자열로 저장
-        const formattedValue = addComma(num)
-        newRows[rowIndex] = {
-          ...row,
-          [field]: formattedValue,
-        }
-        setRows(newRows)
-        calculateYearTotal(rowIndex)
-      }
-      // 숫자가 아니면 무시
       return
     }
 
@@ -436,7 +434,7 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
                   <td className="border border-gray-300 p-0">
                     <input
                       type="text"
-                      value={formatInputValue(row.payment10_premium1)}
+                      value={row.payment10_premium1 || ''}
                       onChange={(e) => handleFieldChange(index, 'payment10_premium1', e.target.value)}
                       className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
                       style={{ height: '31px', fontSize: '0.875rem' }}
@@ -446,7 +444,7 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
                   <td className="border border-gray-300 p-0">
                     <input
                       type="text"
-                      value={formatInputValue(row.payment10_premium2)}
+                      value={row.payment10_premium2 || ''}
                       onChange={(e) => handleFieldChange(index, 'payment10_premium2', e.target.value)}
                       className="w-full px-2 py-1 text-xs border-0 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 text-end"
                       style={{ height: '31px', fontSize: '0.875rem' }}
