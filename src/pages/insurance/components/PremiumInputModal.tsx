@@ -172,13 +172,12 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     newRows[index] = { ...newRows[index], [field]: value }
     setRows(newRows)
 
-    // 년계 자동 계산: (년기본 + 년특약) × 10
+    // 년계 자동 계산: 년기본 + 년특약
     if (field === 'payment10_premium1' || field === 'payment10_premium2') {
       const yearBasic = removeComma(newRows[index].payment10_premium1 as string) || '0'
       const yearSpecial = removeComma(newRows[index].payment10_premium2 as string) || '0'
       const sum = parseFloat(yearBasic) + parseFloat(yearSpecial)
-      const yearTotal = sum === 0 ? null : sum * 10
-      newRows[index].payment10_premium_total = yearTotal ? formatNumber(yearTotal) : null
+      newRows[index].payment10_premium_total = sum > 0 ? formatNumber(sum) : null
       setRows(newRows)
     }
 
