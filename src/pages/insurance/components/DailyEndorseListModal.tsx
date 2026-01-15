@@ -4,6 +4,7 @@ import api from '../../../lib/api'
 import { INSURER_MAP, GITA_OPTIONS, PUSH_MAP } from '../constants'
 import { List, CheckCircle2 } from 'lucide-react'
 import EndorseReviewModal from './EndorseReviewModal'
+import RateDetailModal from './RateDetailModal'
 
 interface DailyEndorseListModalProps {
   isOpen: boolean
@@ -64,6 +65,8 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
     totalPages: 1,
   })
   const [endorseStatusModalOpen, setEndorseStatusModalOpen] = useState(false)
+  const [rateDetailModalOpen, setRateDetailModalOpen] = useState(false)
+  const [selectedRateCode, setSelectedRateCode] = useState<number | string>(1)
 
   // 초기 날짜 설정 (오늘) 및 자동 조회
   useEffect(() => {
@@ -449,8 +452,8 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                             <button
                               className="text-primary hover:underline cursor-pointer"
                               onClick={() => {
-                                // TODO: 요율 상세 모달 열기
-                                toast.info('요율 상세 설명 기능은 구현 중입니다.')
+                                setSelectedRateCode(item.rate || '1')
+                                setRateDetailModalOpen(true)
                               }}
                             >
                               {item.rate || '1'}
@@ -557,6 +560,13 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
         onClose={() => setEndorseStatusModalOpen(false)}
         date={date}
         companyNum={companyNum}
+      />
+
+      {/* 요율 상세 모달 - 요율 클릭 시 열림 */}
+      <RateDetailModal
+        isOpen={rateDetailModalOpen}
+        onClose={() => setRateDetailModalOpen(false)}
+        rateCode={selectedRateCode}
       />
     </>
   )

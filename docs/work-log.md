@@ -12,6 +12,56 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-14 (KJ 대리운전) - 요율 상세 모달 구현
+
+#### 작업 내용
+- **기능**: 일일배서리스트 모달의 요율 상세 모달 구현
+- **파일**: 
+  - `src/pages/insurance/components/RateDetailModal.tsx` (신규 생성)
+  - `src/pages/insurance/components/DailyEndorseListModal.tsx` (요율 클릭 핸들러 추가)
+- **주요 구현 사항**:
+  - ✅ 요율 상세 모달 컴포넌트 생성
+    - 요율 코드 및 값 배지 표시 (요율 코드: primary 색상, 요율: blue 색상)
+    - 요율 설명 섹션 (border-left 강조, Info 아이콘)
+    - 전체 요율 목록 테이블 (코드, 요율, 설명)
+    - 선택된 요율 행 강조 표시 (bg-primary/10)
+  - ✅ 일일배서리스트 모달에 통합
+    - 요율 클릭 시 모달 열기 기능 추가
+    - `rateDetailModalOpen` state 추가
+    - `selectedRateCode` state로 선택된 요율 코드 관리
+  - ✅ 원본 파일과 동일한 기능 구현
+    - `RATE_OPTIONS`, `getRateValue`, `getRateName` 함수 활용
+    - 요율 코드별 상세 정보 표시
+    - 전체 요율 목록 표시
+
+#### 해결한 이슈
+- 요율 클릭 시 토스트 메시지만 표시되던 문제 해결 (상세 모달 구현)
+
+---
+
+### 2026-01-14 (KJ 대리운전) - 일일배서리스트 모달 UI 개선
+
+#### 작업 내용
+- **기능**: 일일배서리스트 모달의 보험료/C보험료 입력 상자 UI 개선 및 콤마 표시 추가
+- **파일**: 
+  - `src/pages/insurance/components/DailyEndorseListModal.tsx` (입력 상자 스타일 개선, 콤마 표시 추가)
+- **주요 구현 사항**:
+  - ✅ 보험료/C보험료 입력 상자 스타일 개선
+    - 테이블 td의 입력 상자가 td에 꽉 차도록 수정
+    - td 패딩 제거 (`px-2 py-2` → `p-0`)
+    - 입력 상자에 `border-0 rounded-none` 적용하여 테이블 테두리와 자연스럽게 연결
+    - 입력 상자 스타일: `padding: '8px 12px'`, `width: '100%'` 적용
+  - ✅ 보험료/C보험료 콤마 표시 개선
+    - `parseFloat`를 사용하여 문자열/숫자 모두 올바르게 처리
+    - 보험료: `item.preminum ? parseFloat(String(item.preminum)).toLocaleString('ko-KR') : '0'`
+    - C보험료: `item.c_preminum ? parseFloat(String(item.c_preminum)).toLocaleString('ko-KR') : '0'`
+    - 이전 버전(`kj-driver-endorse-list.js`)과 동일한 로직 적용
+
+#### 해결한 이슈
+- 보험료/C보험료에 콤마가 표시되지 않던 문제 해결 (parseFloat 사용으로 숫자 변환 후 toLocaleString 적용)
+
+---
+
 ### 2026-01-14 (KJ 대리운전) - 증권 상세 정보 모달 및 보험료 입력 모달 개선 및 완전 재구현
 
 #### 작업 내용
@@ -1657,8 +1707,8 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 ## 📝 다음 작업 계획
 
 ### KJ 대리운전 - 다음 작업
-- [ ] 배서 리스트 페이지 마이그레이션 (`kj-driver-endorse-list.html` → React)
-- [ ] 증권별 코드 페이지 마이그레이션 (`kj-driver-code-by-policy.html` → React)
+- [x] 배서 리스트 페이지 마이그레이션 (`kj-driver-endorse-list.html` → React) - **완료**
+- [x] 증권별 코드 페이지 마이그레이션 (`kj-driver-code-by-policy.html` → React) - **Phase 1-3 완료, Phase 4 (테스트) 남음**
 
 ### Phase 2: 직원 관리 모듈 상태 (업데이트: 2026-01-07)
 - [x] 근무일정 페이지 (staff/employee-schedule)
@@ -1772,7 +1822,38 @@ work-log.md 파일 학습하자
 
 ## 🔄 진행 중인 작업
 
-### 2026-01-14 (KJ 대리운전) - 배서 리스트 페이지 개선 작업
+없음 (모든 진행 중인 작업 완료)
+
+---
+
+## ⏸️ 미제 작업 (보류)
+
+### 일일배서리스트 모달 관련
+- [ ] **보험료/C보험료 업데이트 기능 구현** (일일배서리스트 모달)
+  - 현재 상태: 입력 필드는 있으나 `readOnly` 상태, 업데이트 API 연동 필요
+  - 위치: `src/pages/insurance/components/DailyEndorseListModal.tsx`
+  - 예상 작업 시간: 2-3시간
+  
+- [x] **요율 상세 모달 구현** (일일배서리스트 모달) - **완료**
+  - 구현 완료: 요율 클릭 시 상세 모달 표시
+  - 위치: `src/pages/insurance/components/RateDetailModal.tsx` (신규 생성)
+  - 기능: 요율 코드 및 값 표시, 요율 설명, 전체 요율 목록 테이블 (선택된 요율 강조)
+
+### 증권별 코드 페이지 마이그레이션
+> **상태**: Phase 1-3 완료, Phase 4 (테스트 및 최적화) 남음
+
+**Phase 4: 테스트 및 최적화** (예상 시간: 2-3시간)
+- [ ] 전체 기능 테스트
+- [ ] 에러 핸들링 개선
+- [ ] 로딩 상태 표시
+- [ ] 성능 최적화
+- [ ] UI/UX 개선
+
+---
+
+## 📝 다음 작업 계획
+
+### 2026-01-14 (KJ 대리운전) - 배서 리스트 페이지 개선 작업 (완료)
 
 #### 완료된 작업
 - ✅ 일일배서리스트 모달 완전 구현 (이전 버전과 동일)
@@ -1780,10 +1861,7 @@ work-log.md 파일 학습하자
 - ✅ 문자리스트 모달 완전 구현 (이전 버전과 동일)
 - ✅ 모달 위치 조정 (일일배서리스트 왼쪽 상단, 배서현황 그 옆에 나란히)
 - ✅ 상태 표시 수정 (PUSH_MAP 확장 및 사용)
-
-#### 남은 작업 (미제로 보류)
-- [ ] 보험료/C보험료 업데이트 기능 구현 (일일배서리스트 모달) - **미제로 보류**
-- [ ] 요율 상세 모달 구현 (일일배서리스트 모달) - **미제로 보류**
+- ✅ 일일배서리스트 모달 UI 개선 (입력 상자 스타일, 콤마 표시)
 
 #### 다음 작업 계획
 
