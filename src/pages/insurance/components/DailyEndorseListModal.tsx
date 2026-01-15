@@ -459,7 +459,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 p-0">
                             <input
                               type="text"
-                              value={(item.preminum || 0).toLocaleString('ko-KR')}
+                              value={item.preminum ? parseFloat(String(item.preminum)).toLocaleString('ko-KR') : '0'}
                               className="w-full text-xs border-0 rounded-none text-right"
                               style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                               onKeyPress={(e) => {
@@ -474,7 +474,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 p-0">
                             <input
                               type="text"
-                              value={(item.c_preminum || 0).toLocaleString('ko-KR')}
+                              value={item.c_preminum ? parseFloat(String(item.c_preminum)).toLocaleString('ko-KR') : '0'}
                               className="w-full text-xs border-0 rounded-none text-right"
                               style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                               onKeyPress={(e) => {
