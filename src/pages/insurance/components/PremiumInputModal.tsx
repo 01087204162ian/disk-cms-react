@@ -145,18 +145,20 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     }
   }
 
-  // 년계 자동 계산: (년기본 + 년특약) × 10
+  // 년계 자동 계산: (년기본 + 년특약) × 10 (PremiumModal과 동일한 로직)
   const calculateYearTotal = (rowIndex: number) => {
-    const row = rows[rowIndex]
-    const yearBasic = Number(String(row.payment10_premium1 || '').replace(/,/g, '')) || 0
-    const yearSpecial = Number(String(row.payment10_premium2 || '').replace(/,/g, '')) || 0
+    const newRows = [...rows]
+    const row = newRows[rowIndex]
+    
+    // 콤마 제거 후 숫자로 변환
+    const yearBasic = parseFloat(String(row.payment10_premium1 || '').replace(/,/g, '')) || 0
+    const yearSpecial = parseFloat(String(row.payment10_premium2 || '').replace(/,/g, '')) || 0
     const sum = yearBasic + yearSpecial
     const yearTotal = sum === 0 ? null : sum * 10
 
-    const newRows = [...rows]
     newRows[rowIndex] = {
-      ...newRows[rowIndex],
-      payment10_premium_total: yearTotal,
+      ...row,
+      payment10_premium_total: yearTotal ? addComma(yearTotal) : null,
     }
     setRows(newRows)
   }
@@ -198,45 +200,66 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     const newRows = [...rows]
     const row = newRows[rowIndex]
 
-    // 콤마 제거 후 숫자로 변환
-    let processedValue: string | number | null = value.replace(/,/g, '').trim()
-
     // 나이 필드 (start_month, end_month)는 숫자만 (콤마 없음)
     if (field === 'start_month' || field === 'end_month') {
+      const processedValue = value.replace(/,/g, '').trim()
       if (processedValue === '') {
-        processedValue = null
+        newRows[rowIndex] = {
+          ...row,
+          [field]: null,
+        }
+        setRows(newRows)
+        return
       } else {
         // 숫자만 허용 (정수만)
         const num = Number(processedValue)
         if (!Number.isFinite(num) || !Number.isInteger(num)) {
           return // 유효하지 않은 숫자는 무시
         }
-        processedValue = num
-      }
-    } else {
-      // 보험료 필드는 숫자 또는 null (콤마 포함)
-      if (processedValue === '') {
-        processedValue = null
-      } else {
-        const num = Number(processedValue)
-        if (!Number.isFinite(num)) {
-          return
+        newRows[rowIndex] = {
+          ...row,
+          [field]: num,
         }
-        processedValue = num
+        setRows(newRows)
+        return
       }
     }
 
+    // 보험료 필드는 문자열로 저장 (콤마 포함, PremiumModal과 동일한 로직)
+    if (field === 'payment10_premium1' || field === 'payment10_premium2') {
+      const numValue = value.replace(/,/g, '').trim()
+      if (numValue === '') {
+        newRows[rowIndex] = {
+          ...row,
+          [field]: null,
+        }
+        setRows(newRows)
+        // 년계 계산
+        calculateYearTotal(rowIndex)
+        return
+      } else {
+        const num = parseFloat(numValue)
+        if (!isNaN(num)) {
+          // 콤마가 포함된 문자열로 저장 (PremiumModal과 동일)
+          const formattedValue = addComma(num)
+          newRows[rowIndex] = {
+            ...row,
+            [field]: formattedValue,
+          }
+          setRows(newRows)
+          // 년계 계산
+          calculateYearTotal(rowIndex)
+        }
+        return
+      }
+    }
+
+    // 기타 필드는 그대로 저장
     newRows[rowIndex] = {
       ...row,
-      [field]: processedValue,
+      [field]: value,
     }
     setRows(newRows)
-
-    // 년기본 또는 년특약 변경 시 년계 계산
-    if (field === 'payment10_premium1' || field === 'payment10_premium2') {
-      calculateYearTotal(rowIndex)
-    }
-    // 끝나이 변경 시 자동 채우기는 onBlur에서 처리 (입력 완료 후에만 실행)
   }
 
   // 끝나이 입력 완료 시 다음 행 시작나이 자동 채우기
@@ -246,14 +269,18 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     autoFillNextRow(rowIndex, endMonthValue)
   }
 
-  // 입력 필드 포맷팅 (나이는 콤마 없이, 보험료는 콤마 포함)
+  // 입력 필드 포맷팅 (나이는 콤마 없이, 보험료는 이미 콤마 포함된 문자열)
   const formatInputValue = (val: number | string | null | undefined, isAge: boolean = false): string => {
     if (val === null || val === undefined || val === '' || val === 0 || val === '0') return ''
     // 나이 필드는 콤마 없이 숫자만 표시
     if (isAge) {
       return String(val)
     }
-    // 보험료 필드는 콤마 포함
+    // 보험료 필드는 이미 콤마가 포함된 문자열이거나 숫자일 수 있음
+    if (typeof val === 'string') {
+      return val // 이미 콤마가 포함된 문자열
+    }
+    // 숫자인 경우 콤마 추가
     return addComma(val)
   }
 
