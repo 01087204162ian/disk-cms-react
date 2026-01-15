@@ -227,31 +227,29 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
 
     // 보험료 필드는 문자열로 저장 (콤마 포함, PremiumModal과 동일한 로직)
     if (field === 'payment10_premium1' || field === 'payment10_premium2') {
-      // PremiumModal과 동일: removeComma와 동일한 로직
+      // PremiumModal과 동일한 로직
       const numValue = value.replace(/,/g, '').trim()
       
-      // PremiumModal과 동일: numValue가 있으면 처리
+      // numValue가 있으면 포맷팅 시도
       if (numValue) {
         const num = parseFloat(numValue)
         if (!isNaN(num)) {
           // 콤마가 포함된 문자열로 저장 (formatNumber와 동일)
-          const formattedValue = addComma(num)
-          newRows[rowIndex] = {
-            ...row,
-            [field]: formattedValue,
-          }
-          setRows(newRows)
-          calculateYearTotal(rowIndex)
+          value = addComma(num)
         }
+        // parseFloat가 실패하면 원본 value를 그대로 사용 (PremiumModal과 동일)
       } else {
-        // 빈 값이면 null로 저장
-        newRows[rowIndex] = {
-          ...row,
-          [field]: null,
-        }
-        setRows(newRows)
-        calculateYearTotal(rowIndex)
+        // 빈 값이면 빈 문자열로 저장
+        value = ''
       }
+      
+      // 항상 저장 (PremiumModal과 동일)
+      newRows[rowIndex] = {
+        ...row,
+        [field]: value,
+      }
+      setRows(newRows)
+      calculateYearTotal(rowIndex)
       return
     }
 
