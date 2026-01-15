@@ -378,6 +378,7 @@ export default function PolicySearch() {
           value={filters.startyDay}
           onChange={(value) => setFilters((prev) => ({ ...prev, startyDay: value }))}
           className="w-[102.4px]"
+          fullWidth={false}
         />
         <FilterBar.SearchButton onClick={handleSearch} />
         {statistics && (
