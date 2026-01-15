@@ -112,7 +112,7 @@
                 },
                 {
                   "id": "kj-driver-policy-search",
-                  "title": "증권번호 찾기",
+                  "title": "갱신",
                   "page": "insurance/kj-driver-policy-search",
                   "order": 5
                 }

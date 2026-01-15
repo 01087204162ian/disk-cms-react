@@ -358,7 +358,21 @@ export default function PolicySearch() {
 
   return (
     <div className="space-y-6">
-      <FilterBar>
+      <FilterBar
+        actionButtons={
+          statistics ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleOpenChangeModal}
+                className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-xs"
+              >
+                변경
+              </button>
+              <ExportButton onClick={handleExcelDownload} label="엑셀" />
+            </div>
+          ) : undefined
+        }
+      >
         <FilterBar.Select
           value={filters.isDirectInput ? '__DIRECT_INPUT__' : filters.policyNum}
           onChange={(value) => handlePolicyNumChange(value)}
@@ -380,45 +394,33 @@ export default function PolicySearch() {
           className="w-40"
         />
         <FilterBar.SearchButton onClick={handleSearch} />
+        {statistics && (
+          <FilterBar.Stats
+            stats={[
+              {
+                label: '전체 증권',
+                value: statistics.totalRows || 0,
+                color: 'foreground' as const,
+              },
+              {
+                label: '인원 1명 이상',
+                value: statistics.filteredRows || 0,
+                color: 'green' as const,
+              },
+              {
+                label: '전체 인원',
+                value: (statistics.memberCount || 0).toLocaleString('ko-KR'),
+                color: 'foreground' as const,
+              },
+              {
+                label: '인원 1명 이상 합계',
+                value: (statistics.filteredMemberCount || 0).toLocaleString('ko-KR'),
+                color: 'green' as const,
+              },
+            ]}
+          />
+        )}
       </FilterBar>
-
-      {/* 현황 표시 영역 */}
-      {statistics && (
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h6 className="font-semibold mb-4">검색 현황</h6>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium mb-1">전체 증권</div>
-              <div className="text-2xl font-bold text-primary">{statistics.totalRows || 0}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium mb-1">인원 1명 이상</div>
-              <div className="text-2xl font-bold text-green-600">{statistics.filteredRows || 0}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium mb-1">전체 인원</div>
-              <div className="text-2xl font-bold text-primary">
-                {(statistics.memberCount || 0).toLocaleString('ko-KR')}
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-xs text-muted-foreground font-medium mb-1">인원 1명 이상 합계</div>
-              <div className="text-2xl font-bold text-green-600">
-                {(statistics.filteredMemberCount || 0).toLocaleString('ko-KR')}
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleOpenChangeModal}
-              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center gap-2"
-            >
-              <span>변경</span>
-            </button>
-            <ExportButton onClick={handleExcelDownload} label="엑셀 다운로드" />
-          </div>
-        </div>
-      )}
 
       <DataTable
         columns={columns}
