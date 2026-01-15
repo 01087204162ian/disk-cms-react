@@ -229,16 +229,16 @@ export default function PremiumInputModal({ isOpen, onClose, certi, onUpdate }: 
     }
 
     const premiumData: PremiumRow[] = []
-    rows.forEach((row, idx) => {
+    rows.forEach((row) => {
       // 나이 또는 보험료 중 하나라도 있으면 저장
       if (row.start_month || row.end_month || row.payment10_premium1 || row.payment10_premium2) {
         premiumData.push({
           rowNum: row.rowNum,
           start_month: row.start_month || null,
           end_month: row.end_month || null,
-          payment10_premium1: removeComma(row.payment10_premium1) || null,
-          payment10_premium2: removeComma(row.payment10_premium2) || null,
-          payment10_premium_total: removeComma(row.payment10_premium_total) || null,
+          payment10_premium1: row.payment10_premium1 ? removeComma(row.payment10_premium1) || null : null,
+          payment10_premium2: row.payment10_premium2 ? removeComma(row.payment10_premium2) || null : null,
+          payment10_premium_total: row.payment10_premium_total ? removeComma(row.payment10_premium_total) || null : null,
         })
       }
     })
