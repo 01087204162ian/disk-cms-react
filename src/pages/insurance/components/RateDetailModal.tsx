@@ -18,7 +18,7 @@ export default function RateDetailModal({ isOpen, onClose, rateCode }: RateDetai
       isOpen={isOpen}
       onClose={onClose}
       title="요율 상세 설명"
-      maxWidth="lg"
+      maxWidth="xl"
     >
       <div className="space-y-4">
         {/* 요율 코드 및 값 표시 */}

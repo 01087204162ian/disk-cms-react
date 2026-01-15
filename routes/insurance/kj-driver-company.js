@@ -1088,6 +1088,57 @@ router.post('/kj-daily-endorse/status', async (req, res) => {
 });
 
 // 일일배서현황 조회 API
+// 일일배서리스트 보험료/C보험료 업데이트
+router.post('/kj-daily-endorse/premium-update', async (req, res) => {
+  try {
+    const { seqNo, premium, c_premium } = req.body;
+
+    if (!seqNo) {
+      return res.status(400).json({
+        success: false,
+        error: 'SeqNo가 필요합니다.',
+      });
+    }
+
+    const apiUrl = `${PHP_API_BASE_URL}/kj-daily-endorse-premium-update.php`;
+
+    const response = await axios.post(
+      apiUrl,
+      {
+        seqNo,
+        premium: premium || null,
+        c_premium: c_premium || null,
+      },
+      {
+        timeout: DEFAULT_TIMEOUT,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        transformRequest: [
+          (data) => {
+            const params = new URLSearchParams();
+            Object.keys(data).forEach((key) => {
+              if (data[key] !== null && data[key] !== undefined) {
+                params.append(key, data[key]);
+              }
+            });
+            return params.toString();
+          },
+        ],
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('KJ daily endorse premium update proxy error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: '보험료 업데이트 중 오류가 발생했습니다.',
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
 router.post('/kj-daily-endorse/current-situation', async (req, res) => {
   try {
     const apiUrl = `${PHP_API_BASE_URL}/kj-daily-endorse-current-situation.php`;

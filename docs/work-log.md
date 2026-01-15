@@ -12,6 +12,40 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-14 (KJ 대리운전) - 일일배서리스트 모달 보험료 업데이트 기능 구현 및 요율 상세 모달 크기 조정
+
+#### 작업 내용
+- **기능**: 일일배서리스트 모달의 보험료/C보험료 업데이트 기능 구현 및 요율 상세 모달 크기 조정
+- **파일**: 
+  - `src/pages/insurance/components/DailyEndorseListModal.tsx` (보험료 업데이트 기능 추가)
+  - `src/pages/insurance/components/RateDetailModal.tsx` (모달 크기 조정: lg → xl)
+  - `pci0327/api/insurance/kj-daily-endorse-premium-update.php` (신규 생성)
+  - `routes/insurance/kj-driver-company.js` (보험료 업데이트 API 프록시 추가)
+- **주요 구현 사항**:
+  - ✅ 보험료/C보험료 업데이트 기능 구현
+    - 입력 필드 `readOnly` 제거하여 편집 가능하도록 변경
+    - `editingPremiums` state로 편집 중인 값 관리
+    - `handlePremiumChange`: 입력값 변경 시 콤마 제거 및 숫자만 허용
+    - `handlePremiumUpdate`: Enter 키 또는 blur 시 API 호출하여 업데이트
+    - `formatPremiumValue`: 편집 중이면 콤마 없이 표시, 편집 중이 아니면 콤마 포함 표시
+    - 업데이트 성공 시 데이터 새로고침 및 편집 상태 초기화
+  - ✅ 보험료 업데이트 API 구현
+    - PHP API: `kj-daily-endorse-premium-update.php` 생성
+    - SMSData 테이블의 `preminum`, `c_preminum` 필드 업데이트
+    - 콤마 제거 및 숫자 검증 처리
+    - Node.js 프록시 라우터 추가 (`/kj-daily-endorse/premium-update`)
+  - ✅ 요율 상세 모달 크기 조정
+    - `maxWidth="lg"` → `maxWidth="xl"` (약 10% 증가)
+
+#### API 연동
+- `/api/insurance/kj-daily-endorse/premium-update` - 보험료/C보험료 업데이트 (신규 생성)
+
+#### 해결한 이슈
+- 보험료 입력 필드가 `readOnly` 상태였던 문제 해결 (편집 가능하도록 변경)
+- 보험료 업데이트 API가 없었던 문제 해결 (PHP API 및 Node.js 프록시 생성)
+
+---
+
 ### 2026-01-14 (KJ 대리운전) - 요율 상세 모달 구현
 
 #### 작업 내용
@@ -1829,15 +1863,17 @@ work-log.md 파일 학습하자
 ## ⏸️ 미제 작업 (보류)
 
 ### 일일배서리스트 모달 관련
-- [ ] **보험료/C보험료 업데이트 기능 구현** (일일배서리스트 모달)
-  - 현재 상태: 입력 필드는 있으나 `readOnly` 상태, 업데이트 API 연동 필요
+- [x] **보험료/C보험료 업데이트 기능 구현** (일일배서리스트 모달) - **완료**
+  - 구현 완료: 입력 필드 편집 가능, Enter 키 또는 blur 시 업데이트
   - 위치: `src/pages/insurance/components/DailyEndorseListModal.tsx`
-  - 예상 작업 시간: 2-3시간
+  - API: `pci0327/api/insurance/kj-daily-endorse-premium-update.php` (신규 생성)
+  - 기능: 보험료/C보험료 인라인 편집, 콤마 자동 처리, 업데이트 후 자동 새로고침
   
 - [x] **요율 상세 모달 구현** (일일배서리스트 모달) - **완료**
   - 구현 완료: 요율 클릭 시 상세 모달 표시
   - 위치: `src/pages/insurance/components/RateDetailModal.tsx` (신규 생성)
   - 기능: 요율 코드 및 값 표시, 요율 설명, 전체 요율 목록 테이블 (선택된 요율 강조)
+  - 모달 크기: `xl` (10% 증가)
 
 ### 증권별 코드 페이지 마이그레이션
 > **상태**: Phase 1-3 완료, Phase 4 (테스트 및 최적화) 남음

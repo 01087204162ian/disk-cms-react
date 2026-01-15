@@ -67,6 +67,7 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
   const [endorseStatusModalOpen, setEndorseStatusModalOpen] = useState(false)
   const [rateDetailModalOpen, setRateDetailModalOpen] = useState(false)
   const [selectedRateCode, setSelectedRateCode] = useState<number | string>(1)
+  const [editingPremiums, setEditingPremiums] = useState<Record<number, { premium: string; c_premium: string }>>({})
 
   // 초기 날짜 설정 (오늘) 및 자동 조회
   useEffect(() => {
@@ -301,6 +302,76 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
     setEndorseStatusModalOpen(true)
   }
 
+  const handlePremiumChange = (seqNo: number, field: 'premium' | 'c_premium', value: string) => {
+    // 콤마 제거
+    const cleanedValue = value.replace(/,/g, '')
+    // 숫자만 허용
+    if (cleanedValue === '' || /^\d+$/.test(cleanedValue)) {
+      setEditingPremiums((prev) => ({
+        ...prev,
+        [seqNo]: {
+          ...prev[seqNo],
+          [field]: cleanedValue,
+        },
+      }))
+    }
+  }
+
+  const handlePremiumUpdate = async (seqNo: number, field: 'premium' | 'c_premium') => {
+    const editing = editingPremiums[seqNo]
+    if (!editing) return
+
+    const value = editing[field]
+    if (value === undefined || value === '') {
+      // 빈 값이면 원래 값으로 복원
+      setEditingPremiums((prev) => {
+        const newState = { ...prev }
+        delete newState[seqNo]
+        return newState
+      })
+      return
+    }
+
+    try {
+      const premium = field === 'premium' ? value : null
+      const c_premium = field === 'c_premium' ? value : null
+
+      const res = await api.post('/api/insurance/kj-daily-endorse/premium-update', {
+        seqNo,
+        premium,
+        c_premium,
+      })
+
+      if (res.data.success) {
+        toast.success('보험료가 업데이트되었습니다.')
+        // 데이터 새로고침
+        const sort = policyNum ? '3' : companyNum ? '2' : '1'
+        await loadData(pagination.currentPage, date, companyNum, policyNum, sort)
+        // 편집 상태 초기화
+        setEditingPremiums((prev) => {
+          const newState = { ...prev }
+          delete newState[seqNo]
+          return newState
+        })
+      } else {
+        toast.error(res.data.message || '보험료 업데이트에 실패했습니다.')
+      }
+    } catch (error: any) {
+      console.error('보험료 업데이트 오류:', error)
+      toast.error(error.response?.data?.message || '보험료 업데이트 중 오류가 발생했습니다.')
+    }
+  }
+
+  const formatPremiumValue = (seqNo: number, originalValue: number, field: 'premium' | 'c_premium'): string => {
+    const editing = editingPremiums[seqNo]
+    if (editing && editing[field] !== undefined) {
+      // 편집 중인 값이 있으면 그대로 표시 (콤마 없이)
+      return editing[field]
+    }
+    // 편집 중이 아니면 원래 값에 콤마 추가
+    return originalValue ? parseFloat(String(originalValue)).toLocaleString('ko-KR') : '0'
+  }
+
   const formatDateWithTime = (lastTime: string) => {
     if (!lastTime) return '-'
     if (lastTime.length === 14) {
@@ -462,31 +533,31 @@ export default function DailyEndorseListModal({ isOpen, onClose }: DailyEndorseL
                           <td className="border border-gray-300 p-0">
                             <input
                               type="text"
-                              value={item.preminum ? parseFloat(String(item.preminum)).toLocaleString('ko-KR') : '0'}
-                              className="w-full text-xs border-0 rounded-none text-right"
-                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
+                              value={formatPremiumValue(item.SeqNo, item.preminum, 'premium')}
+                              onChange={(e) => handlePremiumChange(item.SeqNo, 'premium', e.target.value)}
+                              onBlur={() => handlePremiumUpdate(item.SeqNo, 'premium')}
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
-                                  // TODO: 보험료 업데이트
-                                  toast.info('보험료 업데이트 기능은 구현 중입니다.')
+                                  e.currentTarget.blur()
                                 }
                               }}
-                              readOnly
+                              className="w-full text-xs border-0 rounded-none text-right focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                             />
                           </td>
                           <td className="border border-gray-300 p-0">
                             <input
                               type="text"
-                              value={item.c_preminum ? parseFloat(String(item.c_preminum)).toLocaleString('ko-KR') : '0'}
-                              className="w-full text-xs border-0 rounded-none text-right"
-                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
+                              value={formatPremiumValue(item.SeqNo, item.c_preminum, 'c_premium')}
+                              onChange={(e) => handlePremiumChange(item.SeqNo, 'c_premium', e.target.value)}
+                              onBlur={() => handlePremiumUpdate(item.SeqNo, 'c_premium')}
                               onKeyPress={(e) => {
                                 if (e.key === 'Enter') {
-                                  // TODO: C보험료 업데이트
-                                  toast.info('C보험료 업데이트 기능은 구현 중입니다.')
+                                  e.currentTarget.blur()
                                 }
                               }}
-                              readOnly
+                              className="w-full text-xs border-0 rounded-none text-right focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                             />
                           </td>
                           <td className="border border-gray-300 px-2 py-2">{item.manager || '-'}</td>
