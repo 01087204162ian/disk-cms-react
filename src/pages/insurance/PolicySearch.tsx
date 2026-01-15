@@ -358,21 +358,7 @@ export default function PolicySearch() {
 
   return (
     <div className="space-y-6">
-      <FilterBar
-        actionButtons={
-          statistics ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleOpenChangeModal}
-                className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-xs"
-              >
-                변경
-              </button>
-              <ExportButton onClick={handleExcelDownload} label="엑셀" />
-            </div>
-          ) : undefined
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.isDirectInput ? '__DIRECT_INPUT__' : filters.policyNum}
           onChange={(value) => handlePolicyNumChange(value)}
@@ -391,34 +377,45 @@ export default function PolicySearch() {
         <DatePicker
           value={filters.startyDay}
           onChange={(value) => setFilters((prev) => ({ ...prev, startyDay: value }))}
-          className="w-40"
+          className="w-32"
         />
         <FilterBar.SearchButton onClick={handleSearch} />
         {statistics && (
-          <FilterBar.Stats
-            stats={[
-              {
-                label: '전체 증권',
-                value: statistics.totalRows || 0,
-                color: 'foreground' as const,
-              },
-              {
-                label: '인원 1명 이상',
-                value: statistics.filteredRows || 0,
-                color: 'green' as const,
-              },
-              {
-                label: '전체 인원',
-                value: (statistics.memberCount || 0).toLocaleString('ko-KR'),
-                color: 'foreground' as const,
-              },
-              {
-                label: '인원 1명 이상 합계',
-                value: (statistics.filteredMemberCount || 0).toLocaleString('ko-KR'),
-                color: 'green' as const,
-              },
-            ]}
-          />
+          <>
+            <FilterBar.Stats
+              stats={[
+                {
+                  label: '전체 증권',
+                  value: statistics.totalRows || 0,
+                  color: 'foreground' as const,
+                },
+                {
+                  label: '인원 1명 이상',
+                  value: statistics.filteredRows || 0,
+                  color: 'green' as const,
+                },
+                {
+                  label: '전체 인원',
+                  value: (statistics.memberCount || 0).toLocaleString('ko-KR'),
+                  color: 'foreground' as const,
+                },
+                {
+                  label: '인원 1명 이상 합계',
+                  value: (statistics.filteredMemberCount || 0).toLocaleString('ko-KR'),
+                  color: 'green' as const,
+                },
+              ]}
+            />
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={handleOpenChangeModal}
+                className="px-3 py-1.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-xs whitespace-nowrap"
+              >
+                변경
+              </button>
+              <ExportButton onClick={handleExcelDownload} label="엑셀" />
+            </div>
+          </>
         )}
       </FilterBar>
 
