@@ -1,4 +1,4 @@
-import { BookOpen, AlertCircle, CheckCircle, Info, HelpCircle } from 'lucide-react'
+import { BookOpen, AlertCircle, Info, HelpCircle } from 'lucide-react'
 
 export default function Documentation() {
   return (
