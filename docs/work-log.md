@@ -2218,3 +2218,2164 @@ Body: {
 - ✅ FileDownloadLink (파일 다운로드 링크)
 - ✅ ButtonGroup (버튼 그룹)
 - **총 12개 공통 컴포넌트**
+
+---
+
+## 📋 대리운전회사용 시스템 기획 (예정)
+
+### 시스템 개요
+**목적**: 대리운전회사가 직접 사용할 시스템 개발  
+**현재 시스템**: 보험대리점용 시스템 (KJ 대리운전 모듈)  
+**신규 시스템**: 대리운전회사용 시스템
+
+---
+
+### 질의응답 (기획을 위한 요구사항 파악)
+
+#### Q1. 시스템 사용자 및 권한
+**Q**: 대리운전회사용 시스템의 주요 사용자는 누구인가요?
+- [ ] 대리운전회사 관리자
+- [ ] 대리운전회사 직원
+- [ ] 대리운전기사 (개인)
+- [ ] 기타: ___________
+
+**Q**: 사용자별 권한은 어떻게 구분되나요?
+- 관리자: ___________
+- 직원: ___________
+- 기사: ___________
+
+---
+
+#### Q2. 핵심 기능 범위
+**Q**: 대리운전회사가 가장 필요로 하는 기능은 무엇인가요?
+- [ ] 기사 관리 (등록, 수정, 해지)
+- [ ] 증권 관리 (조회, 변경)
+- [ ] 보험료 조회 및 납부
+- [ ] 정산 관리
+- [ ] 일일/월별 통계
+- [ ] 알림/공지사항
+- [ ] 기타: ___________
+
+**Q**: 현재 보험대리점 시스템에서 대리운전회사가 사용하는 기능은?
+- ___________
+- ___________
+
+---
+
+#### Q3. 데이터 접근 범위
+**Q**: 대리운전회사는 어떤 데이터에 접근할 수 있어야 하나요?
+- [ ] 본인 회사 소속 기사만 조회
+- [ ] 본인 회사 증권만 조회
+- [ ] 본인 회사 보험료/정산 정보만 조회
+- [ ] 전체 데이터 조회 (다른 회사 포함)
+- [ ] 기타: ___________
+
+**Q**: 데이터 공유 범위는?
+- 회사 간 데이터 공유: [ ] 예 [ ] 아니오
+- 보험대리점과 데이터 공유: [ ] 예 [ ] 아니오
+
+---
+
+#### Q4. 업무 프로세스
+**Q**: 대리운전회사의 주요 업무 프로세스는?
+1. **기사 가입 프로세스**
+   - ___________
+   - ___________
+
+2. **기사 해지 프로세스**
+   - ___________
+   - ___________
+
+3. **보험료 납부 프로세스**
+   - ___________
+   - ___________
+
+4. **정산 프로세스**
+   - ___________
+   - ___________
+
+**Q**: 보험대리점과의 협업 프로세스는?
+- ___________
+- ___________
+
+---
+
+#### Q5. 통계 및 리포트
+**Q**: 대리운전회사가 필요한 통계/리포트는?
+- [ ] 일일 가입/해지 현황
+- [ ] 월별 가입/해지 통계
+- [ ] 기사별 보험료 내역
+- [ ] 회사별 보험료 합계
+- [ ] 증권별 현황
+- [ ] 기타: ___________
+
+**Q**: 리포트 형식은?
+- [ ] 화면 조회
+- [ ] 엑셀 다운로드
+- [ ] PDF 출력
+- [ ] 이메일 발송
+- [ ] 기타: ___________
+
+---
+
+#### Q6. 알림 및 공지
+**Q**: 필요한 알림/공지 기능은?
+- [ ] 보험료 납부 알림
+- [ ] 기사 가입/해지 알림
+- [ ] 증권 변경 알림
+- [ ] 보험대리점 공지사항
+- [ ] 기타: ___________
+
+**Q**: 알림 방식은?
+- [ ] 화면 알림
+- [ ] 이메일
+- [ ] SMS
+- [ ] 푸시 알림
+- [ ] 기타: ___________
+
+---
+
+#### Q7. 시스템 연동
+**Q**: 연동이 필요한 외부 시스템은?
+- [ ] 보험대리점 시스템 (현재 시스템)
+- [ ] 보험사 시스템
+- [ ] 결제 시스템
+- [ ] SMS 발송 시스템
+- [ ] 기타: ___________
+
+**Q**: 데이터 동기화 방식은?
+- [ ] 실시간 동기화
+- [ ] 배치 동기화 (시간 지정)
+- [ ] 수동 동기화
+- [ ] 기타: ___________
+
+---
+
+#### Q8. UI/UX 요구사항
+**Q**: 주요 사용 환경은?
+- [ ] 데스크톱 웹
+- [ ] 모바일 웹
+- [ ] 모바일 앱
+- [ ] 태블릿
+
+**Q**: 사용 빈도가 높은 기능은?
+- ___________
+- ___________
+
+---
+
+#### Q9. 보안 및 인증
+**Q**: 인증 방식은?
+- [ ] 아이디/비밀번호
+- [ ] 이메일 인증
+- [ ] SMS 인증
+- [ ] 2단계 인증
+- [ ] 기타: ___________
+
+**Q**: 보안 요구사항은?
+- ___________
+- ___________
+
+---
+
+#### Q10. 우선순위
+**Q**: 가장 먼저 구현해야 할 기능은? (우선순위 순서)
+1. ___________
+2. ___________
+3. ___________
+
+**Q**: MVP(최소 기능 제품) 범위는?
+- ___________
+- ___________
+
+---
+
+### 질의응답 답변 요약
+
+#### Q1. 시스템 사용자 및 권한
+- **사용자**: 대리운전회사 관리자, 대리운전회사 직원(읽기 전용), 기사
+- **권한 구분**:
+  - 관리자: 청약, 해지 등 모든 권한
+  - 읽기 전용 사용자: 조회만 가능
+  - 기사: 청약 시 관리자가 핸드폰 번호, 성명 입력 → 기사에게 MMS 발송 → 기사가 주민번호 입력
+
+#### Q2. 핵심 기능 범위
+- 기사 관리 (등록, 수정, 해지)
+- 증권 관리 (조회)
+- 보험료 조회 및 납부
+- 정산 관리
+- 일일/월별 통계
+- 알림/공지사항
+- **현재 사용 기능**: 청약, 해지
+
+#### Q3. 데이터 접근 범위
+- 본인 회사 소속 기사만 조회
+- 본인 회사 증권만 조회
+- 본인 회사 보험료/정산 정보만 조회
+- **데이터 공유**: 대리운전회사 간 공유는 보험대리점이 허용한 특수한 경우에만 가능, 다른 보험대리점과는 공유하지 않음
+
+#### Q4. 업무 프로세스
+1. **기사 가입**: 성격에 맞는 증권에 성명, 주민번호, 핸드폰 번호로 청약
+2. **기사 해지**: 증권별 리스트에서 해지
+3. **보험료 납부**: 월 1회 정산
+4. **정산 프로세스**: 보험대리점에서 월 1회 안내
+5. **협업 프로세스**: 청약/해지 신청 → 보험대리점이 본사 전산에 시행 후 확인 → 문자로 증권번호, 월보험료, 배서보험료 안내
+
+#### Q5. 통계 및 리포트
+- 일일 가입/해지 현황
+- 월별 가입/해지 통계
+- 기사별 보험료 내역
+- 회사별 보험료 합계
+- 증권별 현황
+- **형식**: 화면 조회, 엑셀 다운로드
+
+#### Q6. 알림 및 공지
+- 보험료 납부 알림
+- 기사 가입/해지 알림
+- 보험대리점 공지사항
+- **방식**: 화면 알림, 이메일, SMS, 푸시 알림
+
+#### Q7. 시스템 연동
+- 보험대리점 시스템 (현재 시스템)
+- SMS 발송 시스템
+- **동기화**: 실시간 동기화 (동일한 데이터베이스 사용)
+
+#### Q8. UI/UX 요구사항
+- 데스크톱 웹, 모바일 웹
+- **사용 빈도 높은 기능**: 청약, 해지
+
+#### Q9. 보안 및 인증
+- 아이디/비밀번호
+- 세션 관리
+
+#### Q10. 우선순위
+1. 로그인, 증권별 기사현황, 배서리스트, 청약/해지
+2. (전체 요구사항 개발)
+- **MVP**: 최소 기능 제품 불필요, 본 요구사항 전체 개발
+
+---
+
+## 📋 대리운전회사용 시스템 상세 기획서
+
+### 1. 시스템 개요
+
+#### 1.1 목적
+대리운전회사가 직접 사용할 수 있는 웹 시스템으로, 기사 관리(청약/해지), 증권 조회, 보험료 조회, 정산 관리 등을 제공합니다.
+
+#### 1.2 주요 특징
+- 보험대리점 시스템과 동일한 데이터베이스 사용 (실시간 동기화)
+- 회사별 데이터 격리 (본인 회사 데이터만 조회)
+- 기사 가입 시 MMS를 통한 주민번호 입력 프로세스 (케이드라이브 만 가능능)
+- 데스크톱/모바일 웹 지원
+
+---
+
+### 2. 사용자 및 권한
+
+#### 2.1 사용자 유형
+1. **대리운전회사 관리자**
+   - 권한: 모든 기능 사용 (청약, 해지, 조회, 수정 등)
+   - 주요 업무: 기사 관리, 증권 조회, 정산 확인
+
+2. **대리운전회사 직원 (읽기 전용)**
+   - 권한: 조회만 가능 (수정/삭제 불가)
+   - 주요 업무: 현황 조회, 통계 확인
+
+3. **대리운전기사**
+   - 권한: 제한적 (주민번호 입력만)
+   - 프로세스: 관리자가 청약 시 핸드폰 번호, 성명 입력 → MMS 발송 → 기사가 주민번호 입력
+
+#### 2.2 권한 관리
+- 회사별 사용자 관리
+- 역할 기반 권한 제어 (RBAC)
+- 세션 관리 및 보안
+
+---
+
+### 3. 핵심 기능
+
+#### 3.1 기사 관리
+**3.1.1 기사 청약 (가입)**
+- 증권 선택 (성격에 맞는 증권)
+- 기사 정보 입력: 성명, 핸드폰 번호
+- MMS 발송: 기사에게 주민번호 입력 링크 전송
+- 기사 주민번호 입력 완료 후 청약 처리
+- 보험대리점 시스템으로 전송
+- 처리 완료 후 문자 안내 (증권번호, 월보험료, 배서보험료)
+
+**3.1.2 기사 해지**
+- 증권별 기사 리스트에서 해지 처리
+- 해지 사유 입력 (선택)
+- 보험대리점 시스템으로 전송
+- 처리 완료 후 문자 안내
+
+**3.1.3 기사 조회 및 수정**
+- 증권별 기사 현황 조회
+- 기사 정보 수정 (관리자만)
+- 기사 상세 정보 조회
+
+#### 3.2 증권 관리
+- 본인 회사 증권 목록 조회
+- 증권별 기사 현황 조회
+- 증권 상세 정보 조회
+- 증권별 통계 (인원, 보험료 등)
+
+#### 3.3 배서 리스트
+- 청약/해지 신청 내역 조회
+- 진행 상태 확인
+- 처리 완료 내역 조회
+- 필터링: 날짜, 증권, 상태 등
+
+#### 3.4 보험료 조회 및 납부
+- 기사별 보험료 내역 조회
+- 증권별 보험료 합계 조회
+- 회사별 보험료 합계 조회
+- 월별 보험료 조회
+- 정산 내역 조회
+
+#### 3.5 정산 관리
+- 월 1회 정산 안내 (보험대리점에서 제공)
+- 정산 내역 조회
+- 정산 상세 정보 확인
+- 엑셀 다운로드
+
+#### 3.6 통계 및 리포트
+**3.6.1 일일 통계**
+- 일일 가입 현황
+- 일일 해지 현황
+- 일일 가입/해지 합계
+
+**3.6.2 월별 통계**
+- 월별 가입/해지 통계
+- 월별 보험료 통계
+- 월별 증권별 현황
+
+**3.6.3 리포트**
+- 기사별 보험료 내역
+- 회사별 보험료 합계
+- 증권별 현황
+- 형식: 화면 조회, 엑셀 다운로드
+
+#### 3.7 알림 및 공지
+- 보험료 납부 알림
+- 기사 가입/해지 알림
+- 보험대리점 공지사항
+- 알림 방식: 화면 알림, 이메일, SMS, 푸시 알림
+
+---
+
+### 4. 데이터 접근 범위
+
+#### 4.1 데이터 격리
+- 본인 회사 소속 기사만 조회
+- 본인 회사 증권만 조회
+- 본인 회사 보험료/정산 정보만 조회
+
+#### 4.2 데이터 공유 (고려하지 말것 나중에 다시 의논논)
+- 대리운전회사 간 공유: 보험대리점이 허용한 특수한 경우에만 가능
+- 다른 보험대리점과는 공유하지 않음
+
+#### 4.3 데이터 동기화
+- 보험대리점 시스템과 동일한 데이터베이스 사용
+- 실시간 동기화 (동일 DB 사용)
+
+---
+
+### 5. 업무 프로세스
+
+#### 5.1 기사 가입 프로세스
+```
+1. 관리자 로그인  현황(증권별 인원,배서현황 )
+2. 증권 선택 (성격에 맞는 증권)
+3. 기사 정보 입력 (성명, 핸드폰 번호)
+4. 청약 신청
+5. 시스템이 기사에게 MMS 발송 (주민번호 입력 링크) 케이드라이브 인경우만 
+6. 기사가 주민번호 입력
+7. 보험대리점 시스템으로 전송
+8. 보험대리점이 본사 전산에 시행
+9. 확인 완료 후 문자 안내 (증권번호, 월보험료, 배서보험료)
+```
+
+#### 5.2 기사 해지 프로세스
+```
+1. 관리자 로그인
+2. 증권별 기사 리스트 조회
+3. 해지할 기사 선택
+4. 해지 신청 (해지 사유 입력하지 않음)
+5. 보험대리점 시스템으로 전송
+6. 보험대리점이 본사 전산에 시행
+7. 확인 완료 후 문자 안내
+```
+
+#### 5.3 보험료 납부 프로세스
+```
+1. 월 1회 보험대리점에서 정산 안내
+2. 대리운전회사에서 정산 내역 확인
+3. 보험료 납부
+4. 납부 완료 확인
+```
+
+---
+
+### 6. 시스템 연동
+
+#### 6.1 보험대리점 시스템 연동
+- 동일한 데이터베이스 사용
+- 실시간 데이터 동기화
+- API를 통한 청약/해지 신청 전송
+
+#### 6.2 SMS/MMS 발송 시스템 연동
+- **발송 시점**:
+  - 기사 가입 시 MMS 발송 (케이드라이브만, 주민번호 입력 링크 포함)
+  - 배서 처리 완료 후 SMS 안내 (증권번호, 월보험료, 배서보험료)
+  - 알림 SMS 발송
+- **발송 방식**: Aligo SMS API 연동 (AWS Lambda 프록시 사용)
+- **API 엔드포인트**: `https://j7rqfprgb5.execute-api.ap-northeast-2.amazonaws.com/default/aligo-5962`
+- **발송 모듈 위치**: 
+  - `pci0327/api/utils/kj-sms-utils.php` - 배서 SMS 발송 유틸리티 함수 (`sendEndorseSms()`)
+  - `pci0327/api/utils/kj-sms-aligo.php` - Aligo SMS API 연동 함수 (`sendAligoSms()`)
+- **사용 예시**: `pci0327/api/insurance/kj-endorse-update-status.php`에서 배서 처리 시 사용
+- **발송 이력 저장**: `SMSData` 테이블에 발송 내역 저장
+- **MMS 발송**: 주민번호 입력 링크가 포함된 MMS (케이드라이브만)
+- **재사용**: 대리운전회사용 시스템에서도 동일한 모듈 사용 (`require_once`로 포함)
+
+---
+
+### 7. UI/UX 요구사항
+
+#### 7.1 지원 환경
+- 데스크톱 웹 (보조조 사용 환경)
+- 모바일 웹 (주주 사용 환경)
+
+#### 7.2 주요 화면 구성
+1. **로그인 화면**
+2. **대시보드** (현황 요약)
+3. **증권별 기사 현황** (가장 빈번한 사용)
+4. **배서 리스트** (청약/해지 내역)
+5. **청약 화면**
+6. **해지 화면**
+7. **보험료 조회**
+8. **통계/리포트**
+9. **알림/공지사항**
+
+#### 7.3 사용 빈도 높은 기능
+- 청약 (가장 빈번)
+- 해지
+- 증권별 기사 현황 조회
+
+---
+
+### 8. 보안 및 인증
+
+#### 8.1 인증 방식
+- 아이디/비밀번호
+- 세션 관리
+- 자동 로그아웃 (일정 시간 미사용 시)
+
+#### 8.2 보안 요구사항
+- **HTTPS 통신**: 모든 통신은 HTTPS 필수
+- **비밀번호 암호화**: MD5 해시 사용 (기존 시스템과 동일)
+- **세션 관리**:
+  - PHP 세션 사용 (`session_start()`)
+  - 세션 고정 공격 방지: `session_regenerate_id(true)` 사용
+  - 세션 타임아웃: 30분 미사용 시 자동 로그아웃
+  - 세션 데이터: `$_SESSION['user_num']`, `$_SESSION['user_id']`, `$_SESSION['company_num']` 등
+- **SQL Injection 방지**: PDO Prepared Statement 필수 사용
+- **XSS 방지**: 
+  - 출력 시 `htmlspecialchars()` 사용
+  - 사용자 입력 데이터 검증 및 정제
+- **CSRF 보호**: 중요 작업(청약, 해지) 시 CSRF 토큰 검증 (구현 권장)
+- **입력 검증**:
+  - 필수 필드 검증
+  - 데이터 타입 검증
+  - 길이 제한 검증
+  - 특수문자 필터링
+
+---
+
+### 9. 개발 우선순위
+
+#### Phase 1: 핵심 기능 (최우선)
+1. 로그인/인증
+2. 증권별 기사 현황 조회
+3. 배서 리스트 조회
+4. 기사 청약 (가입)
+5. 기사 해지
+
+#### Phase 2: 보완 기능
+1. 보험료 조회
+2. 정산 관리
+3. 통계/리포트
+4. 알림/공지사항
+
+#### Phase 3: 고도화
+1. 엑셀 다운로드
+2. 모바일 웹 최적화
+3. 성능 최적화
+4. 사용자 경험 개선
+
+---
+
+### 10. 기술 스택
+
+#### 10.1 서버 환경
+- **호스팅**: 카페24 (PHP 호스팅)
+- **인코딩**: UTF-8
+- **백엔드**: PHP 8.2
+- **데이터베이스**: MariaDB 10.x
+- **문자셋**: UTF-8 (데이터베이스, 파일, 통신 모두)
+- **제약사항**: Node.js/React 빌드 환경 미지원
+
+#### 10.2 프론트엔드
+**기술 스택**:
+- 순수 HTML5 + CSS3 + JavaScript (ES6+)
+- 모던 JavaScript (Vanilla JS 또는 jQuery)
+- 반응형 CSS (Flexbox, Grid)
+- 모바일 우선 디자인
+
+**대안 고려사항**:
+- **옵션 1**: 순수 HTML/CSS/JavaScript (권장)
+  - 카페24 환경에 최적화
+  - 별도 빌드 과정 불필요
+  - 빠른 배포 가능
+  
+- **옵션 2**: 정적 파일 빌드 후 업로드
+  - 로컬에서 React로 개발 → 빌드 → 정적 파일 업로드
+  - 개발 편의성은 높지만 배포 과정 복잡
+  
+- **옵션 3**: PHP 템플릿 방식
+  - PHP 파일에 HTML 포함
+  - 서버 사이드 렌더링
+
+**권장 방식**: 순수 HTML/CSS/JavaScript (옵션 1)
+- 카페24 환경에 가장 적합
+- 기존 보험대리점 시스템과 유사한 구조
+- 빠른 개발 및 배포
+
+#### 10.3 백엔드
+- PHP 8.2
+- RESTful API 또는 전통적인 PHP 방식 (폼 제출)
+- 현재 보험대리점 시스템과 동일한 데이터베이스 사용
+- 회사별 데이터 격리 (WHERE 조건으로 필터링)
+
+**기존 API 구조 이해**:
+- `pci0327/api/insurance/` - PHP 백엔드 API (보험대리점용)
+- `disk-cms-react`의 Node.js 서버가 이 PHP API를 프록시로 사용
+- 구조: React 프론트엔드 → Node.js Express 서버 → PHP API → DB
+- 참고: `disk-cms-react/routes/insurance/kj-driver-company.js`에서 `PHP_API_BASE_URL = 'https://pcikorea.com/api/insurance'` 사용
+
+**대리운전회사용 시스템 구조**:
+- 카페24에서 직접 실행 (Node.js 프록시 없음)
+- 구조: HTML/JS → PHP API → DB (직접 호출)
+- `pci0327/api/insurance/`의 PHP API 구조 참고하여 `pci0327/api/daeri/` 개발
+
+#### 10.4 데이터베이스
+- MariaDB 10.x
+- 현재 보험대리점 시스템과 동일한 DB 사용
+- UTF-8 문자셋
+- 회사별 데이터 격리 (WHERE 조건으로 필터링)
+
+#### 10.5 개발 및 배포 방식
+**로컬 개발**:
+- PHP 8.2 로컬 서버 (XAMPP, WAMP 등)
+- MariaDB 로컬 설치 또는 원격 DB 연결
+- 브라우저 개발자 도구 활용
+
+**배포**:
+- FTP/SFTP를 통한 파일 업로드
+- 카페24 호스팅에 직접 업로드
+- 별도 빌드 과정 없이 즉시 배포 가능
+
+---
+
+### 11. 데이터베이스 스키마
+
+#### 11.1 주요 테이블 구조
+
+**11.1.1 사용자 테이블 (`2012Costomer`)**
+- **역할**: 대리운전회사 사용자 정보
+- **주요 필드**:
+  - `num`: 사용자 번호 (PK)
+  - `2012DaeriCompanyNum`: 대리운전회사 번호 (FK → `2012DaeriCompany.num`)
+  - `mem_id`: 로그인 ID
+  - `passwd`: 비밀번호 (MD5 해시)
+  - `name`: 사용자 이름
+  - `level`: 권한 레벨
+  - `permit`: 허가 여부
+  - `readIs`: 읽기 전용 여부
+- **로그인**: `mem_id`와 `passwd`(MD5)로 인증
+
+**11.1.2 대리운전회사 테이블 (`2012DaeriCompany`)**
+- **역할**: 대리운전회사 기본 정보
+- **주요 필드**:
+  - `num`: 회사 번호 (PK)
+  - `company`: 회사명
+  - `Pname`: 대표자명
+  - `jumin`: 주민번호
+  - `hphone`: 핸드폰 번호
+  - `cphone`: 전화번호
+  - `damdanga`: 담당자 번호
+  - `divi`: 구분
+  - `fax`: 팩스
+  - `cNumber`: 사업자번호
+  - `lNumber`: 법인번호
+  - `postNum`: 우편번호
+  - `address1`, `address2`: 주소
+  - `MemberNum`: 회원 번호
+  - `pBankNum`: 은행 번호
+  - `FirstStartDay`: 최초 시작일
+  - `FirstStart`: 최초 시작
+  - `union_`: 연합
+  - `notJumin`: 주민번호 없음 여부
+
+**11.1.3 증권 테이블 (`2012CertiTable`)**
+- **역할**: 보험 증권 정보
+- **주요 필드**:
+  - `num`: 증권 번호 (PK)
+  - `2012DaeriCompanyNum`: 대리운전회사 번호 (FK → `2012DaeriCompany.num`)
+  - `DaeriCompany`: 대리운전회사명
+  - `InsuraneCompany`: 보험회사 코드
+  - `startyDay`: 시작일 (현재일로부터 1년 이내만 유효)
+  - `policyNum`: 증권번호
+  - `nabang`: 회차
+  - `divi`: 결제방식 (1=정상납, 2=월납)
+  - `gita`: 증권성격
+  - `state`: 상태
+  - `preminum1~10`: 보험료 (10회분납)
+  - `preminumE1~10`: 보험료 (10회분납 추가)
+  - `yearP1~6`: 년보험료
+  - `moRate`: 월요율
+  - `jagi`: 단체율
+  - `control`: 관리
+  - `personal`: 개인
+- **유효성**: `startyDay`가 현재일로부터 1년 이내인 증권만 유효
+
+**11.1.4 대리운전기사 테이블 (`2012DaeriMember`)**
+- **역할**: 대리운전기사 정보
+- **주요 필드**:
+  - `num`: 기사 번호 (PK)
+  - `moCertiNum`: 증권 번호
+  - `2012DaeriCompanyNum`: 대리운전회사 번호 (FK → `2012DaeriCompany.num`)
+  - `CertiTableNum`: 증권 테이블 번호 (FK → `2012CertiTable.num`)
+  - `InsuranceCompany`: 보험회사 코드
+  - `Name`: 기사 이름
+  - `Jumin`: 주민번호
+  - `nai`: 나이
+  - `push`: 상태 (1=청약, 4=정상)
+  - `etag`: 증권성격
+  - `FirstStart`: 최초 시작일
+  - `state`: 상태
+  - `cancel`: 해지 여부
+  - `sangtae`: 상태
+  - `Hphone`: 핸드폰 번호
+  - `InputDay`: 입력일
+  - `OutPutDay`: 해지일
+  - `EndorsePnum`: 배서 번호
+  - `dongbuCerti`: 동부증권번호
+  - `dongbuSelNumber`: 동부선택번호
+  - `dongbusigi`: 동부시기
+  - `dongbujeongi`: 동부정기
+  - `nabang_1`: 회차
+  - `ch`: 변경
+  - `changeCom`: 변경 회사
+  - `sPrem`: 보험료
+  - `sago`: 사고
+  - `p_buho`: 보호
+  - `preminum1`: 보험료1
+  - `wdate`: 작성일
+  - `endorse_day`: 배서일
+  - `rate`: 요율
+  - `reasion`: 사유
+  - `manager`: 담당자
+  - `progress`: 진행단계
+- **상태 값**: `push = 4` (정상), `push = 1` (청약)
+
+**11.1.5 요율 테이블 (`2019rate`)**
+- **역할**: 기사별 요율 정보
+- **주요 필드**:
+  - `num`: 번호 (PK)
+  - `policy`: 증권번호 (FK → `2012DaeriMember.dongbuCerti`)
+  - `jumin`: 주민번호 (FK → `2012DaeriMember.Jumin`)
+  - `rate`: 요율 코드
+
+**11.1.6 보험회사 보험료 데이터 (`kj_insurance_premium_data`)**
+- **역할**: 보험회사에 내는 보험료 (C보험료 포함)
+- **주요 필드**:
+  - `id`: 번호 (PK)
+  - `policyNum`: 증권번호 (FK → `2012DaeriMember.dongbuCerti` = `2012CertiTable.policyNum`)
+  - `rowNum`: 행 번호
+  - `start_month`: 시작 나이
+  - `end_month`: 끝 나이
+  - `payment10_premium1`: 년기본 보험료
+  - `payment10_premium2`: 년특약 보험료
+  - `payment10_premium_total`: 년계 보험료
+
+**11.1.7 월납보험료 데이터 (`kj_premium_data`)**
+- **역할**: 월납 보험료 정보
+- **주요 필드**:
+  - `id`: 번호 (PK)
+  - `cNum`: 증권 번호 (FK → `2012CertiTable.num`)
+  - `rowNum`: 행 번호
+  - `start_month`: 시작 나이
+  - `end_month`: 끝 나이
+  - `monthly_premium1`: 월기본 보험료
+  - `monthly_premium2`: 월특약 보험료
+  - `monthly_premium_total`: 월계 보험료
+  - `payment10_premium1`: 년기본 보험료
+  - `payment10_premium2`: 년특약 보험료
+  - `payment10_premium_total`: 년계 보험료
+
+#### 11.2 테이블 관계도
+
+```
+2012Costomer (사용자)
+  ├─ 2012DaeriCompanyNum → 2012DaeriCompany.num (대리운전회사)
+  │
+  └─ 2012DaeriCompanyNum → 2012CertiTable.2012DaeriCompanyNum (증권)
+      │
+      ├─ 2012CertiTable.num → 2012DaeriMember.CertiTableNum (기사)
+      │   │
+      │   ├─ 2012DaeriMember.dongbuCerti → 2019rate.policy (요율)
+      │   │
+      │   └─ 2012DaeriMember.dongbuCerti → kj_insurance_premium_data.policyNum (보험회사 보험료)
+      │
+      └─ 2012CertiTable.num → kj_premium_data.cNum (월납보험료)
+```
+
+#### 11.3 데이터 격리 전략
+
+**회사별 데이터 조회 조건**:
+```sql
+-- 사용자 로그인 시 회사 번호 확인
+SELECT 2012DaeriCompanyNum FROM 2012Costomer WHERE mem_id = ? AND passwd = MD5(?)
+
+-- 회사별 증권 조회
+SELECT * FROM 2012CertiTable 
+WHERE 2012DaeriCompanyNum = ? 
+AND startyDay >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+
+-- 회사별 기사 조회
+SELECT * FROM 2012DaeriMember 
+WHERE 2012DaeriCompanyNum = ?
+
+-- 회사별 증권별 기사 조회
+SELECT * FROM 2012DaeriMember 
+WHERE 2012DaeriCompanyNum = ? 
+AND CertiTableNum = ?
+```
+
+#### 11.4 주요 비즈니스 로직
+
+**11.4.1 증권 유효성 검증**
+- `2012CertiTable.startyDay`가 현재일로부터 1년 이내인 증권만 유효
+- 유효한 증권만 조회 및 선택 가능
+
+**11.4.2 기사 상태 관리**
+- `push = 1`: 청약 (가입 신청)
+- `push = 4`: 정상 (가입 완료)
+- `cancel`: 해지 여부
+
+**11.4.3 결제방식 구분**
+- `2012CertiTable.divi = '1'`: 정상납
+- `2012CertiTable.divi = '2'`: 월납
+- 월납인 경우 `kj_premium_data` 테이블 사용
+
+**11.4.4 보험료 조회**
+- 정상납: `2012CertiTable.premium1~10` 사용
+- 월납: `kj_premium_data` 테이블 사용
+- 보험회사 보험료: `kj_insurance_premium_data` 테이블 사용
+
+#### 11.5 상수값 참조
+
+**참조 파일**: `disk-cms-react/src/pages/insurance/constants.ts`
+
+**11.5.1 보험회사 코드 (`INSURER_MAP`)**
+```typescript
+1: '흥국'
+2: 'DB'
+3: 'KB'
+4: '현대'
+5: '롯데'
+6: '하나'
+7: '한화'
+8: '삼성'
+9: '메리츠'
+```
+- 테이블 필드: `2012CertiTable.InsuraneCompany`, `2012DaeriMember.InsuranceCompany`
+
+**11.5.2 증권성격 코드 (`GITA_MAP`)**
+```typescript
+1: '일반'
+2: '탁송'
+3: '일반/렌트'
+4: '탁송/렌트'
+5: '확대탁송'
+```
+- 테이블 필드: `2012CertiTable.gita`, `2012DaeriMember.etag`
+
+**11.5.3 결제방식 코드 (`DIVI_OPTIONS`)**
+```typescript
+1: '정상납'
+2: '월납'
+```
+- 테이블 필드: `2012CertiTable.divi`
+
+**11.5.4 배서 상태 코드 (`PUSH_MAP`)**
+```typescript
+'1': '청약'
+'2': '해지'
+'3': '청약거절'
+'4': '정상'
+'5': '해지취소'
+'6': '청약취소'
+```
+- 테이블 필드: `2012DaeriMember.push`
+- 주요 상태: `push = 1` (청약), `push = 4` (정상)
+
+**11.5.5 진행단계 코드 (`PROGRESS_MAP`)**
+```typescript
+'1': '프린트'
+'2': '스캔'
+'3': '고객등록'
+'4': '심사중'
+'5': '입금대기'
+'6': '카드승인'
+'7': '수납중'
+'8': '확정중'
+```
+- 테이블 필드: `2012DaeriMember.progress`
+
+**11.5.6 요율 코드 (`RATE_OPTIONS`, `RATE_MAP`, `RATE_NAME_MAP`)**
+```typescript
+1: 1.000 (기본)
+2: 0.900 (할인)
+3: 0.925 (3년간 사고건수 0건 1년간 사고건수 0건 무사고 1년 이상)
+4: 0.898 (3년간 사고건수 0건 1년간 사고건수 0건 무사고 2년 이상)
+5: 0.889 (3년간 사고건수 0건 1년간 사고건수 0건 무사고 3년 이상)
+6: 1.074 (3년간 사고건수 1건 1년간 사고건수 0건)
+7: 1.085 (3년간 사고건수 1건 1년간 사고건수 1)
+8: 1.242 (3년간 사고건수 2건 1년간 사고건수 0)
+9: 1.253 (3년간 사고건수 2건 1년간 사고건수 1)
+10: 1.314 (3년간 사고건수 2건 1년간 사고건수 2)
+11: 1.428 (3년간 사고건수 3건이상 1년간 사고건수 0)
+12: 1.435 (3년간 사고건수 3건이상 1년간 사고건수 1)
+13: 1.447 (3년간 사고건수 3건이상 1년간 사고건수 2)
+14: 1.459 (3년간 사고건수 3건이상 1년간 사고건수 3건이상)
+```
+- 테이블 필드: `2012DaeriMember.rate`, `2019rate.rate`
+
+**11.5.7 사고 코드 (`mapSagoLabel`)**
+```typescript
+1: '사고없음'
+2: '사고있음'
+```
+- 테이블 필드: `2012DaeriMember.sago`
+
+**11.5.8 유틸리티 함수**
+- `getInsurerName(code)`: 보험회사 코드 → 이름
+- `getGitaName(code)`: 증권성격 코드 → 이름
+- `getRateValue(code)`: 요율 코드 → 요율 값
+- `getRateName(code)`: 요율 코드 → 요율 설명
+- `mapPushLabel(push)`: 배서 상태 코드 → 라벨
+- `mapSagoLabel(sago)`: 사고 코드 → 라벨
+
+**참고**: 모든 상수값과 매핑 함수는 `disk-cms-react/src/pages/insurance/constants.ts` 파일을 참조하여 사용
+
+---
+
+### 12. API 설계 (제안)
+
+#### 12.1 인증 API
+- `POST /api/auth/login` - 로그인
+- `POST /api/auth/logout` - 로그아웃
+- `GET /api/auth/me` - 현재 사용자 정보
+
+#### 12.2 기사 관리 API
+- `GET /api/driver/list` - 기사 목록 조회 (증권별, 회사별 필터링)
+- `POST /api/driver/register` - 기사 청약 (가입)
+- `POST /api/driver/cancel` - 기사 해지
+- `GET /api/driver/:id` - 기사 상세 정보
+
+#### 12.3 증권 관리 API
+- `GET /api/policy/list` - 증권 목록 조회 (회사별)
+- `GET /api/policy/:id` - 증권 상세 정보
+- `GET /api/policy/:id/drivers` - 증권별 기사 목록
+
+#### 12.4 배서 리스트 API
+- `GET /api/endorse/list` - 배서 리스트 조회 (회사별 필터링)
+- `GET /api/endorse/:id` - 배서 상세 정보
+
+#### 12.5 보험료 조회 API
+- `GET /api/premium/driver/:id` - 기사별 보험료
+- `GET /api/premium/policy/:id` - 증권별 보험료
+- `GET /api/premium/company` - 회사별 보험료 합계
+
+#### 12.6 통계 API
+- `GET /api/statistics/daily` - 일일 통계
+- `GET /api/statistics/monthly` - 월별 통계
+
+#### 12.7 알림 API
+- `GET /api/notifications` - 알림 목록
+- `POST /api/notifications/:id/read` - 알림 읽음 처리
+
+---
+
+### 13. 개발 일정 (예상)
+
+#### Phase 1: 핵심 기능 개발 (2-3주)
+- 인증 시스템
+- 증권별 기사 현황
+- 배서 리스트
+- 청약/해지 기능
+
+#### Phase 2: 보완 기능 개발 (1-2주)
+- 보험료 조회
+- 정산 관리
+- 통계/리포트
+- 알림/공지사항
+
+#### Phase 3: 테스트 및 최적화 (1주)
+- 통합 테스트
+- 성능 최적화
+- 버그 수정
+- 사용자 테스트
+
+**총 예상 기간**: 4-6주
+
+---
+
+### 14. 추가 확인 사항 및 구현 가이드
+
+#### 14.1 에러 처리 및 로깅
+
+**에러 처리 전략**:
+- **API 응답 형식 표준화**:
+  ```php
+  // 성공 응답
+  {
+    "success": true,
+    "data": {...},
+    "message": "처리 완료"
+  }
+  
+  // 실패 응답
+  {
+    "success": false,
+    "error": "에러 메시지",
+    "code": "ERROR_CODE"
+  }
+  ```
+- **HTTP 상태 코드 사용**:
+  - `200`: 성공
+  - `400`: 잘못된 요청 (입력 검증 실패)
+  - `401`: 인증 실패 (로그인 필요)
+  - `403`: 권한 없음
+  - `404`: 리소스 없음
+  - `500`: 서버 오류
+- **로깅 전략**:
+- **로그 파일 저장 위치**: `pci0327/daeri/logs/` 디렉토리
+- **로그 파일 형식**: `{기능명}-{날짜}.log` (예: `login-2026-01-14.log`)
+- PHP `error_log()` 함수 및 파일 직접 쓰기 사용
+- 중요한 작업(청약, 해지)은 상세 로그 기록
+- 데이터베이스 오류는 로그에 기록하되 사용자에게는 일반적인 메시지 표시
+- **카페24 호스팅 로그**: 카페24 호스팅의 모든 로그 파일 위치도 함께 확인
+- **에러 발생 시**: 관리자에게 메일로 안내 + 로그 파일에 기록
+- **사용자 친화적 에러 메시지**:
+  - 기술적 오류는 로그에만 기록
+  - 사용자에게는 이해하기 쉬운 메시지 표시
+
+#### 14.2 입력 검증 상세 규칙
+
+**필수 검증 항목**:
+- **기사 청약 시**:
+  - 성명: 필수, 한글 2-20자
+  - 주민번호: 필수, 형식 검증 (6자리-7자리 또는 13자리)
+  - 핸드폰 번호: 필수, 형식 검증 (010-XXXX-XXXX)
+  - 증권 선택: 필수, 유효한 증권 번호
+  - 나이: 필수, 숫자, 18-100 범위
+- **기사 해지 시**:
+  - 기사 선택: 필수
+  - 해지 사유: 입력하지 않음 (요구사항)
+- **로그인 시**:
+  - 아이디: 필수, 4-15자
+  - 비밀번호: 필수, 4-20자
+
+**검증 함수 예시**:
+```php
+function validatePhone($phone) {
+    // 010-1234-5678 형식 또는 01012345678 형식
+    return preg_match('/^010-?\d{4}-?\d{4}$/', $phone);
+}
+
+function validateJumin($jumin) {
+    // 6자리-7자리 또는 13자리
+    return preg_match('/^\d{6}-?\d{7}$/', $jumin) || 
+           preg_match('/^\d{13}$/', $jumin);
+}
+```
+
+#### 14.3 API 응답 형식 표준화
+
+**공통 응답 헤더**:
+```php
+header('Content-Type: application/json; charset=utf-8');
+```
+
+**성공 응답 예시**:
+```php
+echo json_encode([
+    'success' => true,
+    'data' => $result,
+    'message' => '처리 완료'
+], JSON_UNESCAPED_UNICODE);
+```
+
+**실패 응답 예시**:
+```php
+http_response_code(400);
+echo json_encode([
+    'success' => false,
+    'error' => '입력값이 올바르지 않습니다.',
+    'code' => 'VALIDATION_ERROR'
+], JSON_UNESCAPED_UNICODE);
+```
+
+#### 14.4 프론트엔드 UI/UX 개선 사항
+
+**로딩 상태 표시**:
+- API 호출 중 로딩 스피너 표시
+- 버튼 비활성화 (중복 클릭 방지)
+- 테이블 데이터 로딩 중 스켈레톤 UI 또는 로딩 메시지
+
+**에러 메시지 표시**:
+- 토스트 메시지 또는 알림창으로 표시
+- 필드별 에러 메시지 (폼 검증 실패 시)
+- 네트워크 오류 시 재시도 버튼 제공
+
+**성공 메시지 표시**:
+- 작업 완료 시 성공 메시지 표시
+- 일정 시간 후 자동으로 사라지거나 사용자가 닫기
+
+#### 14.5 브라우저 호환성
+
+**지원 브라우저**:
+- **모바일**:
+  - iOS Safari 12+
+  - Android Chrome (최신 2개 버전)
+  - Samsung Internet (최신 2개 버전)
+- **데스크톱**:
+  - Chrome (최신 2개 버전)
+  - Firefox (최신 2개 버전)
+  - Safari (최신 2개 버전)
+  - Edge (최신 2개 버전)
+
+**호환성 확인 사항**:
+- ES6+ JavaScript 문법 사용 시 Babel 변환 고려 (필요 시)
+- CSS Grid/Flexbox 사용 (IE 미지원이지만 모바일 우선이므로 문제없음)
+- Fetch API 사용 (구형 브라우저는 polyfill 필요할 수 있음)
+
+#### 14.6 성능 최적화 전략
+
+**프론트엔드**:
+- 이미지 최적화 (WebP 형식 사용, 적절한 크기)
+- CSS/JavaScript 파일 압축 (배포 시)
+- 불필요한 리소스 로딩 방지
+- API 호출 최소화 (필요한 데이터만 요청)
+
+**백엔드**:
+- 데이터베이스 쿼리 최적화 (인덱스 활용)
+- 불필요한 데이터 조회 방지 (SELECT 필요한 컬럼만)
+- 페이지네이션 구현 (대량 데이터 조회 시)
+- 캐싱 전략 (자주 조회되는 데이터)
+
+#### 14.7 세션 관리 상세
+
+**세션 설정**:
+```php
+// 세션 시작
+session_start();
+
+// 세션 고정 공격 방지
+session_regenerate_id(true);
+
+// 세션 타임아웃 설정 (30분)
+ini_set('session.gc_maxlifetime', 1800);
+
+// 세션 쿠키 설정
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1); // HTTPS 환경에서만
+```
+
+**세션 타임아웃**: 30분 미사용 시 자동 로그아웃
+
+**세션 데이터 구조**:
+```php
+$_SESSION['user_num'] = $user['num'];
+$_SESSION['user_id'] = $user['mem_id'];
+$_SESSION['user_name'] = $user['name'];
+$_SESSION['company_num'] = $user['2012DaeriCompanyNum'];
+$_SESSION['login_time'] = time();
+$_SESSION['last_activity'] = time();
+```
+
+**세션 타임아웃 체크**:
+```php
+// 각 API 파일에서 세션 확인 시
+if (isset($_SESSION['last_activity']) && 
+    (time() - $_SESSION['last_activity'] > 1800)) {
+    // 30분 초과 시 세션 만료
+    session_destroy();
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => '세션이 만료되었습니다.']);
+    exit;
+}
+$_SESSION['last_activity'] = time();
+```
+
+#### 14.8 CSRF 보호 (선택 사항)
+
+**CSRF 보호 복잡도**:
+- CSRF 보호를 구현하려면 세션 기반 토큰 생성/검증 로직이 필요
+- 프론트엔드에서 모든 POST 요청에 토큰 포함 필요
+- 구현 복잡도: 중간 (세션 관리 + 토큰 검증 로직)
+- **결정**: 초기 개발에서는 선택 사항으로 두고, 필요 시 나중에 추가
+
+**CSRF 보호 구현 방법** (필요 시):
+```php
+// 토큰 생성
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// 토큰 검증
+if ($_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => '잘못된 요청입니다.']);
+    exit;
+}
+```
+
+**프론트엔드에서 토큰 전송**:
+```javascript
+// 폼 제출 시 CSRF 토큰 포함
+fetch('/api/daeri/driver/register', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        ...formData,
+        csrf_token: sessionStorage.getItem('csrf_token')
+    })
+});
+```
+
+**권장 사항**:
+- Phase 1 (핵심 기능)에서는 CSRF 보호 생략 가능
+- Phase 2 또는 보안 강화 시점에 추가 구현 고려
+- 세션 기반 인증만으로도 어느 정도 보호 가능 (SameSite 쿠키 속성 활용)
+
+#### 14.9 비밀번호 정책
+
+**현재 정책** (기존 시스템과 동일):
+- MD5 해시 사용
+- 최소 길이: 4자 (데이터베이스 제약사항 확인 필요)
+- 최대 길이: 제한 없음 (일반적으로 20자 이내)
+
+**향후 개선 계획**:
+- 비밀번호 변경 기능 개발 예정 (나중에 구현)
+- 비밀번호 복잡도 요구사항 (대소문자, 숫자, 특수문자)
+- 비밀번호 변경 주기
+- 비밀번호 재설정 기능
+
+#### 14.10 로깅 전략
+
+**로깅 대상**:
+- 로그인 시도 (성공/실패)
+- 기사 청약/해지 작업
+- 중요 데이터 수정
+- 에러 발생 시
+
+**로깅 형식**:
+```php
+// 로그 디렉토리 확인 및 생성
+$logDir = __DIR__ . '/../logs';
+if (!is_dir($logDir)) {
+    mkdir($logDir, 0755, true);
+}
+
+// 로그 파일 경로 (날짜별)
+$logFile = $logDir . '/' . $action . '-' . date('Y-m-d') . '.log';
+
+// 로그 기록
+error_log(sprintf(
+    "[%s] [%s] %s: %s\n",
+    date('Y-m-d H:i:s'),
+    $_SERVER['REMOTE_ADDR'],
+    $action,
+    $message
+), 3, $logFile);
+```
+
+**로그 파일 저장 위치**:
+- **애플리케이션 로그**: `pci0327/daeri/logs/` 디렉토리
+- **카페24 호스팅 로그**: 카페24 호스팅의 모든 로그 파일 위치도 함께 확인
+
+**에러 발생 시 처리**:
+- **관리자 메일 안내**: PHP `mail()` 함수 또는 SMTP를 사용하여 관리자에게 에러 메일 발송
+- **로그 파일 기록**: `pci0327/daeri/logs/error-{날짜}.log`에 상세 기록
+- **사용자 메시지**: 사용자에게는 일반적인 에러 메시지 표시 (기술적 세부사항 숨김)
+
+**에러 메일 발송 예시**:
+```php
+function sendErrorEmail($errorMessage, $errorDetails = []) {
+    $adminEmail = 'admin@example.com'; // 관리자 이메일 주소
+    $subject = '[대리운전회사 시스템] 에러 발생 알림';
+    $message = "에러 발생 시간: " . date('Y-m-d H:i:s') . "\n";
+    $message .= "에러 메시지: " . $errorMessage . "\n";
+    $message .= "IP 주소: " . ($_SERVER['REMOTE_ADDR'] ?? '알 수 없음') . "\n";
+    if (!empty($errorDetails)) {
+        $message .= "상세 정보:\n" . print_r($errorDetails, true);
+    }
+    
+    $headers = "From: system@example.com\r\n";
+    $headers .= "Content-Type: text/plain; charset=utf-8\r\n";
+    
+    mail($adminEmail, $subject, $message, $headers);
+}
+```
+
+**로그 파일 관리**:
+- 로그 파일 크기 제한
+- 오래된 로그 파일 자동 삭제 또는 아카이브
+- 민감한 정보(비밀번호, 주민번호)는 로그에 기록하지 않음
+
+---
+
+### 15. 다음 단계
+
+1. ✅ 요구사항 정리 완료
+2. ✅ 데이터베이스 스키마 확정 (스키마 정보 및 상수값 참조 추가 완료)
+3. ✅ 추가 확인 사항 정리 완료
+4. [ ] 상세 화면 설계
+5. [ ] API 명세서 작성 (PHP 8.2 기반)
+6. [ ] 프로젝트 구조 설계
+7. [ ] 개발 시작
+
+---
+
+## 📋 다음 단계 상세 계획
+
+### Phase 1: 설계 단계 (예상 1주)
+
+#### 1. 상세 화면 설계
+**우선순위 화면 (Phase 1 핵심 기능)**:
+- [ ] 로그인 화면
+- [ ] 대시보드 (현황 요약)
+- [ ] 증권별 기사 현황 화면
+- [ ] 배서 리스트 화면
+- [ ] 기사 청약 화면
+- [ ] 기사 해지 화면
+
+**각 화면별 설계 항목**:
+- 화면 레이아웃 (모바일 우선)
+- 필터/검색 영역
+- 데이터 테이블/카드 구성
+- 모달/팝업 구성
+- 버튼 및 액션 영역
+- 반응형 디자인 (모바일/데스크톱)
+
+#### 2. API 명세서 작성
+**필수 API (Phase 1)**:
+- [ ] 인증 API
+  - `POST /api/auth/login` - 로그인 (mem_id, passwd MD5)
+  - `POST /api/auth/logout` - 로그아웃
+  - `GET /api/auth/me` - 현재 사용자 정보
+- [ ] 증권 API
+  - `GET /api/policy/list` - 증권 목록 (회사별, 유효한 증권만)
+  - `GET /api/policy/:id` - 증권 상세 정보
+  - `GET /api/policy/:id/drivers` - 증권별 기사 목록
+- [ ] 기사 API
+  - `GET /api/driver/list` - 기사 목록 (증권별, 회사별 필터링)
+  - `POST /api/driver/register` - 기사 청약 (가입)
+  - `POST /api/driver/cancel` - 기사 해지
+  - `GET /api/driver/:id` - 기사 상세 정보
+- [ ] 배서 API
+  - `GET /api/endorse/list` - 배서 리스트 (회사별 필터링)
+  - `GET /api/endorse/:id` - 배서 상세 정보
+
+**API 명세서 형식**:
+- 엔드포인트 URL
+- HTTP 메서드
+- 요청 파라미터 (Query, Body)
+- 응답 데이터 구조
+- 에러 처리
+- 인증 요구사항
+
+#### 3. 프로젝트 구조 설계
+
+**개발 위치**: `pci0327/daeri/` (pci0327 폴더 아래)
+
+**전체 프로젝트 구조**:
+```
+pci0327/
+├── api/
+│   ├── insurance/                 # PHP 백엔드 API (보험대리점용)
+│   │   └── ...                    # disk-cms-react의 Node.js 서버가 프록시로 사용
+│   │                              # React → Node.js → PHP API → DB
+│   └── daeri/                     # 신규: 대리운전회사용 API
+│       └── ...
+└── daeri/                         # 신규: 대리운전회사용 시스템
+                                    # HTML/JS → PHP API → DB (직접 호출)
+```
+    ├── index.html                 # 메인 페이지 (리다이렉트 또는 대시보드)
+    ├── login.html                 # 로그인 페이지
+    ├── dashboard.html             # 대시보드 (현황 요약)
+    ├── policy-drivers.html        # 증권별 기사 현황
+    ├── endorse-list.html          # 배서 리스트
+    ├── driver-register.html       # 기사 청약
+    ├── driver-cancel.html         # 기사 해지
+    ├── css/
+    │   ├── common.css             # 공통 스타일
+    │   ├── login.css             # 로그인 스타일
+    │   ├── dashboard.css         # 대시보드 스타일
+    │   └── responsive.css        # 반응형 스타일
+    ├── js/
+    │   ├── common.js             # 공통 함수
+    │   ├── api.js                # API 호출 함수
+    │   ├── constants.js          # 상수값 (disk-cms-react/src/pages/insurance/constants.ts 참조)
+    │   ├── login.js              # 로그인 로직
+    │   ├── dashboard.js          # 대시보드 로직
+    │   ├── policy-drivers.js     # 증권별 기사 현황 로직
+    │   ├── endorse-list.js       # 배서 리스트 로직
+    │   ├── driver-register.js    # 기사 청약 로직
+    │   └── driver-cancel.js       # 기사 해지 로직
+    ├── config/
+    │   └── config.php            # 설정 파일 (DB 연결 정보 등)
+    ├── includes/
+    │   ├── header.php            # 공통 헤더
+    │   ├── footer.php            # 공통 푸터
+    │   └── functions.php         # 공통 함수
+    └── components/                # 재사용 가능한 HTML 컴포넌트 (선택)
+        ├── header.html
+        ├── footer.html
+        └── modal.html
+```
+
+**백엔드 API 구조 (PHP)**:
+```
+pci0327/
+└── api/
+    └── daeri/                     # 신규: 대리운전회사용 API
+        ├── auth/
+        │   ├── login.php         # 로그인 처리
+        │   ├── logout.php        # 로그아웃 처리
+        │   └── check-session.php # 세션 확인
+        ├── policy/
+        │   ├── list.php          # 증권 목록 조회
+        │   ├── detail.php        # 증권 상세 정보
+        │   └── drivers.php       # 증권별 기사 목록
+        ├── driver/
+        │   ├── list.php          # 기사 목록 조회
+        │   ├── register.php      # 기사 청약 처리
+        │   ├── cancel.php        # 기사 해지 처리
+        │   └── detail.php        # 기사 상세 정보
+        ├── endorse/
+        │   ├── list.php          # 배서 리스트 조회
+        │   └── detail.php        # 배서 상세 정보
+        └── common/
+            └── session.php        # 세션 관리
+```
+
+**기존 API 참고**:
+- `pci0327/api/insurance/` - 기존 보험 API 참고 가능
+- 동일한 데이터베이스 사용
+- 유사한 구조 및 로직 재사용 가능
+
+**데이터베이스 연결 설정**:
+- 설정 파일: `/api/config/db_config.php` (기존 파일 사용)
+- 연결 함수: `getDbConnection()` - PDO 객체 반환
+- 사용 방법: 각 API 파일에서 `require_once '/api/config/db_config.php'` 후 `getDbConnection()` 호출
+
+**데이터베이스 연결 함수 구조**:
+```php
+/**
+ * PDO 데이터베이스 연결 객체를 반환하는 함수
+ * 
+ * @return PDO 데이터베이스 연결 객체
+ * @throws PDOException 연결 실패 시 예외 발생
+ */
+function getDbConnection() {
+    global $db_config;
+    
+    $dsn = "mysql:host={$db_config['host']};dbname={$db_config['name']};charset={$db_config['charset']}";
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false
+    ];
+    
+    return new PDO($dsn, $db_config['user'], $db_config['pass'], $options);
+}
+```
+
+**API 파일에서 사용 예시**:
+```php
+<?php
+// 데이터베이스 연결 설정 로드
+require_once __DIR__ . '/../../config/db_config.php';
+
+try {
+    $pdo = getDbConnection();
+    
+    // 쿼리 실행 예시
+    $stmt = $pdo->prepare("SELECT * FROM 2012DaeriMember WHERE 2012DaeriCompanyNum = ?");
+    $stmt->execute([$companyNum]);
+    $results = $stmt->fetchAll();
+    
+    // JSON 응답
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => true, 'data' => $results]);
+    
+} catch (PDOException $e) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['success' => false, 'error' => 'Database error']);
+    error_log('Database Error: ' . $e->getMessage());
+}
+?>
+```
+
+**주의사항**:
+- 모든 API 파일은 `getDbConnection()` 함수를 사용하여 데이터베이스 연결
+- PDO 예외 처리는 `PDO::ERRMODE_EXCEPTION`으로 설정되어 있으므로 try-catch 필수
+- `PDO::ATTR_EMULATE_PREPARES => false`로 설정되어 있어 실제 prepared statement 사용
+- `PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC`로 연관 배열 형태로 결과 반환
+
+**폴더 구조 요약**:
+- 프론트엔드: `pci0327/daeri/`
+- 백엔드 API: `pci0327/api/daeri/`
+
+### Phase 2: 개발 단계 (예상 4-6주)
+
+#### 1. 개발 환경 설정
+- [ ] PHP 8.2 로컬 개발 환경 설정 (XAMPP, WAMP, 또는 PHP 내장 서버)
+- [ ] MariaDB 로컬 설치 또는 원격 DB 연결 설정
+- [ ] 프로젝트 폴더 구조 생성
+- [ ] 공통 CSS/JavaScript 파일 준비
+- [ ] 데이터베이스 연결 설정 확인 (`/api/config/db_config.php` 사용)
+- [ ] 세션 관리 설정
+- [ ] FTP/SFTP 클라이언트 설정 (카페24 배포용)
+
+#### 2. Phase 1 핵심 기능 개발
+**우선순위 순서**:
+1. 로그인/인증 시스템
+2. 증권별 기사 현황 조회
+3. 배서 리스트 조회
+4. 기사 청약 (가입)
+5. 기사 해지
+
+#### 3. Phase 2 보완 기능 개발
+- 보험료 조회
+- 정산 관리
+- 통계/리포트
+- 알림/공지사항
+
+#### 4. 테스트 및 최적화
+- 통합 테스트
+- 모바일 웹 최적화
+- 성능 최적화
+- 버그 수정
+
+---
+
+**작성일**: 2026년 1월 14일  
+**상태**: 상세 기획서 작성 완료, 다음 단계 준비 완료  
+**다음 작업**: 상세 화면 설계 또는 API 명세서 작성 시작
+
+---
+
+## 🎨 디자인 방향 및 가이드
+
+### 디자인 철학
+
+#### 1. 모바일 우선 (Mobile First)
+- **주 사용 환경**: 모바일 웹 (스마트폰)
+- **보조 환경**: 데스크톱 웹
+- **접근 방식**: 모바일 레이아웃을 먼저 설계 후 데스크톱 확장
+
+#### 2. 간결하고 직관적인 UI
+- **원칙**: 필요한 기능만 표시, 복잡도 최소화
+- **사용 빈도 높은 기능**: 청약, 해지, 증권별 기사 현황
+- **빠른 접근**: 주요 기능을 1-2번 클릭으로 접근 가능
+
+#### 3. 기존 시스템과의 일관성
+- **참고**: `disk-cms-react` 보험대리점 시스템의 디자인 스타일
+- **차이점**: React/Tailwind CSS → 순수 HTML/CSS/JavaScript로 변환
+- **유지**: 색상, 레이아웃, 사용자 경험 패턴
+
+---
+
+### 디자인 시스템
+
+#### 1. 색상 팔레트
+
+**주요 색상**:
+- **Primary (주 색상)**: `#667eea` → `#764ba2` (그라데이션)
+  - 버튼, 링크, 강조 요소
+  - 모달 헤더 배경
+  
+- **Secondary (보조 색상)**: `#6f42c1` (보라색)
+  - 테이블 헤더 배경
+  - 특수 요소 강조
+
+- **Success (성공)**: `#10b981` (초록색)
+  - 정상 상태 표시
+  - 성공 메시지
+
+- **Danger (위험)**: `#ef4444` (빨간색)
+  - 해지 상태 표시
+  - 에러 메시지
+  - 삭제/취소 버튼
+
+- **Neutral (중립)**: 
+  - 배경: `#ffffff` (흰색)
+  - 테두리: `#e5e7eb` (회색)
+  - 텍스트: `#1f2937` (진한 회색)
+
+**참고**: 기존 보험대리점 시스템의 Tailwind CSS 색상 체계를 순수 CSS로 변환
+
+#### 2. 타이포그래피
+
+**폰트 크기**:
+- **제목 (H1)**: `1.5rem` (24px)
+- **제목 (H2)**: `1.25rem` (20px)
+- **제목 (H3)**: `1.125rem` (18px)
+- **본문**: `0.875rem` (14px) - 기본
+- **작은 텍스트**: `0.75rem` (12px) - 테이블, 라벨
+- **매우 작은 텍스트**: `0.625rem` (10px) - 보조 정보
+
+**폰트 패밀리**:
+- 시스템 기본 폰트 사용 (san-serif)
+- 모바일 최적화 폰트 크기
+
+#### 3. 간격 시스템
+
+**패딩/마진**:
+- **xs**: `0.25rem` (4px)
+- **sm**: `0.5rem` (8px)
+- **md**: `1rem` (16px)
+- **lg**: `1.5rem` (24px)
+- **xl**: `2rem` (32px)
+
+**컨테이너**:
+- 모바일: `padding: 1rem` (16px)
+- 데스크톱: `padding: 1.5rem` (24px)
+- 최대 너비: `1200px` (데스크톱)
+
+#### 4. 버튼 스타일
+
+**Primary 버튼**:
+```css
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 0.5rem 1rem;
+border-radius: 0.375rem;
+font-size: 0.875rem;
+```
+
+**Secondary 버튼**:
+```css
+background: white;
+color: #667eea;
+border: 1px solid #667eea;
+padding: 0.5rem 1rem;
+border-radius: 0.375rem;
+```
+
+**크기**:
+- **Small**: `0.5rem 0.75rem` (8px 12px)
+- **Default**: `0.5rem 1rem` (8px 16px)
+- **Large**: `0.75rem 1.5rem` (12px 24px)
+
+#### 5. 입력 필드 스타일
+
+**기본 입력 필드**:
+```css
+width: 100%;
+padding: 0.5rem 0.75rem;
+border: 1px solid #e5e7eb;
+border-radius: 0.375rem;
+font-size: 0.875rem;
+```
+
+**Select 박스**:
+```css
+height: 2.5rem; /* 40px */
+padding: 0.5rem 0.75rem;
+border: 1px solid #e5e7eb;
+border-radius: 0.375rem;
+```
+
+#### 6. 테이블 스타일
+
+**기본 테이블**:
+```css
+width: 100%;
+border-collapse: collapse;
+font-size: 0.75rem; /* 12px */
+```
+
+**테이블 헤더**:
+```css
+background-color: #6f42c1;
+color: white;
+padding: 0.5rem;
+text-align: center;
+font-weight: 600;
+```
+
+**테이블 셀**:
+```css
+border: 1px solid #e5e7eb;
+padding: 0.5rem;
+text-align: center;
+```
+
+**반응형**:
+- 모바일: 카드 형식으로 변환
+- 데스크톱: 테이블 형식 유지
+
+#### 7. 모달 스타일
+
+**모달 오버레이**:
+```css
+position: fixed;
+inset: 0;
+background: rgba(0, 0, 0, 0.5);
+z-index: 50;
+```
+
+**모달 컨테이너**:
+```css
+background: white;
+border-radius: 0.75rem;
+max-width: 90%; /* 모바일 */
+max-width: 600px; /* 데스크톱 */
+max-height: 90vh;
+overflow-y: auto;
+```
+
+**모달 헤더**:
+```css
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+padding: 1rem 1.5rem;
+border-radius: 0.75rem 0.75rem 0 0;
+```
+
+#### 8. 카드 스타일 (모바일)
+
+**기본 카드**:
+```css
+background: white;
+border: 1px solid #e5e7eb;
+border-radius: 0.5rem;
+padding: 1rem;
+margin-bottom: 1rem;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+```
+
+---
+
+### 레이아웃 구조
+
+#### 1. 전체 레이아웃
+
+**모바일**:
+```
+┌─────────────────────┐
+│   헤더 (고정)        │
+│   (로그인 정보)      │
+├─────────────────────┤
+│                     │
+│   메인 콘텐츠        │
+│   (스크롤 가능)      │
+│                     │
+└─────────────────────┘
+```
+
+**데스크톱**:
+```
+┌─────────────────────────────┐
+│   헤더 (고정)                │
+├─────────────────────────────┤
+│   필터 영역                  │
+├─────────────────────────────┤
+│                             │
+│   메인 콘텐츠                │
+│   (테이블/카드)              │
+│                             │
+├─────────────────────────────┤
+│   페이지네이션               │
+└─────────────────────────────┘
+```
+
+#### 2. 주요 화면 레이아웃
+
+**로그인 화면**:
+- 중앙 정렬
+- 간단한 폼 (아이디, 비밀번호)
+- 로그인 버튼
+- 모바일: 전체 화면
+- 데스크톱: 중앙 카드 형식
+
+**대시보드**:
+- 현황 요약 카드 (3-4개)
+- 최근 활동 목록
+- 빠른 액션 버튼
+
+**증권별 기사 현황**:
+- 증권 선택 (Select)
+- 기사 목록 (테이블/카드)
+- 청약/해지 버튼
+
+**배서 리스트**:
+- 필터 영역 (상태, 증권, 회사)
+- 배서 목록 (테이블/카드)
+- 페이지네이션
+
+**기사 청약/해지**:
+- 증권 선택
+- 기사 정보 입력
+- 확인 버튼
+
+---
+
+### 반응형 디자인 전략
+
+#### 1. 브레이크포인트
+
+```css
+/* 모바일 (기본) */
+@media (max-width: 767px) { }
+
+/* 태블릿 */
+@media (min-width: 768px) and (max-width: 1023px) { }
+
+/* 데스크톱 */
+@media (min-width: 1024px) { }
+```
+
+#### 2. 모바일 최적화
+
+**테이블 → 카드 변환**:
+- 모바일에서는 테이블을 카드 형식으로 표시
+- 각 행을 개별 카드로 렌더링
+- 중요한 정보만 표시
+
+**터치 친화적**:
+- 버튼 최소 크기: `44px × 44px`
+- 충분한 간격: `8px` 이상
+- 스와이프 제스처 지원 (선택)
+
+#### 3. 데스크톱 최적화
+
+**넓은 화면 활용**:
+- 테이블 전체 표시
+- 필터와 콘텐츠 나란히 배치
+- 모달 크기 확대
+
+---
+
+### UI 컴포넌트
+
+#### 1. 공통 컴포넌트 (순수 HTML/CSS/JS)
+
+**버튼**:
+- Primary, Secondary, Danger 버튼
+- 로딩 상태 표시
+- 비활성화 상태
+
+**입력 필드**:
+- 텍스트 입력
+- Select 박스
+- 날짜 선택 (HTML5 date input)
+
+**모달**:
+- 기본 모달 구조
+- 헤더, 본문, 푸터
+- 닫기 버튼
+
+**테이블**:
+- 기본 테이블
+- 정렬 가능 (선택)
+- 페이지네이션
+
+**카드** (모바일):
+- 정보 카드
+- 액션 카드
+
+**알림**:
+- Toast 메시지 (간단한 알림)
+- Alert 다이얼로그 (확인 필요)
+
+#### 2. 재사용 가능한 CSS 클래스
+
+```css
+/* 버튼 */
+.btn-primary { }
+.btn-secondary { }
+.btn-danger { }
+
+/* 입력 */
+.input-field { }
+.select-field { }
+
+/* 카드 */
+.card { }
+.card-header { }
+.card-body { }
+
+/* 모달 */
+.modal-overlay { }
+.modal-container { }
+.modal-header { }
+.modal-body { }
+.modal-footer { }
+
+/* 테이블 */
+.table { }
+.table-header { }
+.table-row { }
+.table-cell { }
+
+/* 유틸리티 */
+.text-center { }
+.text-right { }
+.mt-1 { margin-top: 0.25rem; }
+.mb-1 { margin-bottom: 0.25rem; }
+```
+
+---
+
+### 디자인 참고 자료
+
+#### 1. 기존 시스템 참고
+- `disk-cms-react/src/pages/insurance/` - React 컴포넌트 스타일
+- `pci0327/05/js/kj_endorseList.js` - 기존 JavaScript 구조
+- Tailwind CSS 클래스를 순수 CSS로 변환
+
+#### 2. 디자인 원칙
+- **일관성**: 모든 페이지에서 동일한 스타일 유지
+- **접근성**: 명확한 색상 대비, 충분한 터치 영역
+- **성능**: 최소한의 CSS, 빠른 로딩
+- **유지보수성**: 재사용 가능한 CSS 클래스
+
+---
+
+### 디자인 작업 순서
+
+1. **공통 CSS 파일 작성** (`css/common.css`)
+   - 색상 변수
+   - 타이포그래피
+   - 버튼, 입력 필드 스타일
+   - 유틸리티 클래스
+
+2. **레이아웃 컴포넌트**
+   - 헤더/푸터
+   - 모달 구조
+   - 카드 구조
+
+3. **페이지별 CSS**
+   - 각 페이지의 고유 스타일
+   - 반응형 미디어 쿼리
+
+4. **JavaScript UI 로직**
+   - 모달 열기/닫기
+   - 테이블/카드 전환
+   - 폼 검증
+
+---
+
+**디자인 방향 요약**:
+- 모바일 우선, 간결하고 직관적인 UI
+- 기존 보험대리점 시스템 스타일 참고
+- 순수 HTML/CSS/JavaScript로 구현
+- 반응형 디자인 (모바일/데스크톱)
+- 재사용 가능한 CSS 클래스 구조
+
+---
+
+## 📱 PWA (Progressive Web App) 기능 - 바탕화면 바로가기
+
+### 목적
+핸드폰 바탕화면에 앱처럼 바로가기를 추가하여 빠른 접근 가능
+
+### 구현 방법
+
+#### 1. Web App Manifest 파일 (`manifest.json`)
+
+**파일 위치**: `pci0327/daeri/manifest.json`
+
+**기본 구조**:
+```json
+{
+  "name": "대리운전회사 관리 시스템",
+  "short_name": "대리운전관리",
+  "description": "대리운전회사용 기사 관리 시스템",
+  "start_url": "/daeri/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/daeri/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/daeri/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+```
+
+**주요 속성 설명**:
+- `name`: 앱 전체 이름 (바로가기 설치 시 표시)
+- `short_name`: 짧은 이름 (바로가기 아이콘 아래 표시)
+- `start_url`: 앱 시작 URL
+- `display`: `standalone` (브라우저 UI 없이 앱처럼 표시)
+- `theme_color`: 상태바 색상
+- `icons`: 다양한 크기의 아이콘 이미지
+
+#### 2. HTML에 Manifest 링크 추가
+
+**모든 HTML 파일의 `<head>` 섹션에 추가**:
+```html
+<link rel="manifest" href="/daeri/manifest.json">
+<meta name="theme-color" content="#667eea">
+```
+
+#### 3. iOS용 Meta 태그 추가
+
+**iPhone/iPad 지원을 위한 추가 태그**:
+```html
+<!-- iOS Safari -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="대리운전관리">
+<link rel="apple-touch-icon" href="/daeri/images/icon-180x180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/daeri/images/icon-180x180.png">
+```
+
+#### 4. 아이콘 이미지 준비
+
+**필요한 아이콘 크기**:
+- `icon-72x72.png` (72×72px)
+- `icon-96x96.png` (96×96px)
+- `icon-128x128.png` (128×128px)
+- `icon-144x144.png` (144×144px)
+- `icon-152x152.png` (152×152px) - Android
+- `icon-180x180.png` (180×180px) - iOS
+- `icon-192x192.png` (192×192px) - Android
+- `icon-384x384.png` (384×384px) - Android
+- `icon-512x512.png` (512×512px) - Android
+
+**아이콘 디자인 요구사항**:
+- 배경색: 투명 또는 단색
+- 로고/아이콘: 중앙 배치
+- 모서리: 둥근 모서리 (maskable)
+- 파일 형식: PNG (투명 배경 가능)
+
+**아이콘 생성 방법**:
+- 온라인 도구: PWA Asset Generator
+- 디자인 도구: Figma, Photoshop 등
+- 기본 아이콘: 간단한 로고 또는 텍스트
+
+#### 5. Service Worker (선택적)
+
+**오프라인 기능을 원할 경우**:
+- `pci0327/daeri/sw.js` 파일 생성
+- 기본 캐싱 전략 구현
+- 오프라인 페이지 제공 (선택)
+
+**기본 Service Worker 구조**:
+```javascript
+// sw.js
+const CACHE_NAME = 'daeri-app-v1';
+const urlsToCache = [
+  '/daeri/',
+  '/daeri/css/common.css',
+  '/daeri/js/common.js',
+  '/daeri/images/icon-192x192.png'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
+  );
+});
+```
+
+**HTML에 Service Worker 등록**:
+```javascript
+// common.js 또는 각 페이지의 <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/daeri/sw.js')
+      .then((registration) => {
+        console.log('Service Worker 등록 성공:', registration);
+      })
+      .catch((error) => {
+        console.log('Service Worker 등록 실패:', error);
+      });
+  });
+}
+```
+
+#### 6. 사용자 안내
+
+**바로가기 추가 방법 안내**:
+- **Android Chrome**: 
+  1. 메뉴 (⋮) → "홈 화면에 추가"
+  2. 또는 주소창의 "설치" 배너 클릭
+  
+- **iOS Safari**:
+  1. 공유 버튼 (□↑) → "홈 화면에 추가"
+  2. 또는 자동으로 표시되는 배너
+
+**안내 메시지 표시 (선택)**:
+- 첫 방문 시 "홈 화면에 추가하시면 더 편리하게 사용할 수 있습니다" 안내
+- JavaScript로 설치 가능 여부 확인 후 안내 표시
+
+---
+
+### 구현 체크리스트
+
+#### 필수 항목
+- [ ] `manifest.json` 파일 생성
+- [ ] 아이콘 이미지 파일 준비 (최소 192×192, 512×512)
+- [ ] HTML에 manifest 링크 추가
+- [ ] iOS용 meta 태그 추가
+- [ ] 테스트 (Android Chrome, iOS Safari)
+
+#### 선택 항목
+- [ ] Service Worker 구현 (오프라인 기능)
+- [ ] 설치 안내 메시지
+- [ ] 다양한 아이콘 크기 준비
+- [ ] 스플래시 스크린 이미지
+
+---
+
+### 파일 구조
+
+```
+pci0327/daeri/
+├── manifest.json              # Web App Manifest
+├── sw.js                      # Service Worker (선택)
+├── index.html                 # manifest 링크 포함
+├── login.html                 # manifest 링크 포함
+├── ...
+└── images/
+    ├── icon-72x72.png
+    ├── icon-96x96.png
+    ├── icon-128x128.png
+    ├── icon-144x144.png
+    ├── icon-152x152.png
+    ├── icon-180x180.png       # iOS용
+    ├── icon-192x192.png
+    ├── icon-384x384.png
+    └── icon-512x512.png
+```
+
+---
+
+### 브라우저 지원
+
+**지원 브라우저**:
+- ✅ Android Chrome (완전 지원)
+- ✅ iOS Safari 11.3+ (부분 지원)
+- ✅ Samsung Internet
+- ✅ Firefox Mobile
+- ⚠️ iOS Safari는 일부 제한 (Service Worker 제한적)
+
+**테스트 방법**:
+1. Android: Chrome에서 "홈 화면에 추가" 메뉴 확인
+2. iOS: Safari에서 공유 → "홈 화면에 추가" 확인
+3. 개발자 도구: Application 탭 → Manifest 확인
+
+---
+
+### 추가 고려사항
+
+#### 1. HTTPS 필수
+- PWA 기능은 HTTPS 환경에서만 작동
+- 카페24 호스팅은 HTTPS 지원 확인 필요
+
+#### 2. 아이콘 디자인
+- 간단하고 명확한 디자인
+- 작은 크기에서도 인식 가능
+- 브랜드 일관성 유지
+
+#### 3. 사용자 경험
+- 앱처럼 보이도록 `display: standalone` 사용
+- 시작 URL을 로그인 페이지로 설정 (인증 필요 시)
+- 빠른 로딩 시간
+
+---
+
+**PWA 기능 요약**:
+- Web App Manifest 파일로 바탕화면 바로가기 지원
+- Android/iOS 모두 지원
+- 앱처럼 독립 실행 가능
+- Service Worker로 오프라인 기능 추가 가능 (선택)
