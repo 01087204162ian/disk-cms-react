@@ -32,7 +32,8 @@ export default function Documentation() {
         'faq'
       ]
 
-      const scrollPosition = window.scrollY + 200 // 헤더 높이 고려
+      // 전체 앱 헤더 (64px) + Documentation 헤더 (65px) + 여유 공간 (30px)
+      const scrollPosition = window.scrollY + 64 + 65 + 30
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = document.getElementById(sections[i])
@@ -51,12 +52,11 @@ export default function Documentation() {
     setActiveSection(sectionId)
     const element = document.getElementById(sectionId)
     if (element) {
-      // 헤더의 실제 높이 계산 (sticky 헤더)
-      const header = document.querySelector('header')
-      const headerHeight = header ? header.offsetHeight : 65
-      
-      // 추가 여유 공간 (컨테이너 패딩 등 고려하여 30px)
-      const offset = headerHeight + 30
+      // 전체 앱 헤더 높이 (64px) + Documentation 헤더 높이 (65px) + 여유 공간 (30px)
+      const appHeaderHeight = 64 // 전체 앱 헤더 (h-16)
+      const docHeader = document.querySelector('header.bg-white.border-b') as HTMLElement | null
+      const docHeaderHeight = docHeader ? docHeader.offsetHeight : 65
+      const offset = appHeaderHeight + docHeaderHeight + 30
       
       // 요소의 절대 위치 계산
       const elementTop = element.offsetTop
@@ -84,8 +84,8 @@ export default function Documentation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 - 고정 */}
-      <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
+      {/* 헤더 - 고정 (전체 앱 헤더 아래에 위치) */}
+      <header className="bg-white border-b sticky top-16 z-40 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <BookOpen className="w-6 h-6 text-blue-600" />
