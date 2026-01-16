@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:server": "nodemon server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-    "build": "node scripts/copy-docs.js && tsc && vite build",
+    "build": "tsc && vite build",
     "build:docs": "npm run build",
     "build:server": "echo 'Server build not needed'",
     "start": "NODE_ENV=production node server.js",

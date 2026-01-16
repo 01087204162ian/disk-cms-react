@@ -188,6 +188,16 @@
 
 ## 🛠️ 구현 방법
 
+### 구현 방식: HTML/JSX 직접 작성
+
+**핵심 변경사항**:
+- ❌ Markdown 파일 로드 방식 제거
+- ✅ React 컴포넌트 내에서 HTML/JSX로 직접 작성
+- ✅ 빌드 의존성 완전 제거 (copy-docs.js 불필요)
+- ✅ Tailwind CSS로 스타일링
+
+---
+
 ### 1. 빌드 스크립트 제거
 
 #### `package.json` 수정
@@ -195,7 +205,6 @@
 {
   "scripts": {
     "build": "tsc && vite build",  // copy-docs.js 제거
-    // "build:docs": "npm run build" 제거 (선택)
   }
 }
 ```
@@ -203,52 +212,109 @@
 #### `scripts/copy-docs.js` 삭제
 - 파일 삭제 또는 백업
 
+#### `public/docs/pharmacy/` 폴더 삭제
+- 더 이상 필요 없음
+
 ---
 
-### 2. `Documentation.tsx` 개선
+### 2. `Documentation.tsx` 완전 재작성
 
-#### 현재 구현
+#### 현재 구현 (제거)
 ```typescript
-// README.md만 로드
+// ❌ Markdown 파일 fetch 방식
 const response = await fetch('/docs/pharmacy/README.md')
+const text = await response.text()
+<ReactMarkdown>{content}</ReactMarkdown>
 ```
 
-#### 개선 방안
+#### 새로운 구현 (HTML/JSX 직접 작성)
+```typescript
+// ✅ HTML/JSX로 직접 작성
+export default function Documentation() {
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="mb-8 border-b pb-4">
+        <h1 className="text-3xl font-bold">약국배상책임보험 운영 가이드</h1>
+      </div>
+      
+      {/* 섹션 1: 시스템 개요 */}
+      <section id="system-overview" className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">1. 시스템 개요</h2>
+        {/* HTML 콘텐츠 직접 작성 */}
+      </section>
+      
+      {/* 섹션 2: 일상 업무 플로우 */}
+      <section id="daily-workflow" className="mb-12">
+        <h2 className="text-2xl font-semibold mb-4">2. 일상 업무 플로우</h2>
+        {/* HTML 콘텐츠 직접 작성 */}
+      </section>
+      
+      {/* ... 나머지 섹션들 ... */}
+    </div>
+  )
+}
+```
 
-**옵션 1: 운영 플로우 문서로 완전 교체**
-- `docs/pharmacy/OPERATIONS_GUIDE.md` 생성
-- `Documentation.tsx`에서 이 파일만 로드
-
-**옵션 2: 문서 선택 기능 추가**
-- 사이드바에 문서 목록 표시
-- 사용자가 문서를 선택하여 볼 수 있도록 구현
-- 기본값: 운영 플로우 문서
-
-**옵션 3: 단일 운영 플로우 문서 + 하위 문서 링크**
-- 메인 운영 플로우 문서 하나만 로드
-- 필요시 다른 문서로 링크 (새 탭 열기)
-
-**추천**: **옵션 1** - 가장 간단하고 명확함
+#### 장점
+- ✅ 빌드 의존성 없음
+- ✅ React 컴포넌트로 동적 기능 추가 가능
+- ✅ Tailwind CSS로 일관된 스타일링
+- ✅ 코드와 문서가 함께 관리됨
 
 ---
 
 ### 3. 운영 플로우 문서 작성
 
 #### 파일 위치
-- `docs/pharmacy/OPERATIONS_GUIDE.md`
+- `src/pages/pharmacy/Documentation.tsx` - 직접 HTML/JSX로 작성
 
 #### 문서 작성 원칙
 - 운영자 중심의 실용적인 내용
-- 단계별 스크린샷 또는 설명 포함
-- 문제 해결 방법 구체적으로 설명
-- 예시 시나리오 포함
-- 주의사항 명확히 표시
+- Tailwind CSS 클래스로 스타일링
+- 섹션별로 명확히 구분
+- 단계별 설명은 리스트나 테이블 활용
+- 주의사항은 알림 박스로 강조
+- 예시는 코드 블록 또는 테이블로 표시
 
 #### 참조할 기존 문서
 - `docs/pharmacy/pharmacy-통합-문서.md` - 전체 시스템 이해
 - `docs/pharmacy/guides/` - 문제 해결 방법
 - `docs/pharmacy/work-logs/` - 실제 작업 내역
 - `docs/pharmacy/analysis/LEARNING_SUMMARY.md` - 핵심 프로세스
+
+#### 스타일 가이드
+```tsx
+// 제목
+<h2 className="text-2xl font-semibold mt-8 mb-4 pb-2 border-b">섹션 제목</h2>
+
+// 단락
+<p className="text-gray-700 mb-4">내용...</p>
+
+// 리스트
+<ul className="list-disc list-inside space-y-2 mb-4">
+  <li>항목 1</li>
+  <li>항목 2</li>
+</ul>
+
+// 알림 박스
+<div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+  <p className="text-blue-800">주의사항 또는 중요 정보</p>
+</div>
+
+// 테이블
+<table className="min-w-full border-collapse border border-gray-300 mb-4">
+  <thead className="bg-gray-100">
+    <tr>
+      <th className="border border-gray-300 px-4 py-2">항목</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td className="border border-gray-300 px-4 py-2">내용</td>
+    </tr>
+  </tbody>
+</table>
+```
 
 ---
 
@@ -264,26 +330,46 @@ disk-cms-react/
 ├── public/docs/pharmacy/
 │   └── README.md             # 빌드 시 복사됨
 └── src/pages/pharmacy/
-    └── Documentation.tsx     # public/docs/pharmacy/README.md 로드
+    └── Documentation.tsx     # public/docs/pharmacy/README.md 로드 (Markdown)
 ```
 
 ### 변경 후
 ```
 disk-cms-react/
-├── docs/pharmacy/
+├── docs/pharmacy/            # 참조용 문서 (코드에서 직접 사용 안 함)
 │   ├── README.md
-│   └── OPERATIONS_GUIDE.md   # 새로 작성
+│   └── ... (기타 문서들)
 ├── src/pages/pharmacy/
-│   └── Documentation.tsx     # OPERATIONS_GUIDE.md 로드 (직접 참조)
-└── public/docs/pharmacy/     # 삭제 (더 이상 필요 없음)
+│   └── Documentation.tsx     # HTML/JSX로 직접 작성된 운영 가이드
+└── scripts/
+    └── copy-docs.js          # 삭제
+└── public/docs/pharmacy/     # 삭제
 ```
 
 ---
 
-## ✅ 구현 체크리스트
+## ✅ 구현 체크리스트 (순서대로 진행)
 
-### 1단계: 문서 작성
-- [ ] `docs/pharmacy/OPERATIONS_GUIDE.md` 작성
+### 1단계: 기획 및 구조 설계
+- [x] 기획 문서 작성 (현재 문서)
+- [ ] `docs/pharmacy` 폴더의 기존 문서 검토
+- [ ] 운영 플로우 문서 섹션별 내용 정리
+- [ ] UI/UX 구조 설계 (사이드바 네비게이션 등)
+
+### 2단계: 빌드 의존성 제거
+- [ ] `package.json` 수정
+  - [ ] `build` 스크립트에서 `node scripts/copy-docs.js` 제거
+- [ ] `scripts/copy-docs.js` 삭제 또는 백업
+- [ ] `public/docs/pharmacy/` 폴더 삭제 (있는 경우)
+
+### 3단계: `Documentation.tsx` 재작성
+- [ ] Markdown 로드 로직 제거
+- [ ] ReactMarkdown 관련 import 제거
+- [ ] 기본 레이아웃 구조 작성
+  - [ ] 헤더 섹션
+  - [ ] 사이드바 네비게이션 (선택)
+  - [ ] 메인 콘텐츠 영역
+- [ ] 섹션별 HTML/JSX 콘텐츠 작성
   - [ ] 1. 시스템 개요
   - [ ] 2. 일상 업무 플로우
   - [ ] 3. 신청 처리 프로세스
@@ -292,42 +378,64 @@ disk-cms-react/
   - [ ] 6. 문제 해결 가이드
   - [ ] 7. 자주 묻는 질문(FAQ)
 
-### 2단계: 코드 수정
-- [ ] `Documentation.tsx` 수정
-  - [ ] 파일 경로 변경: `OPERATIONS_GUIDE.md`
-  - [ ] 제목 및 설명 업데이트
-- [ ] `package.json` 수정
-  - [ ] `build` 스크립트에서 `copy-docs.js` 제거
-- [ ] `scripts/copy-docs.js` 삭제 또는 백업
-- [ ] `public/docs/pharmacy/` 폴더 삭제 (선택)
+### 4단계: 스타일링 및 UI 개선
+- [ ] Tailwind CSS 클래스 적용
+- [ ] 반응형 디자인 확인
+- [ ] 섹션 간 간격 및 레이아웃 조정
+- [ ] 알림 박스, 테이블, 리스트 스타일링
 
-### 3단계: 테스트
-- [ ] 로컬 개발 환경에서 문서 로드 확인
-- [ ] 빌드 후 문서 로드 확인
-- [ ] 실제 운영 환경에서 문서 접근 확인
+### 5단계: 테스트
+- [ ] 로컬 개발 환경에서 페이지 로드 확인
+- [ ] 빌드 후 페이지 정상 작동 확인
+- [ ] 실제 운영 환경에서 접근 확인
+- [ ] 모바일 반응형 확인
 
 ---
 
-## 🎨 UI/UX 개선 사항 (선택)
+## 🎨 UI/UX 설계
 
-### 현재 UI
-- Markdown 기본 렌더링
-- 스크롤 가능한 긴 문서
+### 기본 레이아웃
+```
+┌─────────────────────────────────────┐
+│  헤더 (제목, 설명)                     │
+├──────────┬──────────────────────────┤
+│          │                          │
+│ 사이드바  │   메인 콘텐츠 영역        │
+│ (목차)    │   (섹션별 내용)            │
+│          │                          │
+│          │                          │
+└──────────┴──────────────────────────┘
+```
 
-### 개선 제안
-1. **사이드바 네비게이션**
-   - 목차를 사이드바에 고정
-   - 섹션별 빠른 이동
+### 필수 UI 요소
+1. **헤더**
+   - 페이지 제목: "약국배상책임보험 운영 가이드"
+   - 간단한 설명
 
-2. **검색 기능**
-   - 문서 내 키워드 검색
-   - 하이라이트 표시
+2. **사이드바 네비게이션** (선택, 1단계에서는 생략 가능)
+   - 목차 고정
+   - 섹션별 링크
+   - 현재 섹션 하이라이트
 
-3. **인쇄 친화적 스타일**
-   - 인쇄 시 레이아웃 최적화
+3. **메인 콘텐츠**
+   - 섹션별 제목 (h2)
+   - 단락, 리스트, 테이블
+   - 알림 박스 (주의사항)
+   - 코드 블록 (예시)
 
 4. **반응형 디자인**
-   - 모바일에서도 읽기 편하게
+   - 모바일: 사이드바 숨김 또는 하단으로 이동
+   - 태블릿/데스크톱: 사이드바 + 메인 콘텐츠
+
+### 스타일 가이드
+- **색상**: Tailwind 기본 색상 사용
+- **타이포그래피**: 시스템 폰트
+- **간격**: Tailwind spacing scale
+- **알림 박스 색상**:
+  - 정보: `bg-blue-50 border-blue-500`
+  - 경고: `bg-yellow-50 border-yellow-500`
+  - 주의: `bg-red-50 border-red-500`
+  - 성공: `bg-green-50 border-green-500`
 
 ---
 
