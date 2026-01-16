@@ -84,8 +84,8 @@ export default function Documentation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="bg-white border-b sticky top-0 z-10">
+      {/* 헤더 - 고정 */}
+      <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <BookOpen className="w-6 h-6 text-blue-600" />
