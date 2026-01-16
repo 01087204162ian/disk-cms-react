@@ -82,7 +82,7 @@ export default function Documentation() {
     { id: 'faq', label: '10. 자주 묻는 질문(FAQ)' }
   ]
 
-  return (
+    return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 - 고정 (전체 앱 헤더 아래에 위치) */}
       <header className="bg-white border-b sticky top-16 z-40 shadow-sm">
@@ -97,9 +97,9 @@ export default function Documentation() {
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex gap-8">
-          {/* 좌측 사이드바 네비게이션 */}
+          {/* 좌측 사이드바 네비게이션 - 고정 */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-24">
+            <div className="sticky top-[129px]">
               <nav className="bg-white rounded-lg shadow-sm border p-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">📋 목차</h2>
                 <ul className="space-y-2">
@@ -698,9 +698,9 @@ export default function Documentation() {
                           <p className="text-blue-700">
                             거래처 어드민은 <strong>API v2 인증 (HMAC-SHA256)</strong>을 사용합니다.
                             각 거래처는 고유한 API Key와 Secret Key를 가지고 있습니다.
-                          </p>
-                        </div>
-                      </div>
+          </p>
+        </div>
+      </div>
                     </div>
                   </div>
 
@@ -1184,8 +1184,8 @@ X-Timestamp: {unix_timestamp}
 X-Signature: {hmac_signature}
 Content-Type: application/json`}
                         </pre>
-                      </div>
-                    </div>
+        </div>
+      </div>
 
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <h4 className="font-semibold mb-2">서명 생성 방법</h4>
@@ -1202,7 +1202,7 @@ const signature = crypto
   .createHmac('sha256', secretKey)
   .update(stringToSign, 'utf8')
   .digest('hex');`}
-                        </pre>
+                </pre>
                       </div>
                     </div>
 
