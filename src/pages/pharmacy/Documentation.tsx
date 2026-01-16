@@ -4,6 +4,18 @@ import { BookOpen, AlertCircle, Info, HelpCircle } from 'lucide-react'
 export default function Documentation() {
   const [activeSection, setActiveSection] = useState('system-overview')
 
+  // 헤더 높이 확인 (개발용)
+  useEffect(() => {
+    const header = document.querySelector('header')
+    if (header) {
+      console.log('=== 헤더 높이 확인 ===')
+      console.log('offsetHeight:', header.offsetHeight, 'px')
+      console.log('getBoundingClientRect().height:', header.getBoundingClientRect().height, 'px')
+      console.log('clientHeight:', header.clientHeight, 'px')
+      console.log('====================')
+    }
+  }, [])
+
   // 스크롤 시 현재 섹션 감지
   useEffect(() => {
     const handleScroll = () => {
@@ -40,17 +52,18 @@ export default function Documentation() {
     const element = document.getElementById(sectionId)
     if (element) {
       // 헤더의 실제 높이 계산 (sticky 헤더)
-      const header = document.querySelector('header') || document.querySelector('[class*="sticky"]')
-      const headerHeight = header ? header.getBoundingClientRect().height : 100
+      const header = document.querySelector('header')
+      const headerHeight = header ? header.offsetHeight : 100
       
-      // 추가 여유 공간 (10px)
-      const offset = headerHeight + 10
+      // 추가 여유 공간 (20px)
+      const offset = headerHeight + 20
       
-      const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - offset
+      // 요소의 절대 위치 계산
+      const elementTop = element.offsetTop
+      const scrollPosition = elementTop - offset
 
       window.scrollTo({
-        top: Math.max(0, offsetPosition), // 음수 방지
+        top: Math.max(0, scrollPosition),
         behavior: 'smooth'
       })
     }
