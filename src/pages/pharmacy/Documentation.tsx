@@ -32,14 +32,19 @@ export default function Documentation() {
         'faq'
       ]
 
-      // 전체 앱 헤더 (64px) + Documentation 헤더 (65px) + 여유 공간 (30px)
-      const scrollPosition = window.scrollY + 64 + 65 + 30
+      // 전체 앱 헤더 (64px) + Documentation 헤더 (65px) + 여유 공간 (50px)
+      const scrollPosition = window.scrollY + 64 + 65 + 50
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = document.getElementById(sections[i])
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i])
-          break
+        if (section) {
+          const sectionTop = section.offsetTop
+          const sectionHeight = section.offsetHeight
+          // 섹션의 상단이 스크롤 위치보다 위에 있고, 하단이 스크롤 위치보다 아래에 있으면 활성화
+          if (sectionTop <= scrollPosition && sectionTop + sectionHeight > scrollPosition) {
+            setActiveSection(sections[i])
+            break
+          }
         }
       }
     }
@@ -99,7 +104,7 @@ export default function Documentation() {
         <div className="flex gap-8">
           {/* 좌측 사이드바 네비게이션 - 고정 */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-[177px]">
+            <div className="sticky top-[187px]">
               <nav className="bg-white rounded-lg shadow-sm border p-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">📋 목차</h2>
                 <ul className="space-y-2">
