@@ -104,7 +104,7 @@ export default function Documentation() {
         <div className="flex gap-8">
           {/* 좌측 사이드바 네비게이션 - 고정 */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-[187px]">
+            <div className="sticky top-[191px]">
               <nav className="bg-white rounded-lg shadow-sm border p-4">
                 <h2 className="text-sm font-semibold text-gray-900 mb-4">📋 목차</h2>
                 <ul className="space-y-2">
