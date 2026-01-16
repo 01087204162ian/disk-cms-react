@@ -53,10 +53,10 @@ export default function Documentation() {
     if (element) {
       // 헤더의 실제 높이 계산 (sticky 헤더)
       const header = document.querySelector('header')
-      const headerHeight = header ? header.offsetHeight : 100
+      const headerHeight = header ? header.offsetHeight : 65
       
-      // 추가 여유 공간 (20px)
-      const offset = headerHeight + 20
+      // 추가 여유 공간 (컨테이너 패딩 등 고려하여 30px)
+      const offset = headerHeight + 30
       
       // 요소의 절대 위치 계산
       const elementTop = element.offsetTop
@@ -126,7 +126,7 @@ export default function Documentation() {
           <main className="flex-1 min-w-0">
             <div className="bg-white rounded-lg shadow-sm border p-8">
               {/* 섹션 1: 시스템 개요 */}
-              <section id="system-overview" className="mb-12 scroll-mt-28">
+              <section id="system-overview" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">1. 시스템 개요</h2>
                 
                 <div className="space-y-4">
@@ -168,7 +168,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 2: 일상 업무 플로우 */}
-              <section id="daily-workflow" className="mb-12 scroll-mt-28">
+              <section id="daily-workflow" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">2. 일상 업무 플로우</h2>
                 
                 <div className="space-y-4">
@@ -237,7 +237,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 3: 신청 처리 프로세스 */}
-              <section id="application-process" className="mb-12 scroll-mt-28">
+              <section id="application-process" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">3. 신청 처리 프로세스</h2>
                 
                 <div className="space-y-6">
@@ -385,7 +385,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 4: 상태 변경 가이드 */}
-              <section id="status-guide" className="mb-12 scroll-mt-28">
+              <section id="status-guide" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">4. 상태 변경 가이드</h2>
                 
                 <div className="space-y-6">
@@ -473,7 +473,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 5: 보험료 확인 및 수정 */}
-              <section id="premium-guide" className="mb-12 scroll-mt-28">
+              <section id="premium-guide" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">5. 보험료 확인 및 수정</h2>
                 
                 <div className="space-y-6">
@@ -566,7 +566,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 6: 시스템 구조 및 URL */}
-              <section id="system-structure" className="mb-12 scroll-mt-28">
+              <section id="system-structure" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">6. 시스템 구조 및 URL</h2>
                 
                 <div className="space-y-6">
@@ -764,7 +764,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 7: 데이터베이스 테이블 */}
-              <section id="database-tables" className="mb-12 scroll-mt-28">
+              <section id="database-tables" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">7. 데이터베이스 테이블</h2>
                 
                 <div className="space-y-6">
@@ -1153,7 +1153,7 @@ export default function Documentation() {
               </section>
 
               {/* 섹션 8: API 및 RESTful 검증 */}
-              <section id="api-guide" className="mb-12 scroll-mt-28">
+              <section id="api-guide" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">8. API 및 RESTful 검증</h2>
                 
                 <div className="space-y-6">
@@ -1361,7 +1361,7 @@ const signature = crypto
               </section>
 
               {/* 섹션 9: 문제 해결 가이드 */}
-              <section id="troubleshooting" className="mb-12 scroll-mt-28">
+              <section id="troubleshooting" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">9. 문제 해결 가이드</h2>
                 
                 <div className="space-y-6">
@@ -1433,7 +1433,7 @@ const signature = crypto
               </section>
 
               {/* 섹션 10: 자주 묻는 질문(FAQ) */}
-              <section id="faq" className="mb-12 scroll-mt-28">
+              <section id="faq" className="mb-12 scroll-mt-24">
                 <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">10. 자주 묻는 질문(FAQ)</h2>
                 
                 <div className="space-y-6">
