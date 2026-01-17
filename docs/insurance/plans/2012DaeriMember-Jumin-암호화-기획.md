@@ -171,21 +171,28 @@ openssl rand -hex 32
 # a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
 ```
 
-**방법 3: PHP 스크립트로 키 생성**
+**방법 3: 로컬 개발 환경에서 생성 (PHP CLI가 없는 경우) ✅**
+
+서버에 PHP CLI가 없는 경우, 로컬 개발 환경에서 키를 생성:
 
 ```bash
-# 키 생성 PHP 파일 생성
-cat > generate-key.php << 'EOF'
-<?php
-// 256비트 (32바이트) 랜덤 키 생성
-$key = bin2hex(random_bytes(32));
-echo "생성된 암호화 키:\n";
-echo $key . "\n";
-echo "\n키 길이: " . strlen($key) . "자\n";
-EOF
+# 로컬 Mac/Linux에서
+openssl rand -hex 32
 
-# 스크립트 실행
-php generate-key.php
+# 또는 로컬에서 PHP 사용
+php -r "echo bin2hex(random_bytes(32));"
+
+# Windows에서 (Git Bash 또는 WSL)
+openssl rand -hex 32
+```
+
+생성된 키를 복사하여 서버의 `.env` 파일에 저장하세요.
+
+**방법 4: Python 사용 (서버에 Python이 있는 경우)**
+
+```bash
+# Python으로 키 생성
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 #### 3.3.3 키 관리 주의사항

@@ -47,11 +47,16 @@
 ssh pci0327@uws8-wpm-079
 cd /path/to/www  # pci0327 루트 폴더로 이동
 
-# PHP 버전 확인 (PHP가 설치되어 있는지 확인)
-php -v
+# PHP CLI 확인 (선택 사항 - PHP CLI가 없어도 웹 PHP는 동작 가능)
+php -v 2>/dev/null || echo "PHP CLI가 없습니다. 로컬에서 키를 생성하세요."
+
+# Python 확인 (대안)
+python -c "import secrets; print('Python available')" 2>/dev/null || echo "Python이 없습니다."
 ```
 
-**참고**: PHP가 설치되어 있지 않은 경우, 시스템 관리자에게 문의하거나 다른 방법을 사용하세요.
+**참고**: 
+- 서버에 PHP CLI가 없어도 웹 서버에서 PHP는 동작할 수 있습니다.
+- 키 생성은 로컬 개발 환경에서 수행한 후 서버에 전송하는 것을 권장합니다.
 
 ### 2.2 암호화 키 생성
 
@@ -77,25 +82,79 @@ openssl rand -hex 32
 # a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
 ```
 
-**방법 3: PHP 스크립트로 키 생성**
+**방법 3: 로컬 개발 환경에서 생성 후 서버로 전송 (PHP CLI가 없는 경우) ✅**
+
+서버에 PHP CLI가 설치되어 있지 않은 경우, 로컬 개발 환경에서 키를 생성한 후 서버에 전송할 수 있습니다:
+
+#### 로컬 개발 환경에서 키 생성
+
+**Mac/Linux 로컬 환경:**
+```bash
+# OpenSSL 사용
+openssl rand -hex 32
+
+# 또는 PHP 사용
+php -r "echo bin2hex(random_bytes(32));"
+```
+
+**Windows 로컬 환경:**
+```powershell
+# OpenSSL 사용 (Git Bash 또는 WSL)
+openssl rand -hex 32
+
+# 또는 PHP 사용
+php -r "echo bin2hex(random_bytes(32));"
+```
+
+**생성된 키 예시:**
+```
+a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
+```
+
+#### 서버에 키 전송
+
+1. **직접 파일 생성 (권장):**
+   ```bash
+   # 서버에 접속
+   ssh pci0327@uws8-wpm-079
+   cd /path/to/www
+   
+   # .env 파일 생성 및 키 입력
+   vi .env
+   # 또는
+   nano .env
+   
+   # 파일 내용 입력:
+   JUMIN_ENCRYPTION_KEY=a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
+   ```
+
+2. **SCP로 전송 (로컬에서):**
+   ```bash
+   # 로컬에서 키 생성
+   openssl rand -hex 32 > /tmp/jumin-key.txt
+   
+   # 서버에 .env 파일 생성
+   echo "JUMIN_ENCRYPTION_KEY=$(cat /tmp/jumin-key.txt)" | \
+     ssh pci0327@uws8-wpm-079 "cat > /path/to/www/.env"
+   
+   # 로컬 임시 파일 삭제
+   rm /tmp/jumin-key.txt
+   ```
+
+**방법 4: Python 사용 (서버에 Python이 있는 경우)**
 
 ```bash
-# 키 생성 PHP 파일 생성
-cat > /tmp/generate-key.php << 'EOF'
-<?php
-// 256비트 (32바이트) 랜덤 키 생성
-$key = bin2hex(random_bytes(32));
-echo "생성된 암호화 키:\n";
-echo $key . "\n";
-echo "\n키 길이: " . strlen($key) . "자\n";
-EOF
+# Python으로 키 생성
+python -c "import secrets; print(secrets.token_hex(32))"
 
-# 스크립트 실행
-php /tmp/generate-key.php
-
-# 임시 파일 삭제
-rm /tmp/generate-key.php
+# 또는 Python 2
+python2 -c "import os; print(os.urandom(32).encode('hex'))"
 ```
+
+**방법 5: 온라인 도구 사용 (보안 주의) ⚠️**
+
+- 온라인 키 생성 도구는 민감한 암호화 키 생성에 권장하지 않습니다.
+- 사용 시 HTTPS 연결과 신뢰할 수 있는 사이트만 사용하세요.
 
 **중요**: 생성된 키를 복사해 두세요. 이 키는 안전한 곳에 백업하세요.
 
