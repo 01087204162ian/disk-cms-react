@@ -148,12 +148,44 @@ CREATE TABLE `2012DaeriMember` (
 - `.htaccess` 또는 서버 설정 파일에 추가
 
 #### 3.3.2 키 생성 방법
+
+**방법 1: PHP를 사용한 키 생성 (권장) ✅**
+
+OpenSSL이 설치되어 있지 않은 경우:
+
+```bash
+# PHP로 256비트 키 생성 (64자리 hex)
+php -r "echo bin2hex(random_bytes(32));"
+
+# 출력 예시:
+# a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
+```
+
+**방법 2: OpenSSL 사용 (설치되어 있는 경우)**
+
 ```bash
 # OpenSSL을 사용한 256비트 키 생성
 openssl rand -hex 32
 
 # 출력 예시:
 # a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
+```
+
+**방법 3: PHP 스크립트로 키 생성**
+
+```bash
+# 키 생성 PHP 파일 생성
+cat > generate-key.php << 'EOF'
+<?php
+// 256비트 (32바이트) 랜덤 키 생성
+$key = bin2hex(random_bytes(32));
+echo "생성된 암호화 키:\n";
+echo $key . "\n";
+echo "\n키 길이: " . strlen($key) . "자\n";
+EOF
+
+# 스크립트 실행
+php generate-key.php
 ```
 
 #### 3.3.3 키 관리 주의사항
