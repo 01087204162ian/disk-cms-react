@@ -314,8 +314,15 @@ else if (file_exists(__DIR__ . '/../../../.env')) {
     $env_file = __DIR__ . '/../../../.env';
     $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
+        // 주석 무시
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        // JUMIN_ENCRYPTION_KEY=값 형식 파싱
         if (strpos($line, 'JUMIN_ENCRYPTION_KEY=') === 0) {
-            $encryption_key = substr($line, strlen('JUMIN_ENCRYPTION_KEY='));
+            $encryption_key = trim(substr($line, strlen('JUMIN_ENCRYPTION_KEY=')));
+            // 따옴표 제거 (있는 경우)
+            $encryption_key = trim($encryption_key, '"\'');
             break;
         }
     }
