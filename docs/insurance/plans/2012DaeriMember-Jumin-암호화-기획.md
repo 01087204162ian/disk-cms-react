@@ -122,17 +122,46 @@ CREATE TABLE `2012DaeriMember` (
 ### 3.3 암호화 키 관리
 
 #### 3.3.1 키 저장 위치
-- **환경 변수** (권장) ✅
-  ```php
-  // .env 파일 (Git에 포함하지 않음)
+
+**서버**: PHP 백엔드 서버 (`pci0327` / 프로덕션: `pcikorea.com`)
+
+**방법 1: 환경 변수 파일 (권장) ✅**
+- **경로**: `pci0327/.env` (프로덕션 서버의 `/path/to/pci0327/.env`)
+- **내용**:
+  ```bash
   JUMIN_ENCRYPTION_KEY=your-256-bit-key-here
   ```
+- **주의**: `.gitignore`에 포함되어 Git에 커밋되지 않음
+
+**방법 2: PHP 설정 파일**
+- **경로**: `pci0327/api/config/encryption.php` (Git 제외)
+- **내용**:
+  ```php
+  <?php
+  // 암호화 키 (절대 Git에 포함하지 않음)
+  return 'your-256-bit-key-here';
+  ```
+
+**방법 3: 서버 환경 변수** (Apache/Nginx 설정)
+- Apache: `SetEnv JUMIN_ENCRYPTION_KEY "your-256-bit-key-here"`
+- Nginx: `fastcgi_param JUMIN_ENCRYPTION_KEY "your-256-bit-key-here";`
+- `.htaccess` 또는 서버 설정 파일에 추가
 
 #### 3.3.2 키 생성 방법
 ```bash
 # OpenSSL을 사용한 256비트 키 생성
 openssl rand -hex 32
+
+# 출력 예시:
+# a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890
 ```
+
+#### 3.3.3 키 관리 주의사항
+- ✅ **운영/개발 환경 키 분리**: 각 환경별로 다른 키 사용
+- ✅ **Git 제외**: `.gitignore`에 `.env`, `encryption.php` 포함
+- ✅ **권한 제한**: 파일 권한 600 (소유자만 읽기/쓰기)
+- ✅ **백업 보관**: 키는 안전한 별도 위치에 백업 저장
+- ✅ **키 변경 시**: 재암호화 작업 필요 (별도 계획 수립)
 
 ---
 
@@ -273,7 +302,38 @@ CREATE TABLE `2012DaeriMemberSecure` (
  */
 
 // 암호화 키 로드
-$encryption_key = getenv('JUMIN_ENCRYPTION_KEY') ?: require __DIR__ . '/../../config/encryption.php';
+// 우선순위: 1) 환경 변수 2) .env 파일 3) encryption.php 파일
+$encryption_key = null;
+
+// 방법 1: 환경 변수에서 로드
+if ($key = getenv('JUMIN_ENCRYPTION_KEY')) {
+    $encryption_key = $key;
+}
+// 방법 2: .env 파일에서 로드 (pci0327/.env)
+else if (file_exists(__DIR__ . '/../../../.env')) {
+    $env_file = __DIR__ . '/../../../.env';
+    $lines = file($env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos($line, 'JUMIN_ENCRYPTION_KEY=') === 0) {
+            $encryption_key = substr($line, strlen('JUMIN_ENCRYPTION_KEY='));
+            break;
+        }
+    }
+}
+// 방법 3: encryption.php 파일에서 로드 (pci0327/api/config/encryption.php)
+else if (file_exists(__DIR__ . '/../../config/encryption.php')) {
+    $encryption_key = require __DIR__ . '/../../config/encryption.php';
+}
+
+// 키가 없으면 오류
+if (empty($encryption_key)) {
+    throw new Exception('JUMIN_ENCRYPTION_KEY가 설정되지 않았습니다. 환경 변수 또는 설정 파일을 확인하세요.');
+}
+
+// 키 길이 검증 (256비트 = 32바이트 = 64자리 hex)
+if (strlen($encryption_key) !== 64 || !ctype_xdigit($encryption_key)) {
+    throw new Exception('JUMIN_ENCRYPTION_KEY는 64자리 16진수 문자열이어야 합니다. (256비트)');
+}
 
 /**
  * 주민번호 암호화 (AES-256-GCM)
@@ -836,9 +896,21 @@ try {
 ## 8. 보안 고려사항
 
 ### 8.1 암호화 키 보안
-- 환경 변수로 관리 (Git 제외)
-- 운영/개발 환경 키 분리
-- 키 변경 시 재암호화 계획 수립
+
+#### 8.1.1 키 저장 위치
+- **서버**: PHP 백엔드 서버 (`pci0327` / 프로덕션: `pcikorea.com`)
+- **파일 경로**: 
+  - 방법 1: `pci0327/.env` (권장) ✅
+  - 방법 2: `pci0327/api/config/encryption.php`
+  - 방법 3: 서버 환경 변수 (Apache/Nginx 설정)
+
+#### 8.1.2 보안 규칙
+- ✅ 환경 변수 파일로 관리 (`.env` 파일)
+- ✅ Git에 절대 커밋하지 않음 (`.gitignore` 확인)
+- ✅ 파일 권한 600 설정 (소유자만 읽기/쓰기)
+- ✅ 운영/개발 환경 키 분리 (다른 키 사용)
+- ✅ 키는 안전한 별도 위치에 백업 저장
+- ✅ 키 변경 시 재암호화 계획 수립 필요
 
 ### 8.2 로깅 보안
 - 로그에 주민번호 포함 금지
