@@ -4,7 +4,7 @@
 **대상 테이블**: `2012DaeriMember` → 새 테이블 `2012DaeriMemberSecure`  
 **대상 필드**: `Jumin` (주민번호)  
 **목적**: 개인정보보호법 준수 및 민감정보 보안 강화  
-**전략**: 새 테이블 도입 → 점진적 전환 → 기존 테이블 페이드 아웃
+**전략**: 새 테이블 도입 (모든 필드 포함) → 점진적 전환 → 기존 테이블 사용 중단
 
 ---
 
@@ -31,11 +31,11 @@
 - 데이터베이스 유출 시 피해 최소화
 
 ### 1.2 목적
-- 주민번호를 별도 보안 테이블로 분리하여 저장
-- 주민번호는 암호화하여 저장 (AES-256)
-- 검색은 해시(SHA-256)를 사용하여 빠른 검색 가능
-- 점진적 마이그레이션으로 기존 시스템 영향 최소화
-- 안정화 후 기존 테이블 페이드 아웃
+- **새 테이블 생성**: `2012DaeriMemberSecure` 테이블에 기존 테이블의 모든 필드 포함
+- **주민번호 암호화**: 주민번호만 암호화하여 저장 (AES-256)
+- **검색용 해시**: 해시(SHA-256)를 사용하여 빠른 검색 가능
+- **완전 전환**: 마이그레이션 후 `2012DaeriMember` 테이블 사용 중단
+- **점진적 마이그레이션**: 안정화 후 기존 테이블 완전 폐기
 
 ### 1.3 법적 근거
 - 개인정보보호법 제3조 (개인정보 보호 원칙)
@@ -83,22 +83,24 @@ CREATE TABLE `2012DaeriMember` (
 
 ## 3. 보안 강화 방안
 
-### 3.1 전략: 새 테이블 + 해시 기반 검색 ✅
+### 3.1 전략: 완전 대체 테이블 + 해시 기반 검색 ✅
 
 **핵심 개념**:
-- **새 테이블 생성**: `2012DaeriMemberSecure` (주민번호 전용 보안 테이블)
-- **주민번호 암호화**: AES-256으로 암호화하여 저장 (복호화 가능)
-- **검색용 해시**: SHA-256 해시를 함께 저장하여 빠른 검색
-- **점진적 전환**: 새 데이터는 새 테이블, 기존 데이터는 점진적 마이그레이션
-- **페이드 아웃**: 안정화 후 기존 `2012DaeriMember.Jumin` 필드 제거
+- **새 테이블 생성**: `2012DaeriMemberSecure` (기존 테이블의 모든 필드 + 보안 필드 포함)
+- **완전 대체**: 마이그레이션 후 `2012DaeriMember` 테이블 사용 중단
+- **주민번호 암호화**: `Jumin` 필드는 암호화하여 `jumin_encrypted`에 저장 (복호화 가능)
+- **검색용 해시**: `jumin_hash` 필드에 SHA-256 해시 저장하여 빠른 검색
+- **점진적 전환**: 마이그레이션 단계에서만 기존 테이블 참조, 이후 완전 전환
+- **페이드 아웃**: 안정화 후 `2012DaeriMember` 테이블 완전 폐기
 
 **장점**:
-- ✅ 기존 시스템 영향 최소화 (점진적 전환)
-- ✅ 롤백 용이 (기존 테이블 그대로 유지)
+- ✅ 기존 테이블의 모든 필드 포함으로 완전한 대체 가능
+- ✅ 주민번호만 암호화되어 나머지 필드는 그대로 사용
 - ✅ 해시 기반 검색으로 빠른 성능 (인덱스 활용)
 - ✅ 암호화된 주민번호로 보안 강화
 - ✅ 복호화 가능하여 필요한 경우 복원 가능
 - ✅ LIKE 검색 불가 문제 해결 (해시로 정확 일치 검색)
+- ✅ 기존 테이블 사용 중단으로 명확한 전환 경로
 
 ### 3.2 암호화 방식
 
@@ -138,59 +140,117 @@ openssl rand -hex 32
 
 ### 4.1 테이블 구조
 
+**전략**: 기존 `2012DaeriMember` 테이블의 모든 필드를 포함하고, 주민번호만 암호화된 형태로 저장
+
 ```sql
 CREATE TABLE `2012DaeriMemberSecure` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `member_num` int(11) NOT NULL COMMENT '2012DaeriMember.num과 연결',
-  `jumin_encrypted` text NOT NULL COMMENT '암호화된 주민번호 (AES-256-GCM)',
-  `jumin_hash` char(64) NOT NULL COMMENT '검색용 해시 (SHA-256)',
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_member_num` (`member_num`),
+  -- 기존 테이블의 모든 필드 포함
+  `num` int(11) NOT NULL AUTO_INCREMENT,
+  `moCertiNum` int(11) DEFAULT NULL,
+  `2012DaeriCompanyNum` int(11) DEFAULT NULL,
+  `InsuranceCompany` char(2) NOT NULL DEFAULT '',
+  `CertiTableNum` int(11) DEFAULT NULL,
+  `Name` varchar(20) DEFAULT NULL,
+  -- `Jumin` 필드 제거 (암호화된 형태로 대체)
+  `nai` int(2) NOT NULL DEFAULT 0,
+  `push` int(2) DEFAULT NULL,
+  `etag` char(2) DEFAULT NULL,
+  `FirstStart` date DEFAULT NULL,
+  `state` int(2) DEFAULT NULL,
+  `cancel` int(2) DEFAULT NULL,
+  `sangtae` char(2) DEFAULT NULL,
+  `Hphone` varchar(15) DEFAULT NULL,
+  `InputDay` datetime DEFAULT NULL,
+  `OutPutDay` date DEFAULT NULL,
+  `EndorsePnum` int(11) DEFAULT NULL,
+  `dongbuCerti` varchar(20) DEFAULT NULL,
+  `dongbuSelNumber` varchar(10) DEFAULT NULL,
+  `dongbusigi` date DEFAULT NULL,
+  `dongbujeongi` date DEFAULT NULL,
+  `nabang_1` char(2) DEFAULT NULL,
+  `ch` char(2) DEFAULT '1',
+  `changeCom` int(11) DEFAULT NULL,
+  `sPrem` varchar(10) DEFAULT NULL,
+  `sago` char(2) DEFAULT '1',
+  `p_buho` char(2) NOT NULL DEFAULT '1',
+  `a6b` int(11) NOT NULL DEFAULT 0,
+  `a7b` int(11) NOT NULL DEFAULT 0,
+  `a8b` text NOT NULL,
+  `preminum1` varchar(10) DEFAULT NULL,
+  `wdate` datetime DEFAULT NULL,
+  `endorse_day` date DEFAULT NULL,
+  `rate` char(2) DEFAULT NULL,
+  `reasion` text NOT NULL,
+  `manager` varchar(18) NOT NULL DEFAULT '',
+  `progress` char(1) NOT NULL DEFAULT '',
+  
+  -- 추가: 보안 관련 필드
+  `jumin_encrypted` text DEFAULT NULL COMMENT '암호화된 주민번호 (AES-256-GCM)',
+  `jumin_hash` char(64) DEFAULT NULL COMMENT '검색용 해시 (SHA-256)',
+  
+  PRIMARY KEY (`num`),
   UNIQUE KEY `idx_jumin_hash` (`jumin_hash`),
-  KEY `idx_created_at` (`created_at`)
+  KEY `idx_2012DaeriCompanyNum` (`2012DaeriCompanyNum`),
+  KEY `idx_CertiTableNum` (`CertiTableNum`),
+  KEY `idx_InsuranceCompany` (`InsuranceCompany`),
+  KEY `idx_dongbuCerti` (`dongbuCerti`),
+  KEY `idx_wdate` (`wdate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
 ### 4.2 필드 설명
 
-#### 4.2.1 `member_num` (int)
-- **역할**: `2012DaeriMember.num`과 연결
-- **특징**: UNIQUE 제약으로 1:1 관계 보장
-- **용도**: 기존 테이블과 조인
+#### 4.2.1 기존 필드 (모두 포함)
+- **기존 테이블의 모든 필드**: `num`, `moCertiNum`, `2012DaeriCompanyNum`, `InsuranceCompany`, `CertiTableNum`, `Name`, `nai`, `push`, `etag`, `FirstStart`, `state`, `cancel`, `sangtae`, `Hphone`, `InputDay`, `OutPutDay`, `EndorsePnum`, `dongbuCerti`, `dongbuSelNumber`, `dongbusigi`, `dongbujeongi`, `nabang_1`, `ch`, `changeCom`, `sPrem`, `sago`, `p_buho`, `a6b`, `a7b`, `a8b`, `preminum1`, `wdate`, `endorse_day`, `rate`, `reasion`, `manager`, `progress`
+- **`Jumin` 필드 제거**: 평문 주민번호 필드는 제거하고 암호화된 형태로 대체
 
 #### 4.2.2 `jumin_encrypted` (text)
-- **역할**: 암호화된 주민번호 저장
+- **역할**: 암호화된 주민번호 저장 (기존 `Jumin` 필드 대체)
 - **형식**: Base64 인코딩된 암호화 데이터 (IV + Tag + 암호화된 값)
 - **크기**: 약 100-200 바이트 (암호화 후)
+- **NULL 허용**: 주민번호가 없는 경우 NULL
 
 #### 4.2.3 `jumin_hash` (char(64))
 - **역할**: 검색용 해시 (SHA-256)
 - **형식**: 64자리 16진수 문자열 (예: `a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3`)
-- **특징**: UNIQUE 제약으로 중복 검사 및 빠른 검색
-- **용도**: 주민번호 검색 시 해시 비교
+- **특징**: UNIQUE 제약으로 중복 주민번호 방지 및 빠른 검색
+- **NULL 허용**: 주민번호가 없는 경우 NULL
 
 ### 4.3 테이블 관계
 
+**전환 전** (마이그레이션 단계):
 ```
 2012DaeriMember (기존 테이블)
     │
-    │ 1:1 관계
+    │ 데이터 복사
     ↓
 2012DaeriMemberSecure (새 보안 테이블)
-    ├─ member_num (FK → 2012DaeriMember.num)
-    ├─ jumin_encrypted (암호화된 주민번호)
-    └─ jumin_hash (검색용 해시)
+    ├─ 모든 필드 복사
+    ├─ Jumin → jumin_encrypted (암호화)
+    └─ jumin_hash (해시 생성)
+```
+
+**전환 후** (안정화 후):
+```
+2012DaeriMemberSecure (완전 대체 테이블)
+    └─ 모든 기능을 새 테이블로 전환
+    
+2012DaeriMember (사용 중단)
+    └─ 백업/롤백 용도로만 보관
 ```
 
 ### 4.4 인덱스 전략
 
-#### 4.4.1 `idx_member_num` (UNIQUE)
-- **용도**: `2012DaeriMember`와 조인 시 사용
-- **특징**: UNIQUE로 중복 방지
+#### 4.4.1 기존 인덱스 (유지)
+- `PRIMARY KEY (num)` - 기본 키
+- `idx_2012DaeriCompanyNum` - 회사별 조회
+- `idx_CertiTableNum` - 증권별 조회
+- `idx_InsuranceCompany` - 보험회사별 조회
+- `idx_dongbuCerti` - 동부증권번호 조회
+- `idx_wdate` - 날짜별 조회
 
-#### 4.4.2 `idx_jumin_hash` (UNIQUE)
+#### 4.4.2 새 인덱스 (추가)
+- `idx_jumin_hash` (UNIQUE) - 주민번호 해시 검색
 - **용도**: 주민번호 검색 시 사용
 - **특징**: UNIQUE로 중복 주민번호 방지
 - **성능**: 해시 값으로 정확 일치 검색 (O(1) 복잡도)
@@ -343,38 +403,86 @@ function maskJumin($jumin, $isEncrypted = false) {
 **변경 전**:
 ```php
 $jumin = $_POST['jumin'];
-$stmt = $pdo->prepare("INSERT INTO 2012DaeriMember (Jumin, ...) VALUES (?, ...)");
-$stmt->execute([$jumin, ...]);
+$stmt = $pdo->prepare("INSERT INTO 2012DaeriMember (Jumin, Name, Hphone, ...) VALUES (?, ?, ?, ...)");
+$stmt->execute([$jumin, $name, $hphone, ...]);
 ```
 
-**변경 후**:
+**변경 후** (마이그레이션 단계):
 ```php
 require_once __DIR__ . '/../utils/jumin-secure.php';
 
 $jumin = $_POST['jumin'];
 $juminDigits = preg_replace('/[^0-9]/', '', $jumin);
 
-// 1. 기존 테이블에 저장 (하위 호환성)
-$stmt = $pdo->prepare("INSERT INTO 2012DaeriMember (Jumin, ...) VALUES (?, ...)");
-$stmt->execute([$jumin, ...]);
-$memberNum = $pdo->lastInsertId();
+// 1. 기존 테이블에 저장 (하위 호환성 - 마이그레이션 단계에서만)
+if (USE_OLD_TABLE) {
+    $stmt = $pdo->prepare("INSERT INTO 2012DaeriMember (Jumin, Name, Hphone, ...) VALUES (?, ?, ?, ...)");
+    $stmt->execute([$jumin, $name, $hphone, ...]);
+    $memberNum = $pdo->lastInsertId();
+}
 
-// 2. 새 보안 테이블에 저장
+// 2. 새 보안 테이블에 저장 (모든 필드 포함)
 $encryptedJumin = encryptJumin($juminDigits);
 $juminHash = hashJumin($juminDigits);
 
 $secureStmt = $pdo->prepare("
-    INSERT INTO 2012DaeriMemberSecure (member_num, jumin_encrypted, jumin_hash) 
-    VALUES (?, ?, ?)
-    ON DUPLICATE KEY UPDATE 
-        jumin_encrypted = VALUES(jumin_encrypted),
-        jumin_hash = VALUES(jumin_hash),
-        updated_at = CURRENT_TIMESTAMP
+    INSERT INTO 2012DaeriMemberSecure 
+    (num, Name, Hphone, ..., jumin_encrypted, jumin_hash) 
+    VALUES 
+    (?, ?, ?, ..., ?, ?)
 ");
-$secureStmt->execute([$memberNum, $encryptedJumin, $juminHash]);
+$secureStmt->execute([
+    $memberNum ?? null,  // num 필드 (AUTO_INCREMENT 또는 명시적 지정)
+    $name,
+    $hphone,
+    ...  // 기존 모든 필드
+    $encryptedJumin,  // 암호화된 주민번호
+    $juminHash        // 해시
+]);
 ```
 
-#### 5.2.2 검색 시 해시 사용
+**전환 완료 후** (기존 테이블 사용 중단):
+```php
+require_once __DIR__ . '/../utils/jumin-secure.php';
+
+$jumin = $_POST['jumin'];
+$juminDigits = preg_replace('/[^0-9]/', '', $jumin);
+
+// 새 보안 테이블에만 저장 (기존 테이블 사용 안 함)
+$encryptedJumin = encryptJumin($juminDigits);
+$juminHash = hashJumin($juminDigits);
+
+$secureStmt = $pdo->prepare("
+    INSERT INTO 2012DaeriMemberSecure 
+    (Name, Hphone, ..., jumin_encrypted, jumin_hash) 
+    VALUES 
+    (?, ?, ..., ?, ?)
+");
+$secureStmt->execute([
+    $name,
+    $hphone,
+    ...  // 기존 모든 필드
+    $encryptedJumin,  // 암호화된 주민번호
+    $juminHash        // 해시
+]);
+```
+
+#### 5.2.2 조회 시 새 테이블 사용
+
+**파일**: `pci0327/api/insurance/kj-driver-list.php`
+
+**변경 전** (기존 테이블):
+```php
+$sql = "SELECT * FROM 2012DaeriMember WHERE 1=1";
+```
+
+**변경 후** (새 테이블):
+```php
+// 새 보안 테이블에서 조회
+$sql = "SELECT * FROM 2012DaeriMemberSecure WHERE 1=1";
+```
+
+#### 5.2.3 검색 시 해시 사용
 
 **파일**: `pci0327/api/insurance/kj-driver-list.php`
 
@@ -396,12 +504,8 @@ if (!empty($jumin)) {
     if (strlen($juminDigits) === 13) {
         $juminHash = hashJumin($juminDigits);
         
-        // 새 보안 테이블과 조인하여 검색
-        $sql .= " 
-            INNER JOIN 2012DaeriMemberSecure sec 
-            ON 2012DaeriMember.num = sec.member_num 
-            AND sec.jumin_hash = :jumin_hash
-        ";
+        // 해시로 검색
+        $sql .= " AND jumin_hash = :jumin_hash";
         $params[':jumin_hash'] = $juminHash;
     } else {
         // 부분 검색은 불가능 (보안상 LIKE 검색 불가)
@@ -410,10 +514,11 @@ if (!empty($jumin)) {
 }
 ```
 
-#### 5.2.3 조회 시 마스킹 처리
+#### 5.2.4 조회 시 마스킹 처리
 
 **파일**: `pci0327/api/insurance/kj-driver-list.php`
 
+**전환 후** (새 테이블 사용):
 ```php
 require_once __DIR__ . '/../utils/jumin-secure.php';
 
@@ -421,10 +526,16 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // API 응답에는 마스킹된 주민번호만 전송
 foreach ($results as &$row) {
-    if (!empty($row['Jumin'])) {
-        // 서버에서 마스킹 처리 (암호화된 값에서 복호화 후 마스킹)
-        // 또는 클라이언트에서 마스킹 (해시만 전송)
-        $row['Jumin'] = maskJumin($row['Jumin'], false); // 평문이면 false
+    // jumin_encrypted 필드에서 복호화 후 마스킹
+    if (!empty($row['jumin_encrypted'])) {
+        $decryptedJumin = decryptJumin($row['jumin_encrypted']);
+        $row['Jumin'] = maskJumin($decryptedJumin, false); // 마스킹 처리
+        
+        // 보안 필드는 응답에서 제거
+        unset($row['jumin_encrypted']);
+        unset($row['jumin_hash']);
+    } else {
+        $row['Jumin'] = '';  // 주민번호가 없는 경우
     }
 }
 
@@ -459,46 +570,55 @@ const handleSearch = async () => {
 ### 6.1 단계별 마이그레이션
 
 #### Phase 1: 새 테이블 생성 및 준비 (1일)
-- [ ] `2012DaeriMemberSecure` 테이블 생성
-- [ ] 보안 모듈 개발 및 테스트
+- [ ] `2012DaeriMemberSecure` 테이블 생성 (기존 테이블의 모든 필드 포함)
+- [ ] 보안 모듈 개발 및 테스트 (`jumin-secure.php`)
 - [ ] 테스트 환경에서 검증
 
-#### Phase 2: 신규 데이터 이중 저장 (1일)
-- [ ] API 수정 (저장 시 기존 테이블 + 새 테이블 모두 저장)
-- [ ] 신규 데이터만 새 테이블에 저장 시작
-- [ ] 기존 데이터는 평문 유지 (하위 호환성)
+#### Phase 2: 신규 데이터 새 테이블 저장 시작 (1일)
+- [ ] API 수정 (저장 시 새 테이블만 사용)
+- [ ] 조회 API 수정 (새 테이블에서 조회)
+- [ ] 신규 데이터는 새 테이블에 저장 (주민번호 암호화)
 
 #### Phase 3: 검색 기능 전환 (1일)
 - [ ] 검색 API 수정 (해시 기반 검색)
 - [ ] 프론트엔드 검색 UI 변경 (전체 13자리 입력)
 - [ ] 사용자 안내 문구 추가
 
-#### Phase 4: 기존 데이터 마이그레이션 (2-3일)
-- [ ] 배치 스크립트로 기존 데이터 암호화 및 해시 생성
-- [ ] 새 테이블에 데이터 저장
+#### Phase 4: 기존 데이터 마이그레이션 (3-5일)
+- [ ] 배치 스크립트로 기존 데이터 복사
+- [ ] 주민번호 암호화 및 해시 생성
+- [ ] 새 테이블에 모든 필드 데이터 저장
 - [ ] 마이그레이션 진행 상황 모니터링
 
-#### Phase 5: 안정화 및 검증 (2-3일)
+#### Phase 5: 완전 전환 및 안정화 (2-3일)
+- [ ] 모든 API를 새 테이블로 전환
+- [ ] 기존 테이블 사용 코드 제거
 - [ ] 모든 기능 정상 동작 확인
 - [ ] 성능 테스트
 - [ ] 보안 테스트
 
-#### Phase 6: 기존 테이블 페이드 아웃 (1일)
-- [ ] `2012DaeriMember.Jumin` 필드 사용 중단
-- [ ] 관련 코드 제거
-- [ ] 필요 시 `Jumin` 필드 NULL 처리 또는 제거 (선택)
+#### Phase 6: 기존 테이블 폐기 (1일)
+- [ ] `2012DaeriMember` 테이블 사용 중단 확인 (모든 API 새 테이블 사용)
+- [ ] 데이터베이스 백업 완료 확인
+- [ ] 백업 후 테이블 제거 또는 명시적 폐기 처리 (선택)
+- [ ] 관련 코드 완전 제거
 
 ### 6.2 배치 마이그레이션 스크립트
 
-**파일**: `pci0327/scripts/migrate-jumin-to-secure-table.php`
+**파일**: `pci0327/scripts/migrate-to-secure-table.php`
 
 ```php
 <?php
 /**
- * 주민번호 보안 테이블 마이그레이션 스크립트
+ * 2012DaeriMember → 2012DaeriMemberSecure 완전 마이그레이션 스크립트
  * 
  * 사용법:
- * php migrate-jumin-to-secure-table.php [--dry-run] [--batch-size=1000]
+ * php migrate-to-secure-table.php [--dry-run] [--batch-size=1000]
+ * 
+ * 기능:
+ * - 기존 테이블의 모든 레코드를 새 테이블로 복사
+ * - 주민번호는 암호화하여 저장 (jumin_encrypted)
+ * - 해시 생성하여 저장 (jumin_hash)
  */
 
 require_once __DIR__ . '/../api/config/db_config.php';
@@ -507,21 +627,19 @@ require_once __DIR__ . '/../api/utils/jumin-secure.php';
 $dryRun = in_array('--dry-run', $argv);
 $batchSize = 1000;
 
-echo "=== 주민번호 보안 테이블 마이그레이션 시작 ===\n";
+echo "=== 2012DaeriMember → 2012DaeriMemberSecure 마이그레이션 시작 ===\n";
 echo "Dry Run: " . ($dryRun ? 'YES' : 'NO') . "\n";
 echo "Batch Size: {$batchSize}\n\n";
 
 try {
     $pdo = getDbConnection();
     
-    // 마이그레이션 대상 확인
+    // 마이그레이션 대상 확인 (새 테이블에 없는 모든 레코드)
     $totalCount = $pdo->query("
         SELECT COUNT(*) 
         FROM 2012DaeriMember m
-        LEFT JOIN 2012DaeriMemberSecure s ON m.num = s.member_num
-        WHERE m.Jumin IS NOT NULL 
-        AND m.Jumin != ''
-        AND s.member_num IS NULL
+        LEFT JOIN 2012DaeriMemberSecure s ON m.num = s.num
+        WHERE s.num IS NULL
     ")->fetchColumn();
     
     echo "총 마이그레이션 대상: {$totalCount}건\n\n";
@@ -534,14 +652,12 @@ try {
     $offset = 0;
     
     while (true) {
-        // 배치 단위로 조회 (새 테이블에 없는 데이터만)
+        // 배치 단위로 조회 (새 테이블에 없는 모든 레코드)
         $stmt = $pdo->prepare("
-            SELECT m.num, m.Jumin 
+            SELECT m.* 
             FROM 2012DaeriMember m
-            LEFT JOIN 2012DaeriMemberSecure s ON m.num = s.member_num
-            WHERE m.Jumin IS NOT NULL 
-            AND m.Jumin != ''
-            AND s.member_num IS NULL
+            LEFT JOIN 2012DaeriMemberSecure s ON m.num = s.num
+            WHERE s.num IS NULL
             ORDER BY m.num
             LIMIT :limit OFFSET :offset
         ");
@@ -559,32 +675,90 @@ try {
         
         foreach ($rows as $row) {
             $memberNum = $row['num'];
-            $jumin = $row['Jumin'];
+            $jumin = $row['Jumin'] ?? null;
             
             try {
-                // 주민번호 정규화
-                $juminDigits = preg_replace('/[^0-9]/', '', $jumin);
-                if (strlen($juminDigits) !== 13) {
-                    echo "SKIP [num={$memberNum}]: 유효하지 않은 주민번호 ({$jumin})\n";
-                    $skipped++;
-                    continue;
+                // 주민번호 암호화 및 해시 생성
+                $encryptedJumin = null;
+                $juminHash = null;
+                
+                if (!empty($jumin)) {
+                    $juminDigits = preg_replace('/[^0-9]/', '', $jumin);
+                    if (strlen($juminDigits) === 13) {
+                        // 암호화 및 해시 생성
+                        $encryptedJumin = encryptJumin($juminDigits);
+                        $juminHash = hashJumin($juminDigits);
+                    } else {
+                        echo "SKIP [num={$memberNum}]: 유효하지 않은 주민번호 ({$jumin})\n";
+                        $skipped++;
+                        continue;
+                    }
                 }
                 
-                // 암호화 및 해시 생성
-                $encryptedJumin = encryptJumin($juminDigits);
-                $juminHash = hashJumin($juminDigits);
-                
                 if (!$dryRun) {
-                    // 새 보안 테이블에 저장
+                    // 기존 테이블의 모든 필드를 새 테이블에 복사
+                    // 주민번호는 암호화된 형태로 저장
                     $insertStmt = $pdo->prepare("
                         INSERT INTO 2012DaeriMemberSecure 
-                        (member_num, jumin_encrypted, jumin_hash) 
-                        VALUES (?, ?, ?)
-                        ON DUPLICATE KEY UPDATE 
-                            jumin_encrypted = VALUES(jumin_encrypted),
-                            jumin_hash = VALUES(jumin_hash)
+                        (
+                            num, moCertiNum, 2012DaeriCompanyNum, InsuranceCompany, CertiTableNum,
+                            Name, nai, push, etag, FirstStart, state, cancel, sangtae,
+                            Hphone, InputDay, OutPutDay, EndorsePnum,
+                            dongbuCerti, dongbuSelNumber, dongbusigi, dongbujeongi,
+                            nabang_1, ch, changeCom, sPrem, sago, p_buho,
+                            a6b, a7b, a8b, preminum1, wdate, endorse_day,
+                            rate, reasion, manager, progress,
+                            jumin_encrypted, jumin_hash
+                        ) 
+                        VALUES 
+                        (
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                        )
                     ");
-                    $insertStmt->execute([$memberNum, $encryptedJumin, $juminHash]);
+                    
+                    $insertStmt->execute([
+                        $row['num'],
+                        $row['moCertiNum'],
+                        $row['2012DaeriCompanyNum'],
+                        $row['InsuranceCompany'],
+                        $row['CertiTableNum'],
+                        $row['Name'],
+                        $row['nai'],
+                        $row['push'],
+                        $row['etag'],
+                        $row['FirstStart'],
+                        $row['state'],
+                        $row['cancel'],
+                        $row['sangtae'],
+                        $row['Hphone'],
+                        $row['InputDay'],
+                        $row['OutPutDay'],
+                        $row['EndorsePnum'],
+                        $row['dongbuCerti'],
+                        $row['dongbuSelNumber'],
+                        $row['dongbusigi'],
+                        $row['dongbujeongi'],
+                        $row['nabang_1'],
+                        $row['ch'],
+                        $row['changeCom'],
+                        $row['sPrem'],
+                        $row['sago'],
+                        $row['p_buho'],
+                        $row['a6b'],
+                        $row['a7b'],
+                        $row['a8b'],
+                        $row['preminum1'],
+                        $row['wdate'],
+                        $row['endorse_day'],
+                        $row['rate'],
+                        $row['reasion'],
+                        $row['manager'],
+                        $row['progress'],
+                        $encryptedJumin,  // 암호화된 주민번호
+                        $juminHash        // 해시
+                    ]);
                 }
                 
                 $success++;
@@ -702,14 +876,19 @@ try {
 ## 10. 롤백 계획
 
 ### 10.1 롤백 시나리오
-- **시나리오 1**: 새 테이블 오류 발견
-  - **조치**: 검색 API 롤백 (기존 테이블 사용)
-  - **영향**: 새 데이터만 영향 (기존 데이터 안전)
+- **시나리오 1**: 새 테이블 오류 발견 (마이그레이션 단계)
+  - **조치**: API 롤백 (기존 테이블 사용)
+  - **영향**: 새 테이블 데이터는 보존 (백업 용도)
 
 ### 10.2 롤백 절차
-1. 검색 API 롤백 (기존 테이블 `Jumin` 필드 사용)
-2. 저장 API 롤백 (기존 테이블만 저장)
-3. 새 테이블은 유지 (데이터 보존)
+1. **API 롤백**: 모든 API를 기존 `2012DaeriMember` 테이블 사용으로 롤백
+2. **데이터 확인**: 기존 테이블 데이터 정상 확인
+3. **새 테이블 유지**: 마이그레이션 재시도를 위해 새 테이블 유지 (선택)
+4. **문제 해결 후 재마이그레이션**: 문제 해결 후 다시 마이그레이션 시도
+
+### 10.3 롤백 시 주의사항
+- 새 테이블에 저장된 데이터는 그대로 유지 (백업 용도)
+- 기존 테이블과 새 테이블 간 데이터 동기화 필요 (마이그레이션 재실행)
 
 ---
 
