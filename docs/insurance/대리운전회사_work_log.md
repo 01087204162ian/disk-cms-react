@@ -781,7 +781,367 @@ https://pcikorea.com/api/insurance/migrate-to-secure-table.php?batch-size=500
 
 ---
 
+### 2026-01-18 - 해지 상태 업데이트 API 개선 및 프론트엔드 연동
+
+#### 작업 시간
+- **시작**: 2026-01-18 22:04
+- **작업 내용**: 해지 상태 업데이트 엔드포인트 재작성 및 프론트엔드 연동 수정
+
+#### 작업 내용
+
+**1. updateHaeji.php API 재작성**
+- **파일**: `pci0327/kj/api/kjDaeri/updateHaeji.php`
+- **목적**: 기존 엔드포인트를 새롭게 작성하여 로깅 및 에러 처리 개선
+- **주요 개선사항**:
+  - 로그 기능 추가 (`logs/updateHaeji-YYYY-MM-DD.log`)
+  - 필수 파라미터 검증 강화
+  - 기존 데이터 존재 확인 로직 추가
+  - 상세한 에러 로깅 및 스택 트레이스 기록
+  - 해지 상태 업데이트 로직 개선
+
+**2. 해지 처리 로직 개선**
+- **문제점**: 해지 처리 후 다시 조회 시 "정상"으로 표시되는 문제
+- **원인**: `push` 값을 업데이트하지 않고 `cancel`만 설정
+- **해결**:
+  - `push = '2'` (해지) 전송 시: `push = '4'` 유지, `cancel = '42'` 설정 → "해지중" 상태
+  - `push = '4'` (정상) 전송 시: `push = '4'` 유지, `cancel = NULL` 설정 → "정상" 상태
+  - 프론트엔드 표시 로직: `push = 4` && `cancel = 42` → "해지중" 표시
+
+**3. 프론트엔드 엔드포인트 수정**
+- **파일**: `pci0327/kj/js/driverSearch.js`
+- **변경사항**:
+  - 하드코딩된 URL 제거: `https://kjstation.kr/api/kjDaeri/updateHaeji.php`
+  - 상대 경로로 변경: `./api/kjDaeri/updateHaeji.php`
+  - 다른 API 호출과 일관성 유지
+
+**4. JavaScript 비교 로직 수정**
+- **파일**: `pci0327/kj/js/driverSearch.js`
+- **문제점**: 데이터베이스에서 `cancel` 필드가 `int(2)` 타입인데, JavaScript에서 문자열만 비교
+- **해결**:
+  ```javascript
+  // 변경 전
+  if (item.cancel === '42')
+  
+  // 변경 후
+  if (item.cancel == 42 || item.cancel === '42')
+  ```
+- **적용 범위**:
+  - 해지중 표시: `cancel == 42 || cancel === '42'`
+  - 청약 해지: `cancel == 12 || cancel === '12'`
+  - 청약거절: `cancel == 13 || cancel === '13'`
+
+**5. 신규청약 저장 API 수정**
+- **파일**: `pci0327/kj/api/kjDaeri/save_endorse_data_encryption.php`
+- **문제점**: `SQLSTATE[HY000]: General error: 1364 Field '...' doesn't have a default value` 에러 발생
+- **원인**: 
+  - `a8b` 필드: 기본값 없이 NOT NULL 제약조건
+  - `reasion` 필드: 기본값 없이 NOT NULL 제약조건
+  - `InputDay` 필드: 잘못된 날짜 형식 전달 ("배서기준일: YYYY-MM-DD" 형식)
+- **해결**:
+  1. `a8b` 필드 추가:
+     ```php
+     INSERT INTO 2012DaeriMemberSecure (
+         ...
+         etag, a8b, reasion
+     ) VALUES (
+         ...
+         :etag, :a8b, :reasion
+     )
+     $stmt->bindValue(':a8b', '', PDO::PARAM_STR);
+     ```
+  2. `reasion` 필드 추가:
+     ```php
+     $stmt->bindValue(':reasion', '', PDO::PARAM_STR);
+     ```
+  3. `InputDay` 날짜 형식 수정:
+     - 프론트엔드(`home.js`): `saveEndorse` 함수에서 `formattedDate` 변수(YYYY-MM-DD 형식) 직접 전달
+     - 변경 전: `document.getElementById('endorseDay').textContent` 사용 → "배서기준일: YYYY-MM-DD" 포함
+     - 변경 후: `formattedDate` 변수 직접 사용 → "YYYY-MM-DD" 형식만 전달
+
+**6. 프론트엔드 저장 로직 수정**
+- **파일**: `pci0327/kj/js/home.js`
+- **수정 내용**: `saveEndorse` 함수에서 날짜 형식 문제 해결
+- **변경 사항**: `endorseDay` 엘리먼트의 `textContent` 대신 저장된 `formattedDate` 변수 사용
+
+#### 기술적 세부사항
+
+**해지 상태 처리 흐름**:
+1. **정상 → 해지 클릭**:
+   - 프론트엔드: `push = '2'` 전송
+   - 백엔드: `push = '4'`, `cancel = '42'`, `sangtae = '1'` 저장
+   - 결과: "해지중" 상태로 표시
+
+2. **해지중 → 정상 클릭**:
+   - 프론트엔드: `push = '4'` 전송
+   - 백엔드: `push = '4'`, `cancel = NULL`, `sangtae = '1'` 저장
+   - 결과: "정상" 상태로 표시
+
+3. **최종 해지 처리**:
+   - `changeEndorse.php`에서 `push = '2'`, `cancel = '42'`, `sangtae = '2'` 설정
+   - 결과: "해지" 상태로 표시
+
+**로그 파일 위치**:
+- `pci0327/kj/api/kjDaeri/logs/updateHaeji-YYYY-MM-DD.log`
+- 요청 시작/종료, POST 데이터, 기존 데이터 확인, 업데이트 결과, 에러 스택 트레이스 기록
+
+#### 테스트 결과
+
+**성공 케이스**:
+- ✅ 정상 → 해지 클릭 시 "해지중" 상태로 표시
+- ✅ 해지중 → 정상 클릭 시 "정상" 상태로 표시
+- ✅ 데이터베이스에 올바른 값 저장 확인
+- ✅ 로그 파일에 상세 기록 확인
+
+#### 향후 작업 계획
+
+1. **추가 테스트**
+   - 다양한 상태 전환 시나리오 테스트
+   - 에러 케이스 처리 확인
+
+2. **다른 API 개선**
+   - 유사한 패턴의 API들도 로깅 및 에러 처리 개선
+   - 일관된 API 응답 형식 유지
+
+---
+
+## 📋 업무 흐름 (Business Flow)
+
+### 전체 시스템 흐름도
+
+```
+로그인 (index.html)
+    ↓
+대시보드 (dashboard.html)
+    ├─ 증권정보 탭 (home.js)
+    │   ├─ 증권 목록 조회
+    │   ├─ 신규청약 모달 → 배서 등록
+    │   ├─ 진행중인 배서 목록
+    │   └─ 진행 완료 배서 목록
+    │
+    ├─ 기사찾기 탭 (driverSearch.js)
+    │   ├─ 기사 검색 (이름으로 검색)
+    │   ├─ 기사 목록 조회
+    │   ├─ 상태 변경 (정상 ↔ 해지)
+    │   └─ 해지중 상태 표시
+    │
+    ├─ 문자리스트 탭 (sms.js)
+    │   ├─ 문자 발송 내역 조회
+    │   └─ 문자 발송 기능
+    │
+    └─ 사고 처리 (sago.js)
+        └─ 사고 정보 등록 및 관리
+```
+
+### 1. 로그인 및 인증 흐름
+
+**파일**: `index.html`, `js/login.js`, `api/customer/login.php`
+
+1. **로그인 페이지 접속**
+   - 사용자 ID, 비밀번호 입력
+   - `login()` 함수 호출
+
+2. **서버 인증**
+   - `2012Costomer` 테이블에서 사용자 조회
+   - MD5 해시로 비밀번호 검증
+   - 세션 생성 (`$_SESSION['userId']`, `$_SESSION['cNum']`)
+   - 쿠키 설정 (`userId`, `cNum`, `company`, `nAme`)
+
+3. **대시보드 이동**
+   - `dashboard.html`로 리다이렉트
+   - 세션 타임아웃 타이머 시작 (30분)
+
+### 2. 증권정보 탭 업무 흐름
+
+**파일**: `js/home.js`, `api/customer/home_data.php`
+
+#### 2.1 증권 목록 조회
+1. **페이지 로드 시**
+   - `loadHomeData()` 함수 호출
+   - `api/customer/home_data.php` 호출
+   - `2012CertiTable` 테이블에서 증권 목록 조회
+   - 동적 카드 생성 및 표시
+
+2. **증권 카드 클릭**
+   - `viewPolicyDetail()` 함수 호출
+   - 증권 상세 정보 모달 표시
+   - 해당 증권의 기사 목록 조회
+
+#### 2.2 신규청약 (배서 등록)
+1. **신규청약 모달 열기**
+   - 증권 카드에서 "신규청약" 버튼 클릭
+   - `endorseT()` 함수 호출
+   - 모달에 입력 폼 생성
+
+2. **배서 정보 입력**
+   - 성명, 주민번호, 핸드폰번호 입력
+   - 증권성격 선택 (대리/탁송/대리렌트/탁송렌트)
+   - 배서기준일 자동 설정
+
+3. **저장 처리**
+   - `saveEndorse()` 함수 호출
+   - `api/kjDaeri/save_endorse_data_encryption.php` 호출
+   - 주민번호/핸드폰번호 암호화 (AES-256-GCM)
+   - 해시 생성 (SHA-256)
+   - `2012DaeriMemberSecure` 테이블에 저장
+   - `loadHomeData()` 호출하여 목록 갱신
+
+4. **진행중인 배서 목록 갱신**
+   - `toDayEndorse()` 함수 호출
+   - `api/customer/home_data_endorse.php` 호출
+   - `sangtae = '1'` 조건으로 조회
+   - 테이블에 표시
+
+#### 2.3 진행 완료 배서 목록
+- `toDayEndorseAfter()` 함수 호출
+- `api/customer/home_data_endorse_after.php` 호출
+- `sangtae = '2'` 조건으로 조회
+- 완료된 배서 목록 표시
+
+### 3. 기사찾기 탭 업무 흐름
+
+**파일**: `js/driverSearch.js`, `api/customer/driver_data.php`
+
+#### 3.1 기사 검색
+1. **검색 조건 입력**
+   - 기사 이름 입력 (선택사항)
+   - 검색 버튼 클릭
+
+2. **기사 목록 조회**
+   - `driverSearch()` 함수 호출
+   - `api/customer/driver_data.php` 호출
+   - `2012DaeriMemberSecure` 테이블에서 조회
+   - 조건: `push = '4'` (정상) 또는 `push = '1' AND sangtae = '1'` (청약중)
+   - 주민번호/핸드폰번호 복호화하여 표시
+
+3. **페이지네이션**
+   - 한 페이지에 20개씩 표시
+   - 데스크탑/모바일 각각 페이지네이션 제공
+
+#### 3.2 상태 변경 (정상 ↔ 해지)
+1. **해지 처리**
+   - 상태 드롭다운에서 "해지" 선택
+   - `updateHaeji()` 함수 호출
+   - 사용자 확인 메시지
+   - `api/kjDaeri/updateHaeji.php` 호출
+   - `push = '4'`, `cancel = '42'`, `sangtae = '1'` 저장
+   - 결과: "해지중" 상태로 표시
+
+2. **정상 처리**
+   - 해지중 상태에서 "정상" 선택
+   - `push = '4'`, `cancel = NULL`, `sangtae = '1'` 저장
+   - 결과: "정상" 상태로 표시
+
+3. **목록 갱신**
+   - 저장 성공 시 `driverSearch()` 재호출
+   - 최신 상태로 목록 갱신
+
+#### 3.3 상태 표시 로직
+- **정상**: `push = 4` && `cancel != 42` → 드롭다운 표시
+- **해지중**: `push = 4` && `cancel = 42` → "해지중" 텍스트 표시
+- **해지**: `push = 2` → "해지" 텍스트 표시
+- **청약**: `push = 1` && `cancel != 12, 13` → "청약" 텍스트 표시
+
+### 4. 문자리스트 탭 업무 흐름
+
+**파일**: `js/sms.js`, `api/customer/sms_data.php`
+
+1. **문자 발송 내역 조회**
+   - 페이지 로드 시 `loadSmsData()` 호출
+   - `api/customer/sms_data.php` 호출
+   - `SMSData` 테이블에서 조회
+   - 발송 내역 목록 표시
+
+2. **문자 발송**
+   - 발송 대상 선택
+   - 문자 내용 입력
+   - 발송 API 호출
+   - 발송 결과 표시
+
+### 5. 데이터 흐름
+
+#### 5.1 암호화/복호화 흐름
+```
+입력 (프론트엔드)
+    ↓
+암호화 (백엔드)
+    ├─ 주민번호: encryptJumin() → jumin_encrypted
+    ├─ 해시: hashJumin() → jumin_hash
+    ├─ 핸드폰: encryptPhone() → hphone_encrypted
+    └─ 해시: hashPhone() → hphone_hash
+    ↓
+저장 (2012DaeriMemberSecure 테이블)
+    ↓
+조회 시 복호화
+    ├─ decryptJumin() → JuminDecrypted
+    └─ decryptPhone() → HphoneDecrypted
+    ↓
+표시 (프론트엔드)
+```
+
+#### 5.2 상태 관리 흐름
+```
+신규청약 등록
+    ↓
+push = 1, sangtae = 1 (청약중)
+    ↓
+배서 처리 완료
+    ↓
+push = 4, sangtae = 2 (정상)
+    ↓
+해지 신청
+    ↓
+push = 4, cancel = 42, sangtae = 1 (해지중)
+    ↓
+해지 처리 완료
+    ↓
+push = 2, cancel = 42, sangtae = 2 (해지)
+```
+
+### 6. 주요 API 엔드포인트
+
+#### 6.1 인증 관련
+- `api/customer/login.php` - 로그인
+- `api/customer/check_session.php` - 세션 확인
+
+#### 6.2 증권정보 관련
+- `api/customer/home_data.php` - 증권 목록 조회
+- `api/customer/home_data_endorse.php` - 진행중인 배서 목록
+- `api/customer/home_data_endorse_after.php` - 진행 완료 배서 목록
+- `api/kjDaeri/save_endorse_data_encryption.php` - 신규청약 저장
+
+#### 6.3 기사찾기 관련
+- `api/customer/driver_data.php` - 기사 목록 조회
+- `api/kjDaeri/updateHaeji.php` - 해지 상태 업데이트
+
+#### 6.4 문자 관련
+- `api/customer/sms_data.php` - 문자 발송 내역 조회
+
+### 7. 주요 테이블 구조
+
+#### 7.1 2012DaeriMemberSecure
+- **역할**: 기사 정보 저장 (암호화된 주민번호/핸드폰번호)
+- **주요 필드**:
+  - `num`: 기사 번호 (PK)
+  - `2012DaeriCompanyNum`: 대리운전회사 번호
+  - `CertiTableNum`: 증권 테이블 번호
+  - `jumin_encrypted`: 암호화된 주민번호
+  - `jumin_hash`: 주민번호 해시
+  - `hphone_encrypted`: 암호화된 핸드폰번호
+  - `hphone_hash`: 핸드폰번호 해시
+  - `push`: 상태 (1=청약, 4=정상, 2=해지)
+  - `sangtae`: 처리 상태 (1=진행중, 2=완료)
+  - `cancel`: 해지 코드 (42=해지중)
+
+#### 7.2 2012CertiTable
+- **역할**: 증권 정보 저장
+- **주요 필드**: 증권번호, 보험사, 증권명 등
+
+#### 7.3 SMSData
+- **역할**: 문자 발송 내역 저장
+
+---
+
 **작성일**: 2026-01-17
 **학습자**: AI Assistant
-**마지막 업데이트**: 2026-01-17 (2012DaeriMemberSecure 전환 작업 완료)
-**다음 학습 계획**: 마이그레이션 실행 및 테스트, 데이터 검증
+**마지막 업데이트**: 2026-01-18 22:04 (업무 흐름 문서 추가 완료)
+**다음 학습 계획**: 추가 테스트 및 다른 API 개선
