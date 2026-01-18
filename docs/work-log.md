@@ -12,6 +12,74 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-17 (KJ 대리운전) - 2012DaeriMemberSecure 테이블 마이그레이션 및 추가 API 암호화 처리
+
+#### 작업 내용
+- **기능**: `2012DaeriMember` 테이블의 주민번호/핸드폰 번호 암호화 마이그레이션 관련 추가 API 수정
+- **파일**: 
+  - `pci0327/api/insurance/kj-policy-search.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-policy-stats.php` (테이블 변경, 주민번호 복호화)
+  - `pci0327/api/insurance/kj-certi-change-policy.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-certi-change-policy-excel.php` (테이블 변경, 주민번호/핸드폰 복호화)
+  - `pci0327/api/insurance/kj-driver-phone-update.php` (테이블 변경, 핸드폰 암호화 저장)
+  - `pci0327/api/insurance/kj-daily-endorse-status.php` (테이블 변경, 주민번호/핸드폰 복호화)
+  - `pci0327/api/insurance/kj-endorse-update-endorse-day.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-endorse-termination.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-certi-detail.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-company-detail.php` (테이블 변경)
+  - `pci0327/api/insurance/kj-company-list.php` (테이블 변경)
+- **주요 구현 사항**:
+  - ✅ 증권별 코드 페이지 관련 API 수정
+    - `kj-policy-search.php`: `2012DaeriMember` → `2012DaeriMemberSecure` (COUNT 쿼리)
+    - `kj-policy-stats.php`: 테이블 변경, 주민번호 복호화 및 2019rate 조회 시 복호화된 주민번호 사용
+  - ✅ 증권번호 변경 관련 API 수정
+    - `kj-certi-change-policy.php`: SELECT/UPDATE 쿼리 테이블 변경
+    - `kj-certi-change-policy-excel.php`: 테이블 변경, 주민번호/핸드폰 번호 복호화 후 엑셀 데이터 생성
+  - ✅ 추가 API 파일 수정 (총 8개)
+    - `kj-driver-phone-update.php`: 핸드폰 번호 암호화 저장 (`encryptPhone`, `hashPhone`)
+    - `kj-daily-endorse-status.php`: 주민번호/핸드폰 번호 복호화, 2019rate 조회 시 복호화된 주민번호 사용
+    - `kj-endorse-update-endorse-day.php`: SELECT/UPDATE 쿼리 테이블 변경 (주민번호/핸드폰 조회 안 함)
+    - `kj-endorse-termination.php`: UPDATE 쿼리 테이블 변경 (주민번호/핸드폰 조회 안 함)
+    - `kj-certi-detail.php`: COUNT 쿼리 테이블 변경
+    - `kj-company-detail.php`: COUNT 쿼리 테이블 변경
+    - `kj-company-list.php`: EXISTS 서브쿼리 및 COUNT 쿼리 테이블 변경
+  - ✅ 보안 모듈 로드 추가
+    - 주민번호/핸드폰 번호를 조회하거나 저장하는 모든 API에 `jumin-secure.php` 모듈 로드
+  - ✅ 복호화 처리
+    - 조회 API에서 `jumin_encrypted`, `hphone_encrypted` 필드를 복호화하여 응답에 `Jumin`, `Hphone`으로 반환
+    - 2019rate 조회 시 복호화된 주민번호(하이픈 제거, 13자리 숫자) 사용
+  - ✅ 암호화 저장
+    - 저장/업데이트 API에서 평문 주민번호/핸드폰 번호를 `encryptJumin`/`encryptPhone`으로 암호화하여 저장
+    - 해시 생성 (`hashJumin`, `hashPhone`)하여 검색용 해시 필드에 저장
+
+#### 수정된 API 목록 (이번 작업)
+1. `kj-policy-search.php` - 증권 리스트 조회
+2. `kj-policy-stats.php` - 증권별 보험료 통계
+3. `kj-certi-change-policy.php` - 증권번호 변경 (검색 및 실행)
+4. `kj-certi-change-policy-excel.php` - 증권번호 변경 엑셀 다운로드
+5. `kj-driver-phone-update.php` - 기사 전화번호 업데이트
+6. `kj-daily-endorse-status.php` - 일일배서 배서현황 조회
+7. `kj-endorse-update-endorse-day.php` - 배서기준일 업데이트
+8. `kj-endorse-termination.php` - 배서 해지 신청
+9. `kj-certi-detail.php` - 증권 상세 정보
+10. `kj-company-detail.php` - 업체 상세 정보
+11. `kj-company-list.php` - 업체 목록
+
+#### 전체 암호화 처리 완료 현황
+- ✅ 저장 API: `kj-endorse-save.php`, `kj-driver-phone-update.php`
+- ✅ 조회 API: `kj-driver-list.php`, `kj-endorse-list.php`, `kj-daily-endorse-search.php`, `kj-certi-member-list.php`, `kj-daily-endorse-status.php`, `kj-policy-stats.php`
+- ✅ 업데이트 API: `kj-endorse-update-status.php`, `kj-endorse-update-member.php`, `kj-endorse-update-endorse-day.php`, `kj-driver-phone-update.php`
+- ✅ 정산 관련 API: `kj-settlement-adjustment.php`, `kj-settlement-monthly-endorse-search.php`, `kj-settlement-excel-data.php`
+- ✅ 기타 API: `kj-policy-search.php`, `kj-certi-change-policy.php`, `kj-certi-change-policy-excel.php`, `kj-endorse-termination.php`, `kj-certi-detail.php`, `kj-company-detail.php`, `kj-company-list.php`
+
+#### 해결한 이슈
+- `2012DaeriMember` 테이블을 사용하는 모든 API 파일 확인 및 암호화 처리 완료
+- 주민번호/핸드폰 번호 조회 시 복호화 처리 적용
+- 주민번호/핸드폰 번호 저장 시 암호화 처리 적용
+- 2019rate 테이블 조회 시 복호화된 주민번호 사용
+
+---
+
 ### 2026-01-14 (약국배상책임보험) - 운영 가이드 문서 페이지 헤더 고정 및 목차 동기화 개선
 
 #### 작업 내용
