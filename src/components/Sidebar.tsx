@@ -263,12 +263,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             levelStyle.padding,
             levelStyle.margin,
             levelStyle.fontSize,
-            level === 0 && 'hover:bg-accent/50',
-            level === 1 && 'hover:bg-accent/40',
-            level >= 2 && 'hover:bg-accent/30',
             isActive
-              ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-accent text-foreground',
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+              : cn(
+                  'text-foreground',
+                  level === 0 && 'hover:bg-accent/50',
+                  level === 1 && 'hover:bg-accent/40',
+                  level >= 2 && 'hover:bg-accent/30'
+                ),
             level >= 2 && 'border-l-2 border-border/50'
           )}
         >
