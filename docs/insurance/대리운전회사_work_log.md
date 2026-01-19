@@ -1141,7 +1141,113 @@ push = 2, cancel = 42, sangtae = 2 (해지)
 
 ---
 
+### 2026-01-17 - 비밀번호 찾기 기능 구현
+
+#### 작업 개요
+- **목적**: 사용자가 비밀번호를 분실했을 때 핸드폰 번호 인증을 통해 비밀번호를 재설정할 수 있는 기능 추가
+- **조건**: 아이디는 알고 있는 상태에서 등록된 핸드폰 번호와 일치하면 비밀번호 변경 가능
+- **URL**: https://pcikorea.com/kj/
+
+#### 완료된 작업
+
+##### 1. 프론트엔드 구현
+- ✅ 로그인 페이지에 "비밀번호 찾기" 버튼 추가 (`pci0327/kj/index.html`)
+- ✅ 비밀번호 찾기 모달 생성 (2단계 프로세스)
+  - 단계 1: 아이디 + 핸드폰 번호 입력
+  - 단계 2: 새 비밀번호 입력 (2회)
+- ✅ JavaScript 함수 구현 (`pci0327/kj/js/forgot-password.js`)
+  - `showForgotPasswordModal()`: 모달 표시
+  - `verifyPhone()`: 핸드폰 번호 인증
+  - `resetPassword()`: 비밀번호 재설정
+  - 핸드폰 번호 정규화 및 포맷팅 함수
+
+##### 2. 백엔드 API 구현
+- ✅ `api/customer/verify_phone.php`: 핸드폰 번호 인증 API
+  - 아이디와 핸드폰 번호 일치 확인
+  - 권한 확인 (`permit` 필드)
+  - 핸드폰 번호 정규화 처리
+- ✅ `api/customer/reset_password.php`: 비밀번호 재설정 API
+  - 비밀번호 유효성 검사 (6자 이상, 영문+숫자 포함)
+  - 핸드폰 번호 재인증
+  - MD5 해시로 비밀번호 저장 (기존 시스템과 호환)
+  - 로그 기록
+
+##### 3. 비밀번호 검증 규칙
+- **최소 길이**: 6자 이상
+- **필수 포함**: 영문(a-z, A-Z) + 숫자(0-9)
+- **저장 방식**: MD5 해시 (기존 시스템과 호환)
+
+##### 4. 주요 기능
+- **핸드폰 번호 인증**: 아이디와 등록된 핸드폰 번호 일치 확인
+- **2단계 프로세스**: 인증 → 비밀번호 재설정
+- **입력 검증**: 프론트엔드 및 백엔드 양쪽에서 검증
+- **에러 처리**: 상세한 에러 메시지 제공
+- **보안**: PDO Prepared Statement 사용, 입력 데이터 필터링
+
+#### 기술적 세부사항
+
+**비밀번호 찾기 프로세스**:
+```
+사용자 요청
+    ↓
+1. 아이디 + 핸드폰 번호 입력
+    ↓
+2. 서버 검증 (verify_phone.php)
+    - 아이디 존재 확인
+    - 핸드폰 번호 일치 확인
+    - 권한 확인
+    ↓
+3. 인증 성공 → 비밀번호 재설정 페이지
+    ↓
+4. 새 비밀번호 입력 (2회)
+    - 유효성 검사: 6자 이상, 영문+숫자 포함
+    ↓
+5. 비밀번호 변경 처리 (reset_password.php)
+    - 핸드폰 번호 재인증
+    - MD5 해시로 변환
+    - 데이터베이스 업데이트
+    ↓
+6. 완료 메시지 → 로그인 페이지로 이동
+```
+
+**API 엔드포인트**:
+- `POST api/customer/verify_phone.php`
+  - 파라미터: `user_id`, `hphone`
+  - 응답: `{success, verified, message}`
+- `POST api/customer/reset_password.php`
+  - 파라미터: `user_id`, `hphone`, `new_password`, `confirm_password`
+  - 응답: `{success, message}`
+
+**데이터베이스 스키마**:
+- 테이블: `2012Costomer`
+- 필드: `mem_id` (varchar(15)), `passwd` (varchar(32), MD5), `hphone` (varchar(14)), `permit` (char(2))
+
+#### 구현 파일 목록
+- `pci0327/kj/index.html` - 로그인 페이지 (비밀번호 찾기 버튼 추가)
+- `pci0327/kj/js/forgot-password.js` - 비밀번호 찾기 JavaScript 함수
+- `pci0327/kj/api/customer/verify_phone.php` - 핸드폰 번호 인증 API
+- `pci0327/kj/api/customer/reset_password.php` - 비밀번호 재설정 API
+
+#### 보안 고려사항
+- ✅ PDO Prepared Statement 사용 (SQL Injection 방지)
+- ✅ 입력 데이터 필터링 및 검증
+- ✅ 핸드폰 번호 재인증 (비밀번호 변경 시)
+- ✅ 로그 기록 (비밀번호 변경 이력)
+- ⚠️ 개선 권장: MD5 → `password_hash()` 전환 (향후 작업)
+- ⚠️ 개선 권장: 인증 시도 제한 (브루트포스 방지)
+
+---
+
+## 📚 참고 문서
+
+- **기획 문서**: `disk-cms-react/docs/insurance/plans/2012DaeriMember-Jumin-암호화-기획.md`
+- **작업 재개 가이드**: `disk-cms-react/docs/insurance/plans/작업-재개-가이드.md`
+- **보안 모듈 완료 보고**: `disk-cms-react/docs/insurance/plans/보안모듈-개발-완료.md`
+- **비밀번호 찾기 기능 설계**: `disk-cms-react/docs/insurance/plans/비밀번호-찾기-기능-설계.md`
+
+---
+
 **작성일**: 2026-01-17
 **학습자**: AI Assistant
-**마지막 업데이트**: 2026-01-18 22:04 (업무 흐름 문서 추가 완료)
+**마지막 업데이트**: 2026-01-17 (비밀번호 찾기 기능 추가)
 **다음 학습 계획**: 추가 테스트 및 다른 API 개선
