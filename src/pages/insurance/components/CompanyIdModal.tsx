@@ -146,7 +146,7 @@ export default function CompanyIdModal({
     try {
       const response = await api.post('/api/insurance/kj-company/id-update-phone', {
         num,
-        hphone: cleaned,
+        hphone: phone, // 하이픈 포함하여 저장
       })
 
       if (response.data.success) {
@@ -340,7 +340,7 @@ export default function CompanyIdModal({
         dNum: companyNum,
         mem_id: newId.trim(),
         password: newPassword.trim(),
-        phone: removePhoneHyphen(newPhone),
+        phone: newPhone, // 하이픈 포함하여 저장
         company: companyNameDisplay,
         user: newUser.trim(),
       })

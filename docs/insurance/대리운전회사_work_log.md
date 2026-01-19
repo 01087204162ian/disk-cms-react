@@ -1238,6 +1238,111 @@ push = 2, cancel = 42, sangtae = 2 (해지)
 
 ---
 
+### 2026-01-17 - 비밀번호 찾기 기능 개선 (인증번호 SMS 기반)
+
+#### 작업 개요
+- **목적**: 비밀번호 찾기 기능을 보안 강화된 인증번호(SMS) 기반으로 변경
+- **변경 사항**: 모달 방식 → 별도 페이지 방식으로 변경, SMS 인증번호 발송 추가
+
+#### 완료된 작업
+
+##### 1. 프론트엔드 페이지 분리
+- ✅ `forgot-password.html` - 아이디 + 핸드폰 번호 입력 페이지
+- ✅ `verify-code.html` - 6자리 인증번호 입력 페이지
+- ✅ `reset-password.html` - 새 비밀번호 입력 페이지
+- ✅ `index.html` - 비밀번호 찾기 버튼을 페이지 이동으로 변경
+
+##### 2. 백엔드 API 개선
+- ✅ `api/customer/verify_phone.php` - 인증번호 생성 및 SMS 발송 기능 추가
+  - 6자리 랜덤 인증번호 생성
+  - 세션에 인증번호 저장 (5분 유효)
+  - Aligo SMS API를 통한 인증번호 발송
+- ✅ `api/customer/verify_code.php` - 인증번호 확인 API (신규 생성)
+  - 세션에 저장된 인증번호와 사용자 입력 비교
+  - 인증 성공 시 `pw_reset_verified` 세션 생성
+- ✅ `api/customer/reset_password.php` - 인증 완료 세션 검증 추가
+  - `pw_reset_verified` 세션 확인 후 비밀번호 변경 허용
+  - 인증 완료 후 세션 삭제
+
+##### 3. 보안 강화
+- ✅ SMS 인증번호 발송으로 2단계 인증 구현
+- ✅ 인증번호 유효 시간 제한 (5분)
+- ✅ 인증 완료 세션 기반 비밀번호 변경 제어
+
+#### 기술적 세부사항
+
+**비밀번호 찾기 프로세스 (개선 후)**:
+```
+1. forgot-password.html
+   - 아이디 + 핸드폰 번호 입력
+   - verify_phone.php 호출
+   - 인증번호 생성 및 SMS 발송
+   - verify-code.html로 이동
+   
+2. verify-code.html
+   - 6자리 인증번호 입력
+   - verify_code.php 호출
+   - 인증번호 확인
+   - 인증 성공 시 reset-password.html로 이동
+   
+3. reset-password.html
+   - 새 비밀번호 입력 (2회)
+   - reset_password.php 호출
+   - 인증 완료 세션 확인
+   - 비밀번호 변경 완료
+```
+
+**API 엔드포인트 (추가/변경)**:
+- `POST api/customer/verify_phone.php` - 인증번호 생성 및 SMS 발송
+- `POST api/customer/verify_code.php` - 인증번호 확인 (신규)
+- `POST api/customer/reset_password.php` - 인증 완료 세션 검증 추가
+
+#### 구현 파일 목록
+- `pci0327/kj/forgot-password.html` - 비밀번호 찾기 시작 페이지
+- `pci0327/kj/verify-code.html` - 인증번호 확인 페이지
+- `pci0327/kj/reset-password.html` - 비밀번호 변경 페이지
+- `pci0327/kj/index.html` - 로그인 페이지 (버튼 링크 변경)
+- `pci0327/kj/api/customer/verify_phone.php` - 인증번호 발송 기능 추가
+- `pci0327/kj/api/customer/verify_code.php` - 인증번호 확인 API (신규)
+- `pci0327/kj/api/customer/reset_password.php` - 인증 세션 검증 추가
+
+---
+
+### 2026-01-17 - ID 관리 탭 DOM 요소 오류 수정
+
+#### 작업 개요
+- **문제**: `readId.js`가 페이지 로드 시 무조건 `loadIdData()`를 호출하여, ID 관리 탭이 없는 경우 DOM 요소를 찾지 못해 콘솔 경고 발생
+- **해결**: ID 관리 탭이 실제로 존재할 때만 데이터 로드 및 초기화 수행
+
+#### 완료된 작업
+- ✅ `readId.js` - DOM 요소 존재 여부 확인 후 초기화
+  - `DOMContentLoaded`에서 무조건 호출하던 `loadIdData()` 제거
+  - `id-list`, `id-cards-container`, `a[href="#id-management"]` 요소 존재 여부 확인
+  - 요소가 있을 때만 `loadIdData()` 호출
+  - `window.initializeIdManagementTab()` 함수도 동일하게 가드 처리
+
+#### 수정 파일
+- `pci0327/kj/js/readId.js`
+
+---
+
+### 2026-01-17 - 증권정보 탭 인원 0인 증권 표시 개선
+
+#### 작업 개요
+- **문제**: 증권정보 탭에서 인원이 0인 증권이 표시되지 않음
+- **요구사항**: 최근 1년 내 증권은 인원이 없어도 모두 표시되어야 함
+
+#### 완료된 작업
+- ✅ `api/customer/home_data.php` - 인원 필터링 로직 제거
+  - 기존: `if ($row['inwon'] > 0)` 조건으로 인원이 있는 증권만 표시
+  - 변경: 최근 1년 내 증권(`startyDay BETWEEN DATE_SUB(CURDATE(), INTERVAL 1 YEAR) AND CURDATE()`)은 인원이 0이어도 모두 표시
+  - 인원수는 "0명"으로 표시
+
+#### 수정 파일
+- `pci0327/kj/api/customer/home_data.php`
+
+---
+
 ## 📚 참고 문서
 
 - **기획 문서**: `disk-cms-react/docs/insurance/plans/2012DaeriMember-Jumin-암호화-기획.md`
@@ -1249,5 +1354,5 @@ push = 2, cancel = 42, sangtae = 2 (해지)
 
 **작성일**: 2026-01-17
 **학습자**: AI Assistant
-**마지막 업데이트**: 2026-01-17 (비밀번호 찾기 기능 추가)
+**마지막 업데이트**: 2026-01-17 (비밀번호 찾기 인증번호 기반 개선, ID 관리 탭 오류 수정, 증권정보 표시 개선)
 **다음 학습 계획**: 추가 테스트 및 다른 API 개선
