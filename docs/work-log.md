@@ -12,6 +12,107 @@ Disk-CMS React 마이그레이션 프로젝트 Phase별 진행 상황 추적
 
 ## ✅ 완료된 작업
 
+### 2026-01-17 (KJ 대리운전) - 회원번호(num) URL 파라미터 암호화 처리
+
+#### 작업 내용
+- **기능**: `k.html?num=12345` URL에서 회원번호가 노출되지 않도록 암호화 처리
+- **파일**: 
+  - `pci0327/api/utils/jumin-secure.php` (회원번호 암호화/복호화 함수 추가)
+  - `pci0327/api/insurance/kj-endorse-save.php` (SMS 발송 시 암호화된 num 사용)
+  - `pci0327/kj/api/kjDaeri/save_endorse_data_encryption.php` (SMS 발송 시 암호화된 num 사용)
+  - `pci0327/kj/api/customer/check_service_type.php` (암호화된 num 복호화 처리)
+  - `pci0327/kj/api/customer/submit_insurance.php` (암호화된 num 복호화 처리)
+- **주요 구현 사항**:
+  - ✅ 회원번호 암호화/복호화 함수 추가 (`jumin-secure.php`)
+    - `encryptMemberNum()`: 회원번호를 AES-256-GCM으로 암호화, URL-safe Base64로 인코딩
+    - `decryptMemberNum()`: 암호화된 회원번호를 복호화하여 평문 반환
+    - URL-safe Base64 사용 (`+`, `/`, `=` → `-`, `_`, 빈 문자열)
+  - ✅ SMS 발송 시 암호화된 num 값 사용
+    - `kj-endorse-save.php`: 케이드라이브 SMS 발송 시 `encryptMemberNum($insertedId)` 사용
+    - `save_endorse_data_encryption.php`: 동일하게 암호화된 num 사용
+    - SMS 메시지: `https://www.pcikorea.com/k.html?num={암호화된값}`
+  - ✅ 백엔드 API에서 암호화된 num 복호화 처리
+    - `check_service_type.php`: `decryptMemberNum()`으로 복호화 후 `2012DaeriMemberSecure` 테이블 조회
+    - `submit_insurance.php`: `decryptMemberNum()`으로 복호화 후 회원 정보 업데이트
+    - 복호화 실패 시 에러 메시지 반환
+  - ✅ 테이블명 통일
+    - `check_service_type.php`: `DaeriMember` → `2012DaeriMemberSecure` 테이블 사용
+    - `submit_insurance.php`: `2012DaeriMemberSecure` 테이블 사용 (주민번호/핸드폰 암호화 필드 사용)
+
+#### 해결한 이슈
+- URL에 회원번호가 평문으로 노출되던 보안 문제 해결
+- SMS 발송 시 암호화된 회원번호를 URL에 포함하여 전달
+- 백엔드 API에서 암호화된 회원번호를 안전하게 복호화하여 처리
+
+#### 참고 사항
+- 암호화 방식: AES-256-GCM (주민번호/핸드폰 번호와 동일한 방식)
+- URL-safe Base64 인코딩 사용으로 URL 파라미터로 안전하게 전달 가능
+- 기존 암호화 모듈(`jumin-secure.php`) 재사용으로 일관성 유지
+
+---
+
+### 2026-01-17 (KJ 대리운전) - 증권카드 신규청약 시 케이드라이브 SMS 발송 기능 추가
+
+#### 작업 내용
+- **기능**: 증권카드 신규청약 저장 시 케이드라이브(dNum=653)인 경우 신청자 전화번호로 SMS 자동 발송
+- **파일**: 
+  - `pci0327/api/insurance/kj-endorse-save.php` (케이드라이브 SMS 발송 로직 추가)
+- **주요 구현 사항**:
+  - ✅ 케이드라이브 체크 로직 추가
+    - `dNum == '653'` 또는 `dNum == 653`인 경우 SMS 발송
+  - ✅ SMS 메시지 생성
+    - 메시지 형식: `{이름}님 {대리보험/탁송보험} 가입에 동의 해주세요 https://www.pcikorea.com/k.html?num={회원번호}`
+    - 증권성격(gita)에 따라 "대리보험" 또는 "탁송보험" 자동 선택
+    - gita가 1 또는 2이면 "대리보험", 그 외는 "탁송보험"
+  - ✅ SMS 발송 처리
+    - `kj-sms-aligo.php` 모듈 로드 및 `sendAligoSms()` 함수 사용
+    - 전화번호가 있는 경우에만 발송
+    - 하이픈 포함/미포함 모두 처리 가능
+  - ✅ SMSData 테이블 저장
+    - 발송 내역을 SMSData 테이블에 저장
+    - SendId: 'csdrive', SendName: 'drive', RecvName: 'CS'
+    - 회원번호(`2012DaeriMemberNum`) 연결
+  - ✅ 로깅 추가
+    - SMS 발송 결과 및 오류 로깅
+    - 전화번호 마스킹 처리 (민감 정보 보호)
+
+#### 해결한 이슈
+- React 버전에서 케이드라이브 SMS 발송 기능이 누락되어 있던 문제 해결
+- 기존 `save_endorse_data_encryption.php`의 로직을 `kj-endorse-save.php`에 동일하게 적용
+- 트랜잭션 내에서 SMS 발송 및 SMSData 저장 처리
+
+#### 참고 사항
+- 기존 로직: `pci0327/kj/api/kjDaeri/save_endorse_data_encryption.php` (226-309줄)
+- SMS 발송 모듈: `pci0327/api/utils/kj-sms-aligo.php`
+- SMS 발송 API: Aligo SMS API (AWS Lambda 프록시)
+
+---
+
+### 2026-01-17 (KJ 대리운전) - 업체 아이디 추가/수정 시 핸드폰 번호 저장 형식 수정
+
+#### 작업 내용
+- **기능**: 업체 아이디 추가 및 수정 시 핸드폰 번호를 하이픈 포함 형식으로 저장하도록 수정
+- **파일**: 
+  - `src/pages/insurance/components/CompanyIdModal.tsx` (핸드폰 번호 저장 형식 수정)
+- **주요 구현 사항**:
+  - ✅ 신규 아이디 추가 시 핸드폰 번호 저장 형식 수정
+    - 변경 전: `phone: removePhoneHyphen(newPhone)` (하이픈 제거)
+    - 변경 후: `phone: newPhone` (하이픈 포함, `010-1234-5678` 형식)
+  - ✅ 핸드폰 번호 수정 시 저장 형식 수정
+    - 변경 전: `hphone: cleaned` (하이픈 제거된 값)
+    - 변경 후: `hphone: phone` (하이픈 포함된 값)
+  - ✅ 데이터베이스 저장 형식 확인
+    - `2012Costomer` 테이블의 `hphone` 필드는 하이픈 포함 형식으로 저장됨
+    - `kj-sms-utils.php`에서 `explode("-", $id_row['hphone'])`로 하이픈 기준 분리 사용
+    - 입력 필드에서 `addPhoneHyphen` 함수로 자동 하이픈 추가 (`010-1234-5678` 형식)
+
+#### 해결한 이슈
+- 업체 아이디 추가/수정 시 핸드폰 번호가 하이픈 없이 저장되던 문제 해결
+- 데이터베이스에 하이픈 포함 형식으로 저장되어야 하는데 하이픈을 제거하여 저장하던 문제 수정
+- SMS 발송 등 다른 기능에서 하이픈 기준으로 분리하는 로직과 일관성 확보
+
+---
+
 ### 2026-01-17 (KJ 대리운전) - 2012DaeriMemberSecure 테이블 마이그레이션 및 추가 API 암호화 처리
 
 #### 작업 내용
