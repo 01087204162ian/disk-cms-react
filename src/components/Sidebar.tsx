@@ -97,10 +97,65 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       .sort((a, b) => a.order - b.order)
   }
 
-  const toggleExpand = (id: string) => {
-    setExpandedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    )
+  // 메뉴 아이템을 ID로 찾는 헬퍼 함수
+  const findMenuItemById = (items: MenuItem[], id: string): MenuItem | null => {
+    for (const item of items) {
+      if (item.id === id) return item
+      if (item.children) {
+        const found = findMenuItemById(item.children, id)
+        if (found) return found
+      }
+    }
+    return null
+  }
+
+  // 부모 ID를 찾는 헬퍼 함수
+  const findParentId = (items: MenuItem[], targetId: string, parentId?: string): string | undefined => {
+    for (const item of items) {
+      if (item.id === targetId) return parentId
+      if (item.children) {
+        const found = findParentId(item.children, targetId, item.id)
+        if (found !== undefined) return found
+      }
+    }
+    return undefined
+  }
+
+  // 같은 부모의 형제 메뉴 ID들을 찾는 함수
+  const findSiblingIds = (items: MenuItem[], targetId: string, parentId?: string): string[] => {
+    if (!parentId) return []
+    
+    const parentMenu = findMenuItemById(items, parentId)
+    if (!parentMenu?.children) return []
+    
+    return parentMenu.children
+      .filter((child) => child.id !== targetId && child.children && child.children.length > 0)
+      .map((child) => child.id)
+  }
+
+  const toggleExpand = (id: string, level: number = 0) => {
+    setExpandedItems((prev) => {
+      // 2차 메뉴 레벨(level === 1)인 경우, 같은 부모의 다른 자식들을 닫음
+      if (level === 1 && menuConfig) {
+        const parentId = findParentId(menuConfig.menus, id)
+        if (parentId) {
+          const siblingIds = findSiblingIds(menuConfig.menus, id, parentId)
+          
+          // 형제 메뉴들을 닫고, 현재 메뉴만 토글
+          const filtered = prev.filter((itemId) => !siblingIds.includes(itemId))
+          if (filtered.includes(id)) {
+            return filtered.filter((itemId) => itemId !== id)
+          } else {
+            return [...filtered, id]
+          }
+        }
+      }
+      
+      // 기본 동작: 현재 아이템만 토글
+      return prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id]
+    })
   }
 
   const renderIcon = (iconName?: string, size: string = 'w-5 h-5') => {
@@ -157,7 +212,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       return (
         <div key={item.id}>
           <button
-            onClick={() => toggleExpand(item.id)}
+            onClick={() => toggleExpand(item.id, level)}
             className={cn(
               'w-full flex items-center gap-3 rounded-lg transition-colors',
               levelStyle.padding,
