@@ -395,7 +395,7 @@ export default function PolicySearch() {
           className="w-[204.8px]"
           fullWidth={false}
         />
-        <FilterBar.SearchButton onClick={handleSearch} />
+        <FilterBar.SearchButton onClick={() => handleSearch()} />
         {statistics && (
           <>
             <FilterBar.Stats
