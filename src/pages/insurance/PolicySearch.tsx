@@ -204,8 +204,11 @@ export default function PolicySearch() {
       `변경 전: ${policyNum} (${filters.startyDay})\n` +
       `변경 후: ${changeForm.newPolicyNum} (${changeForm.newStartyDay})\n` +
       `보험회사: ${getInsurerName(changeForm.newInsuranceCompany)}\n\n` +
+      `변경 범위:\n` +
+      `- 2012CertiTable: 증권번호/보험기간/보험회사 변경\n` +
+      `- 2012DaeriMemberSecure(대리기사): dongbuCerti(증권번호), InsuranceCompany(보험회사)도 함께 변경\n\n` +
       `변경될 증권: ${searchResults.length}건\n` +
-      `변경될 회원: ${statistics.filteredMemberCount || 0}건`
+      `변경될 회원(대리기사): ${statistics.filteredMemberCount || 0}건`
 
     if (!window.confirm(confirmMessage)) {
       return
@@ -482,6 +485,16 @@ export default function PolicySearch() {
         }
       >
         <div className="space-y-6">
+          {/* 안내 */}
+          <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm leading-relaxed">
+            <div className="font-semibold mb-1">변경 범위 안내</div>
+            <div className="text-muted-foreground">
+              이 작업은 <strong>증권(2012CertiTable)</strong>의 증권번호/보험기간/보험회사를 변경하며,
+              해당 증권에 연결된 <strong>대리기사(2012DaeriMemberSecure)</strong>의{' '}
+              <strong>증권번호(dongbuCerti)</strong>와 <strong>보험회사(InsuranceCompany)</strong>도 함께 업데이트합니다.
+            </div>
+          </div>
+
           {/* 변경 전 정보 */}
           <div>
             <h6 className="font-semibold mb-3">변경 전 정보</h6>
