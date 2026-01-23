@@ -105,6 +105,7 @@ const PAGE_SIZE_OPTIONS = [
 const ENDORSE_PROCESS_OPTIONS = [
   { value: '1', label: '미처리' },
   { value: '2', label: '처리' },
+  { value: '3', label: '취소' },
 ]
 
 export default function EndorseList() {
@@ -477,7 +478,7 @@ export default function EndorseList() {
       return
     }
 
-    const statusText = newStatus === '2' ? '처리' : '미처리'
+    const statusText = newStatus === '1' ? '미처리' : newStatus === '2' ? '처리' : '취소'
     if (!confirm(`선택 ${selectedRows.length}건을 "${statusText}"로 일괄 변경하시겠습니까?`)) {
       return
     }
@@ -487,24 +488,60 @@ export default function EndorseList() {
     let skippedCount = 0
 
     for (const row of selectedRows) {
-      // 기존 단건 로직과 동일: 요율이 먼저 입력되어야 함
-      if (!row.rate || row.rate === '-1' || Number(row.rate) < 0) {
+      // 취소 상태 확인
+      const isCancelled = row.cancel === 45 || row.cancel === '45' || row.cancel === 12 || row.cancel === '12'
+      
+      // 취소된 항목은 변경 불가
+      if (isCancelled && newStatus !== '3') {
+        skippedCount++
+        continue
+      }
+
+      // 취소 선택 시 요율 체크 불필요
+      if (newStatus !== '3' && (!row.rate || row.rate === '-1' || Number(row.rate) < 0)) {
         skippedCount++
         continue
       }
 
       try {
-        const formData = new URLSearchParams()
-        formData.append('num', String(row.num))
-        formData.append('status', newStatus)
-        formData.append('push', String(row.push))
-        formData.append('rate', String(row.rate))
-        formData.append('userName', user?.name || '')
+        // push 값에 따라 endorseProcess 결정
+        const push = Number(row.push)
+        let endorseProcess = ''
+        
+        if (newStatus === '1') {
+          // 미처리: sangtae=1, endorseProcess 전달 안 함
+          endorseProcess = ''
+        } else if (newStatus === '2') {
+          // 처리: push 값에 따라 '청약' 또는 '해지'
+          if (push === 1) {
+            endorseProcess = '청약'
+          } else if (push === 4) {
+            endorseProcess = '해지'
+          }
+        } else if (newStatus === '3') {
+          // 취소
+          endorseProcess = '취소'
+        }
+
+        const requestData: any = {
+          num: row.num,
+          sangtae: newStatus === '1' ? 1 : 2, // 미처리=1, 처리/취소=2
+          push: Number(row.push),
+        }
+        
+        if (endorseProcess) {
+          requestData.endorseProcess = endorseProcess
+        }
+        if (newStatus !== '3') {
+          requestData.rate = String(row.rate)
+        }
+        if (user?.name) {
+          requestData.userName = user.name
+        }
 
         const res = await api.post<{ success: boolean }>(
           '/api/insurance/kj-endorse/update-status',
-          formData.toString(),
-          { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+          requestData
         )
 
         if (res.data.success) successCount++
@@ -514,8 +551,9 @@ export default function EndorseList() {
       }
     }
 
+    const skipReason = newStatus === '3' ? '취소된 항목 또는 요율 미입력' : '요율 미입력'
     toast.success(
-      `배서처리 일괄 변경 완료: 성공 ${successCount}건, 실패 ${failCount}건, 스킵(요율 미입력) ${skippedCount}건`
+      `배서처리 일괄 변경 완료: 성공 ${successCount}건, 실패 ${failCount}건, 스킵(${skipReason}) ${skippedCount}건`
     )
     setSelectedRowNums(new Set())
     setBulkEndorseProcess('')
@@ -712,8 +750,13 @@ export default function EndorseList() {
         key: 'endorseProcess',
         header: '배서처리',
         cell: (row) => {
-          // API 응답에서 sangtae 값이 1이면 미처리, 2면 처리
-          const currentStatus = String(row.sangtae || '1')
+          // 취소 상태 확인 (cancel=45: 해지취소, cancel=12: 청약취소)
+          const isCancelled = row.cancel === 45 || row.cancel === '45' || row.cancel === 12 || row.cancel === '12'
+          // sangtae=2이고 취소 상태면 '3' (취소), sangtae=2이고 취소가 아니면 '2' (처리), 그 외는 '1' (미처리)
+          const currentStatus = isCancelled && row.sangtae === 2 
+            ? '3' 
+            : String(row.sangtae || '1')
+          
           return (
             <select
               value={currentStatus}
@@ -728,12 +771,17 @@ export default function EndorseList() {
                 paddingRight: '2.5rem',
               }}
               onClick={(e) => e.stopPropagation()}
+              disabled={isCancelled && currentStatus === '3'}
             >
-              {ENDORSE_PROCESS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
+              {ENDORSE_PROCESS_OPTIONS.map((opt) => {
+                // 취소된 항목은 "처리" 옵션 비활성화
+                const isDisabled = isCancelled && opt.value === '2'
+                return (
+                  <option key={opt.value} value={opt.value} disabled={isDisabled}>
+                    {opt.label}
+                  </option>
+                )
+              })}
             </select>
           )
         },
@@ -991,32 +1039,70 @@ export default function EndorseList() {
 
   // 배서처리 변경 핸들러
   const handleStatusChange = async (row: EndorseItem, newStatus: string) => {
-    if (!row.rate || row.rate === '-1' || Number(row.rate) < 0) {
+    // 취소 상태 확인
+    const isCancelled = row.cancel === 45 || row.cancel === '45' || row.cancel === 12 || row.cancel === '12'
+    
+    // 취소된 항목은 변경 불가
+    if (isCancelled && newStatus !== '3') {
+      toast.error('취소된 항목은 변경할 수 없습니다.')
+      return
+    }
+
+    // 취소 선택 시 요율 체크 불필요
+    if (newStatus !== '3' && (!row.rate || row.rate === '-1' || Number(row.rate) < 0)) {
       toast.error('개인 요율부터 입력하세요.')
       return
     }
 
-    const statusText = newStatus === '2' ? '처리됨' : '미처리'
+    // 상태 텍스트 결정
+    let statusText = ''
+    if (newStatus === '1') statusText = '미처리'
+    else if (newStatus === '2') statusText = '처리'
+    else if (newStatus === '3') statusText = '취소'
+
     if (!confirm(`정말로 상태를 ${statusText}로 변경하시겠습니까?`)) {
       return
     }
 
     try {
-      const formData = new URLSearchParams()
-      formData.append('num', String(row.num))
-      formData.append('status', newStatus)
-      formData.append('push', String(row.push))
-      formData.append('rate', String(row.rate))
-      formData.append('userName', user?.name || '')
+      // push 값에 따라 endorseProcess 결정
+      const push = Number(row.push)
+      let endorseProcess = ''
+      
+      if (newStatus === '1') {
+        // 미처리: sangtae=1, endorseProcess 전달 안 함
+        endorseProcess = ''
+      } else if (newStatus === '2') {
+        // 처리: push 값에 따라 '청약' 또는 '해지'
+        if (push === 1) {
+          endorseProcess = '청약'
+        } else if (push === 4) {
+          endorseProcess = '해지'
+        }
+      } else if (newStatus === '3') {
+        // 취소
+        endorseProcess = '취소'
+      }
+
+      const requestData: any = {
+        num: row.num,
+        sangtae: newStatus === '1' ? 1 : 2, // 미처리=1, 처리/취소=2
+        push: Number(row.push),
+      }
+      
+      if (endorseProcess) {
+        requestData.endorseProcess = endorseProcess
+      }
+      if (newStatus !== '3') {
+        requestData.rate = String(row.rate)
+      }
+      if (user?.name) {
+        requestData.userName = user.name
+      }
 
       const res = await api.post<{ success: boolean; message?: string; error?: string }>(
         '/api/insurance/kj-endorse/update-status',
-        formData.toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        }
+        requestData
       )
 
       if (res.data.success) {
