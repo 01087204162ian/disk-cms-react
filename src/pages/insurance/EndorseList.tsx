@@ -1090,9 +1090,12 @@ export default function EndorseList() {
         endorseProcess = '취소'
       }
 
+      // sangtae 값 계산 (미처리=1, 처리/취소=2)
+      const sangtaeValue = newStatus === '1' ? 1 : 2
+      
       const requestData: any = {
         num: row.num,
-        sangtae: newStatus === '1' ? 1 : 2, // 미처리=1, 처리/취소=2
+        sangtae: sangtaeValue, // 필수 필드
         push: Number(row.push),
       }
       
@@ -1106,7 +1109,17 @@ export default function EndorseList() {
         requestData.userName = user.name
       }
 
+      // sangtae가 확실히 포함되도록 검증
+      if (!requestData.hasOwnProperty('sangtae') || requestData.sangtae === undefined || requestData.sangtae === null) {
+        console.error('sangtae가 누락되었습니다!', requestData)
+        toast.error('요청 데이터 오류: sangtae 필드가 누락되었습니다.')
+        return
+      }
+
       console.log('배서처리 요청 데이터:', requestData)
+      console.log('sangtae 값:', requestData.sangtae, '타입:', typeof requestData.sangtae)
+      console.log('JSON 직렬화:', JSON.stringify(requestData))
+      console.log('sangtae 포함 여부:', 'sangtae' in requestData)
 
       const res = await api.post<{ success: boolean; message?: string; error?: string }>(
         '/api/insurance/kj-endorse/update-status',

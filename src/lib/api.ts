@@ -18,6 +18,15 @@ const api = axios.create({
 // 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
+    // 디버깅: update-status 엔드포인트 요청 데이터 로그
+    if (config.url?.includes('update-status')) {
+      console.log('API 인터셉터 - URL:', config.url)
+      console.log('API 인터셉터 - 요청 데이터:', config.data)
+      console.log('API 인터셉터 - 데이터 타입:', typeof config.data)
+      if (config.data && typeof config.data === 'object') {
+        console.log('API 인터셉터 - sangtae 포함 여부:', 'sangtae' in config.data)
+      }
+    }
     return config
   },
   (error) => {
