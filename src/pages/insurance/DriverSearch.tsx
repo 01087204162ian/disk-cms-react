@@ -256,6 +256,17 @@ export default function DriverSearch() {
             return <span>해지중</span>
           }
 
+          // 청약 취소/거절 표시 (push=1 유지 + cancel 코드)
+          if (push === 1) {
+            if (cancelNum === 12) return <span>청약취소</span>
+            if (cancelNum === 13) return <span>청약거절</span>
+          }
+
+          // 해지취소 표시 (정상 push=4 유지 + cancel=45)
+          if (push === 4 && cancelNum === 45) {
+            return <span>해지취소</span>
+          }
+
           // 정상일 때만 select 제공
           if (push === 4) {
             return (
