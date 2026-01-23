@@ -43,7 +43,7 @@ interface EndorseItem {
   phone: string
   push: number | string
   progressStep: string
-  cancel?: string
+  cancel?: number | string
   manager?: string
   damdanja?: string
   standardDate?: string // endorse_day (배서기준일)
@@ -488,8 +488,9 @@ export default function EndorseList() {
     let skippedCount = 0
 
     for (const row of selectedRows) {
-      // 취소 상태 확인
-      const isCancelled = row.cancel === 45 || row.cancel === '45' || row.cancel === 12 || row.cancel === '12'
+      // 취소 상태 확인 (cancel=45: 해지취소, cancel=12: 청약취소)
+      const cancelValue = row.cancel
+      const isCancelled = cancelValue === 45 || cancelValue === '45' || cancelValue === 12 || cancelValue === '12'
       
       // 취소된 항목은 변경 불가
       if (isCancelled && newStatus !== '3') {
