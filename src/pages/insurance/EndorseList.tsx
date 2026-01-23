@@ -650,6 +650,11 @@ export default function EndorseList() {
         header: '기준일',
         cell: (row) => {
           const standardDate = row.standardDate || '-'
+          // 오늘 날짜와 비교
+          const today = new Date()
+          const todayStr = today.toISOString().split('T')[0] // YYYY-MM-DD 형식
+          const isToday = standardDate === todayStr
+          
           if (standardDate !== '-' && row.num && row.standardDate) {
             return (
               <button
@@ -663,13 +668,19 @@ export default function EndorseList() {
                     row.companyName
                   )
                 }}
-                className="text-primary hover:underline"
+                className={`hover:underline ${
+                  isToday ? 'text-primary' : 'text-orange-600'
+                }`}
               >
                 {standardDate}
               </button>
             )
           }
-          return <div>{standardDate}</div>
+          return (
+            <div className={isToday ? '' : 'text-orange-600'}>
+              {standardDate}
+            </div>
+          )
         },
         className: 'w-28',
       },
