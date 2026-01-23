@@ -603,7 +603,10 @@ export default function EndorseList() {
       {
         key: 'jumin',
         header: '주민번호',
-        cell: (row) => row.jumin || '-',
+        cell: (row) => {
+          const jumin = row.jumin || ''
+          return jumin ? jumin.replace(/-/g, '') : '-'
+        },
         className: 'w-44',
       },
       {
