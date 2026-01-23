@@ -569,7 +569,7 @@ export default function EndorseList() {
       },
       {
         key: 'companyName',
-        header: '대리운전회사명',
+        header: '업체명',
         cell: (row) => {
           const companyName = row.companyName || '-'
           const companyNum = row.companyNum
@@ -592,35 +592,35 @@ export default function EndorseList() {
       },
       {
         key: 'name',
-        header: '성명',
-        cell: (row) => row.name || '-',
+        header: '성명(나이)',
+        cell: (row) => {
+          const name = row.name || '-'
+          const age = row.age ? `(${row.age})` : ''
+          return name !== '-' ? `${name} ${age}` : '-'
+        },
         className: 'w-24',
       },
       {
         key: 'jumin',
-        header: '주민번호(나이)',
-        cell: (row) => {
-          const jumin = row.jumin || ''
-          const age = row.age ? `(${row.age})` : ''
-          return jumin ? `${jumin} ${age}` : '-'
-        },
+        header: '주민번호',
+        cell: (row) => row.jumin || '-',
         className: 'w-44',
       },
       {
         key: 'phone',
-        header: '핸드폰',
+        header: '핸드폰번호',
         cell: (row) => (row.phone ? addPhoneHyphen(row.phone) : '-'),
         className: 'w-36',
       },
       {
-        key: 'progressStep',
-        header: '진행단계',
+        key: 'rate',
+        header: '요율',
         cell: (row) => {
-          const currentProgress = row.progressStep || '-1'
+          const currentRate = row.rate || '-1'
           return (
             <select
-              value={currentProgress}
-              onChange={(e) => handleProgressChange(row, e.target.value)}
+              value={currentRate}
+              onChange={(e) => handleRateChange(row, e.target.value)}
               className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
               style={{
                 fontSize: '0.75rem',
@@ -632,8 +632,7 @@ export default function EndorseList() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <option value="-1">선택</option>
-              {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
+              {RATE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -641,12 +640,6 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-28',
-      },
-      {
-        key: 'manager',
-        header: 'manager',
-        cell: (row) => row.manager || '-',
         className: 'w-20',
       },
       {
@@ -691,39 +684,9 @@ export default function EndorseList() {
       },
       {
         key: 'certiType',
-        header: '증권성격',
+        header: '증권종류',
         cell: (row) => GITA_MAP[Number(row.certiType)] || row.certiType || '-',
         className: 'w-24',
-      },
-      {
-        key: 'rate',
-        header: '요율',
-        cell: (row) => {
-          const currentRate = row.rate || '-1'
-          return (
-            <select
-              value={currentRate}
-              onChange={(e) => handleRateChange(row, e.target.value)}
-              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
-              style={{
-                fontSize: '0.75rem',
-                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                backgroundPosition: 'right 0.5rem center',
-                backgroundRepeat: 'no-repeat',
-                backgroundSize: '1.5em 1.5em',
-                paddingRight: '2.5rem',
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {RATE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          )
-        },
-        className: 'w-20',
       },
       {
         key: 'push',
@@ -767,6 +730,43 @@ export default function EndorseList() {
         header: '보험사',
         cell: (row) => INSURER_MAP[Number(row.insuranceCom)] || row.insuranceCom || '-',
         className: 'w-10',
+      },
+      {
+        key: 'manager',
+        header: '매니저',
+        cell: (row) => row.manager || '-',
+        className: 'w-20',
+      },
+      {
+        key: 'progressStep',
+        header: '진행단계',
+        cell: (row) => {
+          const currentProgress = row.progressStep || '-1'
+          return (
+            <select
+              value={currentProgress}
+              onChange={(e) => handleProgressChange(row, e.target.value)}
+              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none"
+              style={{
+                fontSize: '0.75rem',
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="-1">선택</option>
+              {PROGRESS_OPTIONS.filter((opt) => opt.value !== '').map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )
+        },
+        className: 'w-28',
       },
       {
         key: 'premium',
@@ -842,7 +842,7 @@ export default function EndorseList() {
       },
       {
         key: 'duplicate',
-        header: '중복여부',
+        header: '중복',
         cell: (row) => {
           const duplicateText = row.duplicate || '-'
           if (duplicateText === '중복' && row.jumin) {
