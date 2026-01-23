@@ -542,7 +542,12 @@ export default function EndorseList() {
 
         const res = await api.post<{ success: boolean }>(
           '/api/insurance/kj-endorse/update-status',
-          requestData
+          requestData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
         )
 
         if (res.data.success) successCount++
@@ -1101,9 +1106,16 @@ export default function EndorseList() {
         requestData.userName = user.name
       }
 
+      console.log('배서처리 요청 데이터:', requestData)
+
       const res = await api.post<{ success: boolean; message?: string; error?: string }>(
         '/api/insurance/kj-endorse/update-status',
-        requestData
+        requestData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
       )
 
       if (res.data.success) {
