@@ -227,23 +227,28 @@ export default function DriverSearch() {
       {
         key: 'Name',
         header: '이름',
-        cell: (row) => <div className="whitespace-nowrap">{row.Name || ''}</div>,
+        cell: (row) => (
+          <div className="whitespace-nowrap text-center">
+            {row.Name || ''}
+            {row.age ? ` (${row.age}세)` : ''}
+          </div>
+        ),
+        className: 'text-center',
       },
       {
         key: 'Jumin',
         header: '주민번호',
         cell: (row) => (
-          <div className="hidden lg:table-cell whitespace-nowrap">
+          <div className="hidden lg:table-cell whitespace-nowrap text-center">
             {row.Jumin || ''}
-            {row.age ? ` (${row.age}세)` : ''}
           </div>
         ),
-        className: 'hidden lg:table-cell',
+        className: 'hidden lg:table-cell text-center',
       },
       {
         key: 'status',
         header: '상태',
-        className: 'whitespace-nowrap p-0',
+        className: 'whitespace-nowrap p-0 text-center',
         cell: (row) => {
           const push = Number(row.push)
           const cancel = row.cancel != null ? String(row.cancel) : ''
@@ -253,18 +258,18 @@ export default function DriverSearch() {
           const cancelNum = typeof cancel === 'string' ? Number(cancel) : cancel
           const sangtaeNum = typeof sangtae === 'string' ? Number(sangtae) : sangtae
           if (push === 4 && cancelNum === 42 && sangtaeNum === 1) {
-            return <span>해지중</span>
+            return <span className="text-center">해지중</span>
           }
 
           // 청약 취소/거절 표시 (push=1 유지 + cancel 코드)
           if (push === 1) {
-            if (cancelNum === 12) return <span>청약취소</span>
-            if (cancelNum === 13) return <span>청약거절</span>
+            if (cancelNum === 12) return <span className="text-center">청약취소</span>
+            if (cancelNum === 13) return <span className="text-center">청약거절</span>
           }
 
           // 해지취소 표시 (정상 push=4 유지 + cancel=45)
           if (push === 4 && cancelNum === 45) {
-            return <span>해지취소</span>
+            return <span className="text-center">해지취소</span>
           }
 
           // 정상일 때만 select 제공
@@ -283,7 +288,7 @@ export default function DriverSearch() {
             )
           }
 
-          return <span className="whitespace-nowrap">{mapPushLabel(push)}</span>
+          return <span className="whitespace-nowrap text-center">{mapPushLabel(push)}</span>
         },
       },
       {
@@ -307,7 +312,7 @@ export default function DriverSearch() {
             </select>
           )
         },
-        className: 'hidden lg:table-cell p-0',
+        className: 'hidden lg:table-cell p-0 text-center',
       },
       {
         key: 'company',
@@ -318,7 +323,7 @@ export default function DriverSearch() {
           return (
             <button
               type="button"
-              className="text-primary hover:underline whitespace-nowrap text-left"
+              className="text-primary hover:underline whitespace-nowrap text-center"
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -333,16 +338,19 @@ export default function DriverSearch() {
             </button>
           )
         },
+        className: 'text-center',
       },
       {
         key: 'InsuranceCompany',
         header: '보험회사',
-        cell: (row) => <div className="whitespace-nowrap">{row.insuranceCompanyName || row.InsuranceCompany || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap text-center">{row.insuranceCompanyName || row.InsuranceCompany || ''}</div>,
+        className: 'text-center',
       },
       {
         key: 'policyNum',
         header: '증권번호',
-        cell: (row) => <div className="whitespace-nowrap">{row.policyNum || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap text-center">{row.policyNum || ''}</div>,
+        className: 'text-center',
       },
       {
         key: 'discount',
@@ -350,8 +358,9 @@ export default function DriverSearch() {
         cell: (row) => {
           const rateText = row.personRateFactor != null ? String(row.personRateFactor) : ''
           const nameText = row.personRateName ? ` (${row.personRateName})` : ''
-          return <div className="whitespace-nowrap">{rateText + nameText}</div>
+          return <div className="whitespace-nowrap text-center">{rateText + nameText}</div>
         },
+        className: 'text-center',
       },
       {
         key: 'Hphone',
@@ -361,7 +370,7 @@ export default function DriverSearch() {
           return (
             <input
               type="text"
-              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell text-center"
               style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
               defaultValue={phone}
               onInput={(e) => {
@@ -400,24 +409,24 @@ export default function DriverSearch() {
             />
           )
         },
-        className: 'hidden lg:table-cell p-0',
+        className: 'hidden lg:table-cell p-0 text-center',
       },
       {
         key: 'InputDay',
         header: '등록일',
-        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap">{row.InputDay || ''}</div>,
-        className: 'hidden lg:table-cell',
+        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap text-center">{row.InputDay || ''}</div>,
+        className: 'hidden lg:table-cell text-center',
       },
       {
         key: 'OutPutDay',
         header: '해지일',
-        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap">{row.OutPutDay || '-'}</div>,
-        className: 'hidden lg:table-cell',
+        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap text-center">{row.OutPutDay || '-'}</div>,
+        className: 'hidden lg:table-cell text-center',
       },
       {
         key: 'sago',
         header: '사고',
-        className: 'whitespace-nowrap p-0',
+        className: 'whitespace-nowrap p-0 text-center',
         cell: (row) => {
           const sago = Number(row.sago || 0)
           return (
