@@ -239,7 +239,7 @@ export default function DriverSearch() {
         key: 'Jumin',
         header: '주민번호',
         cell: (row) => (
-          <div className="hidden lg:table-cell whitespace-nowrap text-center">
+          <div className="whitespace-nowrap text-center w-full">
             {row.Jumin || ''}
           </div>
         ),
@@ -414,13 +414,13 @@ export default function DriverSearch() {
       {
         key: 'InputDay',
         header: '등록일',
-        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap text-center">{row.InputDay || ''}</div>,
+        cell: (row) => <div className="whitespace-nowrap text-center w-full">{row.InputDay || ''}</div>,
         className: 'hidden lg:table-cell text-center',
       },
       {
         key: 'OutPutDay',
         header: '해지일',
-        cell: (row) => <div className="hidden lg:table-cell whitespace-nowrap text-center">{row.OutPutDay || '-'}</div>,
+        cell: (row) => <div className="whitespace-nowrap text-center w-full">{row.OutPutDay || '-'}</div>,
         className: 'hidden lg:table-cell text-center',
       },
       {
