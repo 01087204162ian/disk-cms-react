@@ -370,50 +370,54 @@ export default function CompanyDetailModal({
                 <tbody>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>주민번호</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.jumin || ''}
                           onChange={(e) => updateEditingBasicInfo('jumin', e.target.value)}
                         />
                       ) : (
-                        displayBasicInfo?.jumin || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.jumin || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>대리운전회사</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.company || companyName || ''}
                           onChange={(e) => updateEditingBasicInfo('company', e.target.value)}
                         />
                       ) : (
-                        displayBasicInfo?.company || companyName || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.company || companyName || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>성명</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.Pname || ''}
                           onChange={(e) => updateEditingBasicInfo('Pname', e.target.value)}
                         />
                       ) : (
-                        displayBasicInfo?.Pname || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.Pname || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>핸드폰번호</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.hphone || ''}
                           onChange={(e) => {
                             const cleaned = removePhoneHyphen(e.target.value)
@@ -422,17 +426,18 @@ export default function CompanyDetailModal({
                           }}
                         />
                       ) : (
-                        displayBasicInfo?.hphone || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.hphone || '-'}</div>
                       )}
                     </td>
                   </tr>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>전화번호</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.cphone || ''}
                           onChange={(e) => {
                             const cleaned = removePhoneHyphen(e.target.value)
@@ -441,17 +446,18 @@ export default function CompanyDetailModal({
                           }}
                         />
                       ) : (
-                        displayBasicInfo?.cphone || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.cphone || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>담당자</th>
                     <td className="px-3 py-2 border border-border">{displayBasicInfo?.name || displayBasicInfo?.damdanga || '-'}</td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>팩스</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.fax || ''}
                           onChange={(e) => {
                             const cleaned = removePhoneHyphen(e.target.value)
@@ -460,15 +466,16 @@ export default function CompanyDetailModal({
                           }}
                         />
                       ) : (
-                        displayBasicInfo?.fax || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.fax || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>사업자번호</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.cNumber || ''}
                           onChange={(e) => {
                             const cleaned = removeBusinessNumberHyphen(e.target.value)
@@ -477,17 +484,18 @@ export default function CompanyDetailModal({
                           }}
                         />
                       ) : (
-                        displayBasicInfo?.cNumber || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.cNumber || '-'}</div>
                       )}
                     </td>
                   </tr>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>법인번호</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
-                          className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                          className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                          style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                           value={displayBasicInfo?.lNumber || ''}
                           onChange={(e) => {
                             const cleaned = removeCorporateNumberHyphen(e.target.value)
@@ -496,14 +504,15 @@ export default function CompanyDetailModal({
                           }}
                         />
                       ) : (
-                        displayBasicInfo?.lNumber || '-'
+                        <div className="px-3 py-2">{displayBasicInfo?.lNumber || '-'}</div>
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>보험료 받는날</th>
-                    <td className="px-3 py-2 border border-border">
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       <input
                         type="date"
-                        className="w-full px-2 py-1 text-xs border-0 bg-transparent"
+                        className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                        style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                         value={displayBasicInfo?.FirstStart ? displayBasicInfo.FirstStart.substring(0, 10) : ''}
                         readOnly
                       />
@@ -524,9 +533,9 @@ export default function CompanyDetailModal({
                   </tr>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>주소</th>
-                    <td colSpan={7} className="px-3 py-2 border border-border">
+                    <td colSpan={7} className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2" style={{ padding: '8px 12px' }}>
                           <input
                             type="text"
                             className="w-24 px-2 py-1 text-xs border border-gray-300 rounded"
@@ -550,7 +559,7 @@ export default function CompanyDetailModal({
                           />
                         </div>
                       ) : (
-                        [displayBasicInfo?.postNum, displayBasicInfo?.address1, displayBasicInfo?.address2].filter(Boolean).join(' ') || '-'
+                        <div className="px-3 py-2">{[displayBasicInfo?.postNum, displayBasicInfo?.address1, displayBasicInfo?.address2].filter(Boolean).join(' ') || '-'}</div>
                       )}
                     </td>
                   </tr>
