@@ -204,16 +204,34 @@ export default function CodeByPolicy() {
     ]
   }, [certiList])
 
+  // 정렬된 데이터 (계약일 오름차순, 보험사 내림차순)
+  const sortedPolicies = useMemo(() => {
+    return [...policies].sort((a, b) => {
+      // 1순위: 계약일(sigi) 오름차순
+      const sigiA = a.sigi || ''
+      const sigiB = b.sigi || ''
+      if (sigiA !== sigiB) {
+        return sigiA.localeCompare(sigiB)
+      }
+      // 2순위: 보험사(insurance) 내림차순
+      const insuranceA = String(a.insurance || '')
+      const insuranceB = String(b.insurance || '')
+      return insuranceB.localeCompare(insuranceA)
+    })
+  }, [policies])
+
   // 페이지네이션 계산
   const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = Math.min(startIndex + itemsPerPage, policies.length)
-  const currentPolicies = policies.slice(startIndex, endIndex)
+  const endIndex = Math.min(startIndex + itemsPerPage, sortedPolicies.length)
+  const currentPolicies = sortedPolicies.slice(startIndex, endIndex)
 
   // 인원 합계 계산
-  const totalInwon = policies.reduce((sum, item) => {
-    const inwon = parseInt(String(item.inwon || 0), 10)
-    return sum + (isNaN(inwon) ? 0 : inwon)
-  }, 0)
+  const totalInwon = useMemo(() => {
+    return sortedPolicies.reduce((sum, item) => {
+      const inwon = parseInt(String(item.inwon || 0), 10)
+      return sum + (isNaN(inwon) ? 0 : inwon)
+    }, 0)
+  }, [sortedPolicies])
 
   // 테이블 컬럼 정의
   const columns: Column<PolicyItem>[] = [
@@ -221,7 +239,7 @@ export default function CodeByPolicy() {
       key: 'num',
       header: '#',
       cell: (row: PolicyItem) => {
-        const index = policies.findIndex((p) => p.certi === row.certi)
+        const index = sortedPolicies.findIndex((p) => p.certi === row.certi)
         return (
           <button
             onClick={(e) => {
@@ -357,9 +375,9 @@ export default function CodeByPolicy() {
         <FilterBar.SearchButton onClick={searchPolicies} />
         <div className="ml-auto flex items-center gap-4 text-sm">
           <span className="text-muted-foreground">
-            총 {policies.length}개의 증권이 검색되었습니다. ({startIndex + 1}-{endIndex}/{policies.length})
+            총 {sortedPolicies.length}개의 증권이 검색되었습니다. ({startIndex + 1}-{endIndex}/{sortedPolicies.length})
           </span>
-          {policies.length > 0 && (
+          {sortedPolicies.length > 0 && (
             <span className="text-foreground font-medium">
               인원 합계: <strong className="text-primary">{totalInwon.toLocaleString('ko-KR')}</strong>
             </span>
@@ -375,7 +393,7 @@ export default function CodeByPolicy() {
         pagination={{
           currentPage,
           pageSize: itemsPerPage,
-          totalCount: policies.length,
+          totalCount: sortedPolicies.length,
           onPageChange: handlePageChange,
         }}
       />
