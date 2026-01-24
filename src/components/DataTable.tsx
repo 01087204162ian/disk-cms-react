@@ -26,6 +26,7 @@ interface DataTableProps<T> {
     pageSizeOptions?: number[]
   }
   mobileCard?: (row: T) => ReactNode // 모바일 카드 렌더링 함수
+  footer?: ReactNode // 테이블 footer (마지막 행)
   className?: string
 }
 
@@ -37,6 +38,7 @@ export default function DataTable<T extends Record<string, any>>({
   onRowClick,
   pagination,
   mobileCard,
+  footer,
   className = '',
 }: DataTableProps<T>) {
 
@@ -185,6 +187,13 @@ export default function DataTable<T extends Record<string, any>>({
             <table className="w-full border-collapse">
               {renderTableHeader()}
               {renderTableBody()}
+              {footer && (
+                <tfoot>
+                  <tr style={{ backgroundColor: '#f8f9fa', fontWeight: 600 }}>
+                    {footer}
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
 

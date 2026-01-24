@@ -54,7 +54,7 @@ export default function CodeByPolicy() {
   const [policyNumInput, setPolicyNumInput] = useState<string>('')
   const [isDirectInput, setIsDirectInput] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(15)
+  const [itemsPerPage] = useState(20)
   const [selectedCerti, setSelectedCerti] = useState<string>('')
   const [detailModalOpen, setDetailModalOpen] = useState(false)
 
@@ -204,19 +204,19 @@ export default function CodeByPolicy() {
     ]
   }, [certiList])
 
-  // 정렬된 데이터 (계약일 오름차순, 보험사 내림차순)
+  // 정렬된 데이터 (보험사 오름차순, 계약일 오름차순)
   const sortedPolicies = useMemo(() => {
     return [...policies].sort((a, b) => {
-      // 1순위: 계약일(sigi) 오름차순
-      const sigiA = a.sigi || ''
-      const sigiB = b.sigi || ''
-      if (sigiA !== sigiB) {
-        return sigiA.localeCompare(sigiB)
-      }
-      // 2순위: 보험사(insurance) 내림차순
+      // 1순위: 보험사(insurance) 오름차순
       const insuranceA = String(a.insurance || '')
       const insuranceB = String(b.insurance || '')
-      return insuranceB.localeCompare(insuranceA)
+      if (insuranceA !== insuranceB) {
+        return insuranceA.localeCompare(insuranceB)
+      }
+      // 2순위: 계약일(sigi) 오름차순
+      const sigiA = a.sigi || ''
+      const sigiB = b.sigi || ''
+      return sigiA.localeCompare(sigiB)
     })
   }, [policies])
 
@@ -396,6 +396,17 @@ export default function CodeByPolicy() {
           totalCount: sortedPolicies.length,
           onPageChange: handlePageChange,
         }}
+        footer={
+          <>
+            <td colSpan={9} className="px-2 py-2 text-center border border-[#e9ecef]" style={{ fontSize: '13px', fontWeight: 600 }}>
+              합계
+            </td>
+            <td className="px-2 py-2 text-end border border-[#e9ecef]" style={{ fontSize: '13px', fontWeight: 600 }}>
+              {totalInwon.toLocaleString('ko-KR')}
+            </td>
+            <td colSpan={6} className="px-2 py-2 border border-[#e9ecef]"></td>
+          </>
+        }
       />
 
       {/* 증권 상세 모달 */}
