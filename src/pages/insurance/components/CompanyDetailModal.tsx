@@ -366,11 +366,11 @@ export default function CompanyDetailModal({
               </div>
             </div>
             <div className="border border-border rounded overflow-hidden">
-              <table className="w-full border-collapse" style={{ fontSize: '0.85rem' }}>
+              <table className="w-full border-collapse" style={{ fontSize: '0.85rem', tableLayout: 'fixed' }}>
                 <tbody>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>주민번호</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -384,7 +384,7 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>대리운전회사</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -398,7 +398,7 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>성명</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -412,7 +412,7 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>핸드폰번호</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -432,7 +432,7 @@ export default function CompanyDetailModal({
                   </tr>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>전화번호</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -450,9 +450,9 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>담당자</th>
-                    <td className="px-3 py-2 border border-border">{displayBasicInfo?.name || displayBasicInfo?.damdanga || '-'}</td>
+                    <td className="px-3 py-2 border border-border" style={{ width: 'calc((100% - 480px) / 4)' }}>{displayBasicInfo?.name || displayBasicInfo?.damdanga || '-'}</td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>팩스</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -470,7 +470,7 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>사업자번호</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -490,7 +490,7 @@ export default function CompanyDetailModal({
                   </tr>
                   <tr>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>법인번호</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       {isEditingBasicInfo ? (
                         <input
                           type="text"
@@ -508,7 +508,7 @@ export default function CompanyDetailModal({
                       )}
                     </td>
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>보험료 받는날</th>
-                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
+                    <td className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`} style={{ width: 'calc((100% - 480px) / 4)' }}>
                       <input
                         type="date"
                         className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
@@ -535,24 +535,27 @@ export default function CompanyDetailModal({
                     <th className="bg-gray-200 px-3 py-2 text-center font-medium border border-border" style={{ width: '120px' }}>주소</th>
                     <td colSpan={7} className={`border border-border ${isEditingBasicInfo ? 'p-0' : 'px-3 py-2'}`}>
                       {isEditingBasicInfo ? (
-                        <div className="flex gap-2" style={{ padding: '8px 12px' }}>
+                        <div className="flex w-full" style={{ width: '100%', gap: '8px' }}>
                           <input
                             type="text"
-                            className="w-24 px-2 py-1 text-xs border border-gray-300 rounded"
+                            className="text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                            style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100px', flexShrink: 0 }}
                             placeholder="우편번호"
                             value={displayBasicInfo?.postNum || ''}
                             onChange={(e) => updateEditingBasicInfo('postNum', e.target.value)}
                           />
                           <input
                             type="text"
-                            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+                            className="text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                            style={{ fontSize: '0.75rem', padding: '8px 12px', flex: 1, minWidth: 0 }}
                             placeholder="주소1"
                             value={displayBasicInfo?.address1 || ''}
                             onChange={(e) => updateEditingBasicInfo('address1', e.target.value)}
                           />
                           <input
                             type="text"
-                            className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded"
+                            className="text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                            style={{ fontSize: '0.75rem', padding: '8px 12px', flex: 1, minWidth: 0 }}
                             placeholder="주소2"
                             value={displayBasicInfo?.address2 || ''}
                             onChange={(e) => updateEditingBasicInfo('address2', e.target.value)}
