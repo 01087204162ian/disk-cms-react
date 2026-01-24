@@ -652,40 +652,44 @@ export default function CompanyDetailModal({
                               )}
                             </div>
                           </td>
-                          <td className="px-2 py-2 border border-border">
+                          <td className="p-0 border border-border">
                             <Select
                               value={policy.InsuraneCompany || 0}
                               onChange={(e) => updateEditingPolicy(idx, 'InsuraneCompany', Number(e.target.value))}
                               options={INSURER_OPTIONS}
                               variant="modal"
                               fullWidth={false}
-                              className="text-xs"
+                              className="text-xs border-0 rounded-none"
+                              style={{ width: '100%' }}
                             />
                           </td>
-                          <td className="px-2 py-2 border border-border">
+                          <td className="p-0 border border-border">
                             <input
                               type="date"
                               value={policy.startyDay ? policy.startyDay.substring(0, 10) : ''}
                               onChange={(e) => updateEditingPolicy(idx, 'startyDay', e.target.value)}
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                             />
                           </td>
-                          <td className="px-2 py-2 border border-border">
+                          <td className="p-0 border border-border">
                             <input
                               type="text"
                               value={policy.policyNum || policy.certi || ''}
                               onChange={(e) => updateEditingPolicy(idx, 'policyNum', e.target.value)}
                               placeholder="증권번호"
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                             />
                           </td>
-                          <td className="px-2 py-2 border border-border">
+                          <td className="p-0 border border-border">
                             <input
                               type="text"
                               value={policy.nabang || ''}
                               onChange={(e) => updateEditingPolicy(idx, 'nabang', e.target.value)}
                               placeholder="분납"
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded"
+                              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                             />
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
@@ -697,7 +701,7 @@ export default function CompanyDetailModal({
                               {isSaving ? '저장 중...' : (policy.num ? '수정' : '저장')}
                             </button>
                           </td>
-                          <td className="px-2 py-2 text-center border border-border">
+                          <td className="p-0 text-center border border-border">
                             {!isNew && policy.num ? (
                               <Select
                                 value={policy.nabang_1 || 1}
@@ -729,10 +733,11 @@ export default function CompanyDetailModal({
                                 options={Array.from({ length: 10 }, (_, i) => ({ value: i + 1, label: `${i + 1}회차` }))}
                                 variant="modal"
                                 fullWidth={false}
-                                className="text-xs"
+                                className="text-xs border-0 rounded-none"
+                                style={{ width: '100%' }}
                               />
                             ) : (
-                              '-'
+                              <div className="px-2 py-2">-</div>
                             )}
                           </td>
                           <td className="px-2 py-2 text-center border border-border">
@@ -840,7 +845,7 @@ export default function CompanyDetailModal({
                               </button>
                             ) : null}
                           </td>
-                          <td className="px-2 py-2 text-center border border-border">
+                          <td className="p-0 text-center border border-border">
                             {!isNew && policy.num ? (
                               <Select
                                 value={policy.gita || 1}
@@ -872,10 +877,11 @@ export default function CompanyDetailModal({
                                 options={GITA_OPTIONS}
                                 variant="modal"
                                 fullWidth={false}
-                                className="text-xs"
+                                className="text-xs border-0 rounded-none"
+                                style={{ width: '100%' }}
                               />
                             ) : (
-                              policy.gitaName || (policy.gita ? getGitaName(policy.gita) : '-')
+                              <div className="px-2 py-2">{policy.gitaName || (policy.gita ? getGitaName(policy.gita) : '-')}</div>
                             )}
                           </td>
                         </tr>
