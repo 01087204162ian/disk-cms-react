@@ -243,7 +243,7 @@ export default function DriverSearch() {
       {
         key: 'status',
         header: '상태',
-        className: 'whitespace-nowrap',
+        className: 'whitespace-nowrap p-0',
         cell: (row) => {
           const push = Number(row.push)
           const cancel = row.cancel != null ? String(row.cancel) : ''
@@ -271,9 +271,11 @@ export default function DriverSearch() {
           if (push === 4) {
             return (
               <select
-                className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+                style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
                 defaultValue={push}
                 onChange={(e) => handleStatusChange(row.num, push, Number(e.target.value))}
+                onClick={(e) => e.stopPropagation()}
               >
                 <option value="4">정상</option>
                 <option value="2">해지</option>
@@ -291,9 +293,11 @@ export default function DriverSearch() {
           const etag = Number(row.etag || 0)
           return (
             <select
-              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
               defaultValue={etag}
               onChange={(e) => handleEtagChange(row.num, Number(e.target.value))}
+              onClick={(e) => e.stopPropagation()}
             >
               {GITA_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -303,7 +307,7 @@ export default function DriverSearch() {
             </select>
           )
         },
-        className: 'hidden lg:table-cell',
+        className: 'hidden lg:table-cell p-0',
       },
       {
         key: 'company',
@@ -357,7 +361,8 @@ export default function DriverSearch() {
           return (
             <input
               type="text"
-              className="w-[70%] text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring hidden lg:table-cell"
+              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
               defaultValue={phone}
               onInput={(e) => {
                 const target = e.target as HTMLInputElement
@@ -395,7 +400,7 @@ export default function DriverSearch() {
             />
           )
         },
-        className: 'hidden lg:table-cell',
+        className: 'hidden lg:table-cell p-0',
       },
       {
         key: 'InputDay',
@@ -412,12 +417,13 @@ export default function DriverSearch() {
       {
         key: 'sago',
         header: '사고',
-        className: 'whitespace-nowrap',
+        className: 'whitespace-nowrap p-0',
         cell: (row) => {
           const sago = Number(row.sago || 0)
           return (
             <select
-              className="w-full text-xs px-2 py-1 rounded border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              className="w-full text-xs border-0 rounded-none bg-background text-foreground focus:border-input focus:bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+              style={{ fontSize: '0.75rem', padding: '8px 12px', width: '100%' }}
               defaultValue={sago}
               onChange={(e) => handleSagoChange(row.num, Number(e.target.value))}
               onClick={(e) => e.stopPropagation()}
