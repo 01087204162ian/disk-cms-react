@@ -220,6 +220,130 @@ export default function Documentation() {
                     </div>
                   </div>
 
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">2-4) 영업/운영 관점 업무 흐름(신규 회사 → 운영 → 정산)</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        <strong>상담/신규 연결</strong>: 대리운전회사와 상담 후 “신규 회사”로 연결 확정
+                      </li>
+                      <li>
+                        <strong>대리운전회사 등록</strong>: 회사 기본정보 등록 (`2012DaeriCompany`)
+                      </li>
+                      <li>
+                        <strong>증권 추가</strong>: 회사가 가입한 증권(운영) 등록 (`2012CertiTable`), 보험사 기준 증권(기준) 정보는 `2012Certi`와 매핑
+                      </li>
+                      <li>
+                        <strong>월 보험료 입력</strong>: 회사로부터 받는 월 보험료 입력 (`kj_premium_data`)
+                      </li>
+                      <li>
+                        <strong>회사 계정 발급</strong>: 대리운전회사가 사용할 아이디/담당자 계정 생성 (`2012Costomer`)
+                      </li>
+                      <li>
+                        <strong>회사 운영(기사 등록/해지)</strong>: 회사가 기사 등록(청약) / 해지 요청을 수행 → 기사 데이터는 `2012DaeriMemberSecure`에 누적
+                      </li>
+                      <li>
+                        <strong>당사 운영(배서 처리)</strong>: 당사 직원이 배서 리스트를 확인하고 보험사 전산에서 업무 처리 후, 배서처리/취소/거절 등 상태를 확정
+                      </li>
+                      <li>
+                        <strong>월 1회 정산</strong>: “정산” 메뉴에서 월 1회 보험료 정산 및 검증(회사 기준 월 보험료 vs 보험사 기준 10회분납 보험료)
+                      </li>
+                    </ol>
+                    <div className="mt-3 text-sm text-gray-600">
+                      데이터 기준(요약): 회사/담당자(`2012DaeriCompany`, `2012Costomer`) → 증권(`2012CertiTable`, `2012Certi`) → 기사(`2012DaeriMemberSecure`) → 요율(`2019rate`) → 보험료(`kj_premium_data`, `kj_insurance_premium_data`) → 이력/검증(`SMSData`, `ssang_c_memo`)
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg border p-4">
+                    <p className="font-semibold mb-2">2-5) 실무 메뉴얼(화면 기준 체크리스트)</p>
+                    <div className="space-y-5 text-sm">
+                      <div>
+                        <p className="font-semibold text-gray-900">A. 신규 대리운전회사 세팅(당사)</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            <strong>대리업체 관리</strong> (`/insurance/kj-driver-company`)에서 <strong>업체 등록</strong>
+                          </li>
+                          <li>
+                            업체 상세에서 <strong>증권정보 탭</strong>으로 이동 → <strong>증권 추가(운영 증권)</strong> (`2012CertiTable`)
+                          </li>
+                          <li>
+                            <strong>월보험료 입력</strong>: 업체/증권 기준으로 월 보험료 입력 (`kj_premium_data`)
+                          </li>
+                          <li>
+                            <strong>업체 계정 발급</strong>: 업체 담당자/아이디 생성 (`2012Costomer`)
+                          </li>
+                        </ol>
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p className="font-semibold mb-1">필수 입력(현재 UI 검증 기준)</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>
+                              <strong>업체 신규 등록</strong>(신규 등록 모달): 주민번호(엔터로 중복검사), 대리운전회사명, 대표자(Pname){" "}
+                              <span className="text-gray-500">(전화/사업자번호/법인번호는 입력 가능)</span>
+                            </li>
+                            <li>
+                              <strong>업체 계정 발급</strong>(업체 I.D 모달): 담당자명(user), 아이디(mem_id), 핸드폰번호(hphone), 비밀번호(8자+영문/숫자)
+                            </li>
+                            <li>
+                              <strong>확정보험료 입력</strong>(정산 모달): 정산일, 확정보험료 금액(숫자)
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-900">B. 기사 운영(대리운전회사)</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            <strong>기사 등록/조회</strong>: <strong>기사 찾기</strong> (`/insurance/kj-driver-search`) 또는 업체 상세에서 기사 등록/확인
+                          </li>
+                          <li>
+                            <strong>청약/해지</strong>: 회사가 기사 청약 등록 또는 해지 요청을 수행 → 기사 데이터는 `2012DaeriMemberSecure`에 저장
+                          </li>
+                        </ol>
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-900">C. 배서 처리(당사 운영자)</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            <strong>배서 리스트</strong> (`/insurance/kj-driver-endorse-list`)에서 <strong>대상 건 확인</strong> (증권/회사/기준일/신청일)
+                          </li>
+                          <li>
+                            필요 시 <strong>요율 입력</strong> (`2019rate`) 후 배서처리 상태 변경
+                          </li>
+                          <li>
+                            <strong>보험사 전산 처리</strong> 완료 후 CMS에서 <strong>배서처리/취소/거절</strong>로 상태 확정
+                          </li>
+                          <li>
+                            <strong>검증</strong>: 기사 상태(`push/cancel/sangtae`) + 문자 이력(`SMSData`) 확인
+                          </li>
+                        </ol>
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p className="font-semibold mb-1">필수 입력(운영 규칙)</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>
+                              <strong>처리/거절/취소</strong>는 모두 <strong>처리 상태(sangtae=2)</strong>로 관리
+                            </li>
+                            <li>
+                              배서처리 변경 시 <strong>요율(rate)</strong>이 선행되어야 하는 케이스가 있음(개인 요율부터 입력)
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-900">D. 월 1회 정산(당사 ↔ 회사)</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            업체 기준 월 보험료(`kj_premium_data`)와 보험사 기준 10회분납(`kj_insurance_premium_data`)를 비교/검증
+                          </li>
+                          <li>
+                            정산 메뉴(업체 상세 내 정산/정산 모달 등)에서 월 1회 정산 처리 및 기록
+                          </li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
                     <p className="text-yellow-800 font-semibold mb-1">실무 체크포인트(핵심)</p>
                     <ul className="list-disc list-inside text-yellow-800 space-y-1">
@@ -416,19 +540,37 @@ export default function Documentation() {
                     <p className="font-semibold mb-2">핵심 테이블(요약)</p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>
-                        <strong>`2012Certi`</strong>: 증권 기본(예: `certi`, `sigi`, `insurance`)
+                        <strong>`2012Member`</strong>: KJ 대리운전 <strong>영업담당자</strong> 리스트
                       </li>
                       <li>
-                        <strong>`2012CertiTable`</strong>: 증권 운영 테이블(예: `num`, `policyNum`, `startyDay`, `InsuraneCompany`, `2012DaeriCompanyNum`)
+                        <strong>`2012Costomer`</strong>: 대리운전회사 <strong>담당자(계정)</strong> 리스트
                       </li>
                       <li>
-                        <strong>`2012DaeriCompany`</strong>: 대리운전회사(예: `num`, `company`)
+                        <strong>`2012DaeriCompany`</strong>: <strong>대리운전회사 관리</strong> 테이블 (회사 기본정보/담당자 연결 등)
                       </li>
                       <li>
-                        <strong>`2012DaeriMemberSecure`</strong>: 기사(암호화/보안 버전 포함) (예: `CertiTableNum`, `dongbuCerti`, `InsuranceCompany`, `push`, `cancel`)
+                        <strong>`2012CertiTable`</strong>: 대리운전회사 기준 <strong>증권(운영)</strong> 테이블 (회사별 가입 증권/기간/보험사/납입정보 등)
                       </li>
                       <li>
-                        <strong>`SMSData`</strong>: 문자 발송/이력(예: `policyNum`, `endorse_day`, `2012DaeriCompanyNum`, `2012DaeriMemberNum`)
+                        <strong>`2012Certi`</strong>: 보험회사 기준 <strong>증권(기준)</strong> 테이블 (보험사 기준 납입/기간/기준정보)
+                      </li>
+                      <li>
+                        <strong>`2012DaeriMemberSecure`</strong>: <strong>대리기사</strong> 리스트(보안/암호화 적용) — 증권/회사에 연결됨
+                      </li>
+                      <li>
+                        <strong>`2019rate`</strong>: 대리기사 <strong>할인할증(요율)</strong> 테이블 (주민번호/증권번호 기준)
+                      </li>
+                      <li>
+                        <strong>`kj_premium_data`</strong>: 당사가 대리운전회사로부터 받은 <strong>월보험료</strong> (회사 기준)
+                      </li>
+                      <li>
+                        <strong>`kj_insurance_premium_data`</strong>: 보험회사에 내는 <strong>10회 분납 보험료</strong> (보험사 기준)
+                      </li>
+                      <li>
+                        <strong>`SMSData`</strong>: 문자(SMS) 발송/동의/배서 관련 <strong>이력</strong> 테이블
+                      </li>
+                      <li>
+                        <strong>`ssang_c_memo`</strong>: 대리운전회사 관련 <strong>메모</strong>
                       </li>
                     </ul>
                   </div>
