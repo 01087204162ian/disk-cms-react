@@ -313,6 +313,55 @@ export default function Documentation() {
                             </li>
                           </ul>
                         </div>
+                        <div className="mt-4 rounded border bg-gray-50 p-3">
+                          <p className="font-semibold text-gray-900 mb-2">회사 담당자 화면(기존 고객사 화면) 기준: “어디서 무엇을 하나요?”</p>
+                          <div className="space-y-3 text-gray-700">
+                            <div className="bg-white border rounded p-3">
+                              <p className="font-semibold mb-2">1) 증권정보 탭 → “신규청약” (여러 명 한 번에 등록)</p>
+                              <ul className="list-disc list-inside space-y-1">
+                                <li>
+                                  <strong>경로</strong>: `https://pcikorea.com/kj/dashboard.html` → 좌측 메뉴 <strong>증권정보</strong> → 카드의 <strong>신규청약</strong> 버튼
+                                </li>
+                                <li>
+                                  <strong>필수 입력</strong>: 성명, 핸드폰번호, 주민번호(13자리)
+                                </li>
+                                <li>
+                                  <strong>입력 팁</strong>: 한 번에 여러 명(여러 줄)을 입력 후 <strong>저장하기</strong>
+                                </li>
+                                <li>
+                                  <strong>저장 후 확인</strong>: 같은 화면의 <strong>진행 중인 배서</strong> 목록에 “요청”이 표시되고, 당사 처리 후 <strong>진행 완료 배서</strong>로 이동합니다.
+                                </li>
+                              </ul>
+                            </div>
+
+                            <div className="bg-white border rounded p-3">
+                              <p className="font-semibold mb-2">2) 기사찾기 탭 → “기사 상태 확인/해지 요청”</p>
+                              <ul className="list-disc list-inside space-y-1">
+                                <li>
+                                  <strong>경로</strong>: 좌측 메뉴 <strong>기사찾기</strong> → 기사 이름 검색
+                                </li>
+                                <li>
+                                  <strong>상태 의미</strong>: 정상(운영 기준) / 청약(요청) / <strong>해지중(요청)</strong> / 청약취소/청약거절/해지취소(결과)
+                                </li>
+                                <li>
+                                  <strong>해지 요청</strong>: 상태 셀에서 <strong>정상 → 해지</strong>로 변경하면 “해지중”으로 표시됩니다(당사 확정 전).
+                                </li>
+                              </ul>
+                            </div>
+
+                            <div className="bg-white border rounded p-3">
+                              <p className="font-semibold mb-2">3) 문자리스트 탭 → “문자 발송/이력 확인(검증)”</p>
+                              <ul className="list-disc list-inside space-y-1">
+                                <li>
+                                  <strong>언제 보나요?</strong> 저장/요청 후 “문자 발송이 되었는지”, “링크 동의가 되었는지” 확인할 때 봅니다.
+                                </li>
+                                <li>
+                                  <strong>검증 포인트</strong>: 대상 번호/증권번호/발송일자/동의 여부를 함께 확인합니다.
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <div>
