@@ -6,7 +6,17 @@ export default function Documentation() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['system-overview', 'screens', 'urls', 'customer-flow', 'cms-howto', 'api-summary', 'references']
+      const sections = [
+        'system-overview',
+        'screens',
+        'urls',
+        'customer-flow',
+        'cms-howto',
+        'api-summary',
+        'db-summary',
+        'faq',
+        'references',
+      ]
       const scrollPosition = window.scrollY + 64 + 65 + 50
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -48,7 +58,9 @@ export default function Documentation() {
     { id: 'customer-flow', label: '4. 고객사(기존) 화면 흐름' },
     { id: 'cms-howto', label: '5. CMS(React) 화면별 사용법' },
     { id: 'api-summary', label: '6. API 요약(화면 → API)' },
-    { id: 'references', label: '7. 참고(기존 고객사/문서)' },
+    { id: 'db-summary', label: '7. DB/테이블 요약' },
+    { id: 'faq', label: '8. FAQ / 트러블슈팅' },
+    { id: 'references', label: '9. 참고(기존 고객사/문서)' },
   ]
 
   return (
@@ -286,8 +298,132 @@ export default function Documentation() {
                 </div>
               </section>
 
+              <section id="db-summary" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">7. DB/테이블 요약</h2>
+
+                <div className="space-y-6 text-gray-700">
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <p className="text-blue-800">
+                      운영 데이터는 주로 <strong>증권(2012Certi/2012CertiTable)</strong>, <strong>기사(2012DaeriMember/2012DaeriMemberSecure)</strong>,
+                      <strong>회사(2012DaeriCompany)</strong>, <strong>SMS(SMSData)</strong>를 중심으로 흐릅니다.
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">핵심 테이블(요약)</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>`2012Certi`</strong>: 증권 기본(예: `certi`, `sigi`, `insurance`)
+                      </li>
+                      <li>
+                        <strong>`2012CertiTable`</strong>: 증권 운영 테이블(예: `num`, `policyNum`, `startyDay`, `InsuraneCompany`, `2012DaeriCompanyNum`)
+                      </li>
+                      <li>
+                        <strong>`2012DaeriCompany`</strong>: 대리운전회사(예: `num`, `company`)
+                      </li>
+                      <li>
+                        <strong>`2012DaeriMemberSecure`</strong>: 기사(암호화/보안 버전 포함) (예: `CertiTableNum`, `dongbuCerti`, `InsuranceCompany`, `push`, `cancel`)
+                      </li>
+                      <li>
+                        <strong>`SMSData`</strong>: 문자 발송/이력(예: `policyNum`, `endorse_day`, `2012DaeriCompanyNum`, `2012DaeriMemberNum`)
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">관계(운영 관점)</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>회사(2012DaeriCompany.num)</strong> → <strong>증권(2012CertiTable.2012DaeriCompanyNum)</strong>
+                      </li>
+                      <li>
+                        <strong>증권(2012CertiTable.num)</strong> → <strong>기사(2012DaeriMemberSecure.CertiTableNum)</strong>
+                      </li>
+                      <li>
+                        <strong>증권번호 변경</strong> 시: <strong>2012CertiTable</strong> 뿐 아니라, 연결 기사 테이블의 <strong>`dongbuCerti` / `InsuranceCompany`</strong>도 함께 업데이트
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                    <p className="text-yellow-800 font-semibold mb-1">자주 보는 필드(운영)</p>
+                    <ul className="list-disc list-inside text-yellow-800 space-y-1">
+                      <li><strong>기사 상태</strong>: `push`, `cancel`, `sangtae`</li>
+                      <li><strong>증권 매핑</strong>: `CertiTableNum`, `policyNum`, `dongbuCerti`</li>
+                      <li><strong>보험사</strong>: `InsuraneCompany`(증권), `InsuranceCompany`(기사)</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
+              <section id="faq" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">8. FAQ / 트러블슈팅</h2>
+
+                <div className="space-y-6 text-gray-700">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">Q1. 검색 버튼 클릭 시 “Converting circular structure to JSON” 오류</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>원인</strong>: 클릭 이벤트 객체가 그대로 검색 함수로 전달되어, axios가 요청 데이터를 stringify 하면서 순환 참조가 발생
+                      </li>
+                      <li>
+                        <strong>해결</strong>: 예) <code className="bg-gray-100 px-1 rounded">{`onClick={() => handleSearch()}`}</code> 처럼 이벤트 객체를 넘기지 않도록 래핑
+                      </li>
+                      <li>
+                        <strong>관련 화면</strong>: 갱신(증권검색) 페이지
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">Q2. 대리운전회사 상세 모달에서 th는 맞는데 td/입력상자 폭이 안 맞음</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>해결(기본정보)</strong>: `tableLayout: 'fixed'` + th 폭 고정 + td 폭 균등 분배
+                      </li>
+                      <li>
+                        <strong>해결(수정 모드)</strong>: td `p-0` + input/select를 `border-0 rounded-none` + `width: 100%`로 변경하여 td 꽉 채움
+                      </li>
+                      <li>
+                        <strong>해결(증권정보)</strong>: 입력이 있는 td도 동일하게 `p-0` 처리하고 Select/input 스타일 통일
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">Q3. “증권번호 변경(갱신)” 시 어떤 데이터까지 변경되나요?</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>증권(2012CertiTable)</strong>: 증권번호/보험기간/보험사 등 변경
+                      </li>
+                      <li>
+                        <strong>연결 기사(2012DaeriMemberSecure)</strong>: 해당 증권에 연결된 기사들의 <strong>증권번호(dongbuCerti)</strong>와 <strong>보험사(InsuranceCompany)</strong>도 함께 업데이트
+                      </li>
+                      <li>
+                        <strong>운영 포인트</strong>: 모달 안내문/확인 메시지로 변경 범위를 사용자에게 명확히 표시
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">Q4. 빌드 실패: TS6133 (선언만 하고 사용하지 않는 변수)</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      <li>
+                        <strong>증상</strong>: `is declared but its value is never read`로 `npm run build` 실패
+                      </li>
+                      <li>
+                        <strong>해결</strong>: 사용하지 않는 변수/계산을 제거하거나, 실제 UI에 표시하여 “사용” 상태로 만들기
+                      </li>
+                      <li>
+                        <strong>예</strong>: `currentPageInwon`이 미사용이라면 삭제
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
               <section id="references" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">7. 참고(기존 고객사/문서)</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">9. 참고(기존 고객사/문서)</h2>
                 <div className="space-y-4 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
                     <div className="flex items-start">
@@ -305,6 +441,10 @@ export default function Documentation() {
                         <p className="text-blue-700">
                           `pci0327/kj/docs/API.md` 를 기준으로 상세 파라미터/응답을 확인하세요.
                         </p>
+                        <p className="text-blue-800 font-semibold mt-4 mb-1">DB 상세(참조)</p>
+                        <p className="text-blue-700">
+                          `pci0327/kj/docs/DATABASE.md` 를 기준으로 실제 테이블/필드/관계를 확인하세요.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -312,7 +452,7 @@ export default function Documentation() {
               </section>
 
               <div className="mt-12 pt-8 border-t text-center text-gray-500 text-sm">
-                <p>KJ 대리운전 운영 매뉴얼 v0.3</p>
+                <p>KJ 대리운전 운영 매뉴얼 v0.5</p>
                 <p className="mt-2">최종 업데이트: 2026-01-24</p>
               </div>
             </div>
