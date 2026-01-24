@@ -8,6 +8,7 @@ export default function Documentation() {
     const handleScroll = () => {
       const sections = [
         'system-overview',
+        'work-flow',
         'screens',
         'urls',
         'customer-flow',
@@ -53,14 +54,15 @@ export default function Documentation() {
 
   const navItems = [
     { id: 'system-overview', label: '1. 시스템 개요' },
-    { id: 'screens', label: '2. 주요 화면(메뉴)' },
-    { id: 'urls', label: '3. URL / 경로 / 소스 매핑' },
-    { id: 'customer-flow', label: '4. 고객사(기존) 화면 흐름' },
-    { id: 'cms-howto', label: '5. CMS(React) 화면별 사용법' },
-    { id: 'api-summary', label: '6. API 요약(화면 → API)' },
-    { id: 'db-summary', label: '7. DB/테이블 요약' },
-    { id: 'faq', label: '8. FAQ / 트러블슈팅' },
-    { id: 'references', label: '9. 참고(기존 고객사/문서)' },
+    { id: 'work-flow', label: '2. 업무 흐름(실무)' },
+    { id: 'screens', label: '3. 주요 화면(메뉴)' },
+    { id: 'urls', label: '4. URL / 경로 / 소스 매핑' },
+    { id: 'customer-flow', label: '5. 고객사(기존) 화면 흐름' },
+    { id: 'cms-howto', label: '6. CMS(React) 화면별 사용법' },
+    { id: 'api-summary', label: '7. API 요약(화면 → API)' },
+    { id: 'db-summary', label: '8. DB/테이블 요약' },
+    { id: 'faq', label: '9. FAQ / 트러블슈팅' },
+    { id: 'references', label: '10. 참고(기존 고객사/문서)' },
   ]
 
   return (
@@ -128,8 +130,109 @@ export default function Documentation() {
                 </div>
               </section>
 
+              <section id="work-flow" className="mb-12 scroll-mt-24">
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">2. 업무 흐름(실무)</h2>
+
+                <div className="space-y-6 text-gray-700">
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <p className="text-blue-800">
+                      아래 흐름은 `pci0327/kj/docs/ARCHITECTURE.md`, `FRONTEND.md`, `API.md`의 “데이터 흐름/배서 프로세스”를 바탕으로,
+                      실무자가 이해하기 쉬운 순서로 재구성한 것입니다.
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">전체 흐름(요약)</p>
+                    <pre className="text-sm bg-gray-900 text-gray-100 rounded p-3 overflow-x-auto">{`1) 증권 확인/선택
+   ↓
+2) 대리기사 추가(청약) → 동의(SMS) → 배서 처리
+   ↓
+3) 해지 요청/해지 처리 → (필요 시) 해지취소
+   ↓
+4) 정산/통계 확인 (증권/일자/담당자 기준)
+   ↓
+5) 문자 이력/재발송/검증`}</pre>
+                    <p className="text-sm text-gray-600 mt-2">
+                      ※ 실제 운영에서는 “배서 리스트/갱신/증권별 코드”를 상황에 따라 오가며 처리합니다.
+                    </p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">2-1) 대리기사 추가(청약) 흐름</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        <strong>증권 확인</strong>: 증권정보/증권별 코드에서 대상 증권번호(보험사/기간) 확인
+                      </li>
+                      <li>
+                        <strong>기사 등록/추가</strong>: 기사 찾기 또는 업체 상세(증권정보)에서 기사 정보 입력/등록
+                      </li>
+                      <li>
+                        <strong>상태 확인</strong>: 기본적으로 청약 단계(`push=1`)로 관리(운영 표기 기준)
+                      </li>
+                      <li>
+                        <strong>동의(SMS)</strong>: 대상 기사에게 동의 요청 문자 발송 → 링크 확인/동의
+                      </li>
+                      <li>
+                        <strong>배서 처리</strong>: 배서 리스트에서 처리 완료까지 상태 전환(처리/취소 등)
+                      </li>
+                    </ol>
+                    <div className="mt-3 text-sm text-gray-600">
+                      관련 API(구버전 기준): 기사 조회 `POST /api/customer/driver_data.php`, 배서 상태 변경 `POST /api/kjDaeri/changeEndorse.php`, 문자 `POST /api/kjDaeri/smsSend.php`
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">2-2) 해지/해지취소(배서 포함) 흐름</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        <strong>해지 대상 확인</strong>: 기사 상태/기간/증권번호 확인
+                      </li>
+                      <li>
+                        <strong>해지 처리</strong>: 배서 리스트에서 해지 관련 처리 진행
+                      </li>
+                      <li>
+                        <strong>취소/되돌리기</strong>: 운영 정책에 따라 “해지취소” 또는 “청약취소/청약거절” 처리
+                      </li>
+                      <li>
+                        <strong>결과 검증</strong>: 기사 상태(`push/cancel`) 및 SMS 이력 확인
+                      </li>
+                    </ol>
+                    <div className="mt-3 text-sm text-gray-600">
+                      관련 API(구버전 기준): 배서 되돌리기 `POST /api/kjDaeri/changeEndorseBack.php`, 일일 배서 검색 `POST /api/kjDaeri/dailyEndorseSearch.php`
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">2-3) 정산/통계 흐름(증권/담당자 기준)</p>
+                    <ol className="list-decimal list-inside space-y-1">
+                      <li>
+                        <strong>증권 기준 집계</strong>: 증권번호별 인원/요율/보험료 통계 확인
+                      </li>
+                      <li>
+                        <strong>담당자 기준 집계</strong>: 필요 시 담당자별 집계로 분리
+                      </li>
+                      <li>
+                        <strong>정산 검증</strong>: SMSData/처리 상태/기간을 교차 확인
+                      </li>
+                    </ol>
+                    <div className="mt-3 text-sm text-gray-600">
+                      관련 API(구버전 기준): 증권별 보험료 통계 `POST /api/kjDaeri/PolicyNumInsurancePremiumStatistics.php`
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                    <p className="text-yellow-800 font-semibold mb-1">실무 체크포인트(핵심)</p>
+                    <ul className="list-disc list-inside text-yellow-800 space-y-1">
+                      <li><strong>증권번호 변경</strong>은 연결 기사 테이블의 증권번호/보험사도 함께 바뀝니다(갱신 화면 안내문 확인).</li>
+                      <li><strong>배서 처리</strong>는 취소/재처리 가능 여부 정책을 먼저 확인하고 진행합니다.</li>
+                      <li><strong>문자(SMS)</strong>는 이력(SMSData)로 검증하고, 링크/대상번호/증권번호를 함께 확인합니다.</li>
+                    </ul>
+                  </div>
+                </div>
+              </section>
+
               <section id="screens" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">2. 주요 화면(메뉴)</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">3. 주요 화면(메뉴)</h2>
                 <ul className="list-disc list-inside space-y-2 text-gray-700">
                   <li>
                     <strong>기사 찾기</strong>: 기사 조회/수정
@@ -150,7 +253,7 @@ export default function Documentation() {
               </section>
 
               <section id="urls" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">3. URL / 경로 / 소스 매핑</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">4. URL / 경로 / 소스 매핑</h2>
                 <div className="space-y-4 text-gray-700">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-semibold mb-2">React CMS (disk-cms-react)</p>
@@ -172,7 +275,7 @@ export default function Documentation() {
               </section>
 
               <section id="customer-flow" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">4. 고객사(기존) 화면 흐름</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">5. 고객사(기존) 화면 흐름</h2>
                 <div className="space-y-4 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
                     <p className="text-blue-800">
@@ -206,7 +309,7 @@ export default function Documentation() {
               </section>
 
               <section id="cms-howto" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">5. CMS(React) 화면별 사용법</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">6. CMS(React) 화면별 사용법</h2>
                 <div className="space-y-4 text-gray-700">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="font-semibold mb-2">KJ대리운전 메뉴(React CMS)</p>
@@ -245,7 +348,7 @@ export default function Documentation() {
               </section>
 
               <section id="api-summary" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">6. API 요약(화면 → API)</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">7. API 요약(화면 → API)</h2>
 
                 <div className="space-y-6 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
@@ -299,7 +402,7 @@ export default function Documentation() {
               </section>
 
               <section id="db-summary" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">7. DB/테이블 요약</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">8. DB/테이블 요약</h2>
 
                 <div className="space-y-6 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
@@ -357,7 +460,7 @@ export default function Documentation() {
               </section>
 
               <section id="faq" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">8. FAQ / 트러블슈팅</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">9. FAQ / 트러블슈팅</h2>
 
                 <div className="space-y-6 text-gray-700">
                   <div className="bg-gray-50 rounded-lg p-4">
@@ -423,7 +526,7 @@ export default function Documentation() {
               </section>
 
               <section id="references" className="mb-12 scroll-mt-24">
-                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">9. 참고(기존 고객사/문서)</h2>
+                <h2 className="text-2xl font-semibold mb-4 pb-2 border-b">10. 참고(기존 고객사/문서)</h2>
                 <div className="space-y-4 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
                     <div className="flex items-start">
@@ -452,7 +555,7 @@ export default function Documentation() {
               </section>
 
               <div className="mt-12 pt-8 border-t text-center text-gray-500 text-sm">
-                <p>KJ 대리운전 운영 매뉴얼 v0.5</p>
+                <p>KJ 대리운전 운영 매뉴얼 v0.6</p>
                 <p className="mt-2">최종 업데이트: 2026-01-24</p>
               </div>
             </div>
