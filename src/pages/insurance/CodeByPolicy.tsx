@@ -204,14 +204,14 @@ export default function CodeByPolicy() {
     ]
   }, [certiList])
 
-  // 정렬된 데이터 (보험사 오름차순, 계약일 오름차순)
+  // 정렬된 데이터 (보험사 내림차순, 계약일 오름차순)
   const sortedPolicies = useMemo(() => {
     return [...policies].sort((a, b) => {
-      // 1순위: 보험사(insurance) 오름차순
+      // 1순위: 보험사(insurance) 내림차순
       const insuranceA = String(a.insurance || '')
       const insuranceB = String(b.insurance || '')
       if (insuranceA !== insuranceB) {
-        return insuranceA.localeCompare(insuranceB)
+        return insuranceB.localeCompare(insuranceA)
       }
       // 2순위: 계약일(sigi) 오름차순
       const sigiA = a.sigi || ''
@@ -225,13 +225,21 @@ export default function CodeByPolicy() {
   const endIndex = Math.min(startIndex + itemsPerPage, sortedPolicies.length)
   const currentPolicies = sortedPolicies.slice(startIndex, endIndex)
 
-  // 인원 합계 계산
+  // 전체 인원 합계 계산
   const totalInwon = useMemo(() => {
     return sortedPolicies.reduce((sum, item) => {
       const inwon = parseInt(String(item.inwon || 0), 10)
       return sum + (isNaN(inwon) ? 0 : inwon)
     }, 0)
   }, [sortedPolicies])
+
+  // 현재 페이지 인원 합계 계산
+  const currentPageInwon = useMemo(() => {
+    return currentPolicies.reduce((sum, item) => {
+      const inwon = parseInt(String(item.inwon || 0), 10)
+      return sum + (isNaN(inwon) ? 0 : inwon)
+    }, 0)
+  }, [currentPolicies])
 
   // 테이블 컬럼 정의
   const columns: Column<PolicyItem>[] = [
@@ -379,7 +387,7 @@ export default function CodeByPolicy() {
           </span>
           {sortedPolicies.length > 0 && (
             <span className="text-foreground font-medium">
-              인원 합계: <strong className="text-primary">{totalInwon.toLocaleString('ko-KR')}</strong>
+              전체 인원 합계: <strong className="text-primary">{totalInwon.toLocaleString('ko-KR')}</strong>
             </span>
           )}
         </div>
@@ -399,7 +407,7 @@ export default function CodeByPolicy() {
         footer={
           <>
             <td colSpan={9} className="px-2 py-2 text-center border border-[#e9ecef]" style={{ fontSize: '13px', fontWeight: 600 }}>
-              합계
+              합계 (전체)
             </td>
             <td className="px-2 py-2 text-end border border-[#e9ecef]" style={{ fontSize: '13px', fontWeight: 600 }}>
               {totalInwon.toLocaleString('ko-KR')}
