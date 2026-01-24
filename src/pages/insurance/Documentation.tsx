@@ -136,120 +136,123 @@ export default function Documentation() {
                 <div className="space-y-6 text-gray-700">
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
                     <p className="text-blue-800">
-                      아래 흐름은 `pci0327/kj/docs/ARCHITECTURE.md`, `FRONTEND.md`, `API.md`의 “데이터 흐름/배서 프로세스”를 바탕으로,
-                      실무자가 이해하기 쉬운 순서로 재구성한 것입니다.
+                      이 섹션은 <strong>“대리운전회사 담당자(고객사)”</strong>와 <strong>“당사 운영자(직원)”</strong>가
+                      각각 무엇을 언제 하는지 한 번에 이해할 수 있도록, <strong>역할(관점) 기준</strong>으로 정리했습니다.
                     </p>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="font-semibold mb-2">전체 흐름(요약)</p>
-                    <pre className="text-sm bg-gray-900 text-gray-100 rounded p-3 overflow-x-auto">{`1) 증권 확인/선택
-   ↓
-2) 대리기사 추가(청약) → 동의(SMS) → 배서 처리
-   ↓
-3) 해지 요청/해지 처리 → (필요 시) 해지취소
-   ↓
-4) 정산/통계 확인 (증권/일자/담당자 기준)
-   ↓
-5) 문자 이력/재발송/검증`}</pre>
-                    <p className="text-sm text-gray-600 mt-2">
-                      ※ 실제 운영에서는 “배서 리스트/갱신/증권별 코드”를 상황에 따라 오가며 처리합니다.
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="font-semibold mb-2">2-1) 대리기사 추가(청약) 흐름</p>
-                    <ol className="list-decimal list-inside space-y-1">
-                      <li>
-                        <strong>증권 확인</strong>: 증권정보/증권별 코드에서 대상 증권번호(보험사/기간) 확인
-                      </li>
-                      <li>
-                        <strong>기사 등록/추가</strong>: 기사 찾기 또는 업체 상세(증권정보)에서 기사 정보 입력/등록
-                      </li>
-                      <li>
-                        <strong>상태 확인</strong>: 기본적으로 청약 단계(`push=1`)로 관리(운영 표기 기준)
-                      </li>
-                      <li>
-                        <strong>동의(SMS)</strong>: 대상 기사에게 동의 요청 문자 발송 → 링크 확인/동의
-                      </li>
-                      <li>
-                        <strong>배서 처리</strong>: 배서 리스트에서 처리 완료까지 상태 전환(처리/취소 등)
-                      </li>
-                    </ol>
-                    <div className="mt-3 text-sm text-gray-600">
-                      관련 API(구버전 기준): 기사 조회 `POST /api/customer/driver_data.php`, 배서 상태 변경 `POST /api/kjDaeri/changeEndorse.php`, 문자 `POST /api/kjDaeri/smsSend.php`
+                    <p className="font-semibold mb-2">2-0) 한 장 요약(누가/언제/무엇)</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div className="bg-white border rounded p-3">
+                        <p className="font-semibold mb-2 text-gray-900">대리운전회사 담당자(고객사) 관점</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            <strong>기사 등록(청약)</strong>: 신규 기사 입력 → 신청 생성
+                          </li>
+                          <li>
+                            <strong>기사 해지 요청</strong>: 해지로 변경(해지중 표시)
+                          </li>
+                          <li>
+                            <strong>진행 확인</strong>: 처리/취소/거절 결과 확인
+                          </li>
+                          <li>
+                            <strong>월 정산 확인</strong>: 정산/보험료 관련 확인(월 1회)
+                          </li>
+                        </ol>
+                      </div>
+                      <div className="bg-white border rounded p-3">
+                        <p className="font-semibold mb-2 text-gray-900">당사 운영자(직원) 관점</p>
+                        <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                          <li>
+                            <strong>신규 회사 세팅</strong>: 회사 등록/증권 추가/월보험료/계정 발급
+                          </li>
+                          <li>
+                            <strong>배서 리스트 처리</strong>: 청약/해지/거절/취소 → 보험사 전산 처리 후 상태 확정
+                          </li>
+                          <li>
+                            <strong>정산 검증</strong>: 회사 월보험료 vs 보험사 분납보험료/인원/기간 교차 확인
+                          </li>
+                          <li>
+                            <strong>검증/추적</strong>: SMS 이력/상태값(push/cancel/sangtae)로 근거 확인
+                          </li>
+                        </ol>
+                      </div>
                     </div>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="font-semibold mb-2">2-2) 해지/해지취소(배서 포함) 흐름</p>
-                    <ol className="list-decimal list-inside space-y-1">
+                    <p className="font-semibold mb-2">2-1) 회사 담당자: “기사 등록(청약)”을 할 때</p>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-700">
                       <li>
-                        <strong>해지 대상 확인</strong>: 기사 상태/기간/증권번호 확인
+                        <strong>기사 정보 입력</strong> (주민번호/성명/핸드폰 등) → <strong>청약 신청 생성</strong>
                       </li>
                       <li>
-                        <strong>해지 처리</strong>: 배서 리스트에서 해지 관련 처리 진행
+                        신청 후 상태는 기본적으로 <strong>청약 진행</strong>으로 관리됩니다(운영 표기 기준)
                       </li>
                       <li>
-                        <strong>취소/되돌리기</strong>: 운영 정책에 따라 “해지취소” 또는 “청약취소/청약거절” 처리
-                      </li>
-                      <li>
-                        <strong>결과 검증</strong>: 기사 상태(`push/cancel`) 및 SMS 이력 확인
+                        당사에서 보험사 전산 처리를 완료하면, 배서 리스트에서 <strong>처리/거절/취소</strong>로 확정됩니다
                       </li>
                     </ol>
-                    <div className="mt-3 text-sm text-gray-600">
-                      관련 API(구버전 기준): 배서 되돌리기 `POST /api/kjDaeri/changeEndorseBack.php`, 일일 배서 검색 `POST /api/kjDaeri/dailyEndorseSearch.php`
+                    <div className="mt-3 text-xs text-gray-600">
+                      핵심 포인트: 회사 담당자는 “신청(요청)을 만든다” / 당사 운영자는 “보험사 전산 처리 후 결과를 확정한다”
                     </div>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="font-semibold mb-2">2-3) 정산/통계 흐름(증권/담당자 기준)</p>
-                    <ol className="list-decimal list-inside space-y-1">
+                    <p className="font-semibold mb-2">2-2) 회사 담당자: “기사 해지(해지 요청)”를 할 때</p>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-700">
                       <li>
-                        <strong>증권 기준 집계</strong>: 증권번호별 인원/요율/보험료 통계 확인
+                        기사 상태를 <strong>해지</strong>로 변경하면, 화면에는 <strong>해지중</strong>으로 표시됩니다(요청 상태)
                       </li>
                       <li>
-                        <strong>담당자 기준 집계</strong>: 필요 시 담당자별 집계로 분리
-                      </li>
-                      <li>
-                        <strong>정산 검증</strong>: SMSData/처리 상태/기간을 교차 확인
+                        당사에서 보험사 전산 처리를 완료하면, 배서 리스트에서 최종 상태(처리/취소 등)로 확정됩니다
                       </li>
                     </ol>
-                    <div className="mt-3 text-sm text-gray-600">
-                      관련 API(구버전 기준): 증권별 보험료 통계 `POST /api/kjDaeri/PolicyNumInsurancePremiumStatistics.php`
+                    <div className="mt-3 text-xs text-gray-600">
+                      상태 표현 핵심: <strong>해지중</strong>은 “요청은 들어왔고, 아직 당사 처리 확정 전”이라는 의미입니다.
                     </div>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="font-semibold mb-2">2-4) 영업/운영 관점 업무 흐름(신규 회사 → 운영 → 정산)</p>
+                    <p className="font-semibold mb-2">2-3) 당사 운영자: “배서 리스트”를 처리할 때(실무 순서)</p>
+                    <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                      <li>
+                        <strong>대상 건 확인</strong>: 회사/증권번호/기준일/신청일을 먼저 확인
+                      </li>
+                      <li>
+                        필요 시 <strong>개인 요율(rate)</strong> 선입력 후 처리 진행
+                      </li>
+                      <li>
+                        <strong>보험사 전산 처리</strong> 완료 후, CMS에서 <strong>배서처리/거절/취소</strong>로 상태 확정
+                      </li>
+                      <li>
+                        <strong>근거 검증</strong>: 상태값(push/cancel/sangtae) + SMSData 이력으로 교차 확인
+                      </li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="font-semibold mb-2">2-4) 당사 운영자: “신규 회사 세팅” 체크리스트(처음 1회)</p>
                     <ol className="list-decimal list-inside space-y-1">
                       <li>
-                        <strong>상담/신규 연결</strong>: 대리운전회사와 상담 후 “신규 회사”로 연결 확정
+                        <strong>회사 등록</strong>: 회사 기본정보 등록 (`2012DaeriCompany`)
                       </li>
                       <li>
-                        <strong>대리운전회사 등록</strong>: 회사 기본정보 등록 (`2012DaeriCompany`)
-                      </li>
-                      <li>
-                        <strong>증권 추가</strong>: 회사가 가입한 증권(운영) 등록 (`2012CertiTable`), 보험사 기준 증권(기준) 정보는 `2012Certi`와 매핑
+                        <strong>증권 추가</strong>: 회사 운영 증권 등록 (`2012CertiTable`) + 보험사 기준 증권은 `2012Certi`와 매핑
                       </li>
                       <li>
                         <strong>월 보험료 입력</strong>: 회사로부터 받는 월 보험료 입력 (`kj_premium_data`)
                       </li>
                       <li>
-                        <strong>회사 계정 발급</strong>: 대리운전회사가 사용할 아이디/담당자 계정 생성 (`2012Costomer`)
+                        <strong>회사 계정 발급</strong>: 회사 담당자/아이디 생성 (`2012Costomer`)
                       </li>
                       <li>
-                        <strong>회사 운영(기사 등록/해지)</strong>: 회사가 기사 등록(청약) / 해지 요청을 수행 → 기사 데이터는 `2012DaeriMemberSecure`에 누적
-                      </li>
-                      <li>
-                        <strong>당사 운영(배서 처리)</strong>: 당사 직원이 배서 리스트를 확인하고 보험사 전산에서 업무 처리 후, 배서처리/취소/거절 등 상태를 확정
-                      </li>
-                      <li>
-                        <strong>월 1회 정산</strong>: “정산” 메뉴에서 월 1회 보험료 정산 및 검증(회사 기준 월 보험료 vs 보험사 기준 10회분납 보험료)
+                        <strong>초기 운영 안내</strong>: 기사 등록/해지/진행 확인 방법(회사 담당자에게 전달)
                       </li>
                     </ol>
                     <div className="mt-3 text-sm text-gray-600">
-                      데이터 기준(요약): 회사/담당자(`2012DaeriCompany`, `2012Costomer`) → 증권(`2012CertiTable`, `2012Certi`) → 기사(`2012DaeriMemberSecure`) → 요율(`2019rate`) → 보험료(`kj_premium_data`, `kj_insurance_premium_data`) → 이력/검증(`SMSData`, `ssang_c_memo`)
+                      데이터 기준(요약): 회사/담당자 → 증권 → 기사 → 요율 → 보험료 → 이력/검증
                     </div>
                   </div>
 
@@ -290,15 +293,26 @@ export default function Documentation() {
                       </div>
 
                       <div>
-                        <p className="font-semibold text-gray-900">B. 기사 운영(대리운전회사)</p>
+                        <p className="font-semibold text-gray-900">B. 기사 운영(대리운전회사 담당자)</p>
                         <ol className="list-decimal list-inside space-y-1 text-gray-700">
                           <li>
                             <strong>기사 등록/조회</strong>: <strong>기사 찾기</strong> (`/insurance/kj-driver-search`) 또는 업체 상세에서 기사 등록/확인
                           </li>
                           <li>
-                            <strong>청약/해지</strong>: 회사가 기사 청약 등록 또는 해지 요청을 수행 → 기사 데이터는 `2012DaeriMemberSecure`에 저장
+                            <strong>청약/해지</strong>: 회사가 기사 청약 등록 또는 해지 요청을 수행 → 당사 운영자가 배서 리스트에서 처리 확정
                           </li>
                         </ol>
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p className="font-semibold mb-1">자주 헷갈리는 포인트</p>
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>
+                              회사 화면의 “해지”는 <strong>요청</strong>에 가깝고, 당사에서 확정 처리 전에는 <strong>해지중</strong>으로 관리됩니다.
+                            </li>
+                            <li>
+                              “취소”는 상황에 따라 <strong>청약취소</strong> 또는 <strong>해지취소</strong> 의미로 쓰이며, 당사 운영 정책(상태 코드)로 확정됩니다.
+                            </li>
+                          </ul>
+                        </div>
                       </div>
 
                       <div>
