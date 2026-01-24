@@ -233,14 +233,6 @@ export default function CodeByPolicy() {
     }, 0)
   }, [sortedPolicies])
 
-  // 현재 페이지 인원 합계 계산
-  const currentPageInwon = useMemo(() => {
-    return currentPolicies.reduce((sum, item) => {
-      const inwon = parseInt(String(item.inwon || 0), 10)
-      return sum + (isNaN(inwon) ? 0 : inwon)
-    }, 0)
-  }, [currentPolicies])
-
   // 테이블 컬럼 정의
   const columns: Column<PolicyItem>[] = [
     {

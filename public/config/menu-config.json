@@ -115,6 +115,12 @@
                   "title": "갱신",
                   "page": "insurance/kj-driver-policy-search",
                   "order": 5
+                },
+                {
+                  "id": "kj-driver-documentation",
+                  "title": "문서(매뉴얼)",
+                  "page": "insurance/kj-driver-documentation",
+                  "order": 6
                 }
               ]
             },
