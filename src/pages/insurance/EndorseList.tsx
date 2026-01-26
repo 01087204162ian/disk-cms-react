@@ -687,7 +687,7 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-28',
+        className: 'w-32',
       },
       {
         key: 'standardDate',
@@ -738,7 +738,7 @@ export default function EndorseList() {
         key: 'policyNum',
         header: '증권번호',
         cell: (row) => row.policyNum || '-',
-        className: 'w-36',
+        className: 'w-32',
       },
       {
         key: 'certiType',
