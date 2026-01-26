@@ -687,7 +687,7 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-27',
+        className: 'w-28',
       },
       {
         key: 'standardDate',
