@@ -725,61 +725,7 @@ export default function Applications() {
   return (
     <div className="space-y-6">
       {/* 필터 영역 */}
-      <FilterBar
-        actionButtons={
-          <>
-            <button
-              onClick={() => setDailyReportModalOpen(true)}
-              className="px-3 py-1.5 bg-success text-success-foreground rounded-lg text-xs font-medium hover:bg-success/90 transition-colors flex items-center gap-1.5"
-            >
-              <TrendingUp className="w-3 h-3" />
-              <span className="hidden md:inline">일별실적</span>
-            </button>
-            <button
-              onClick={() => setDepositBalanceModalOpen(true)}
-              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5"
-            >
-              <Wallet className="w-3 h-3" />
-              <span className="hidden md:inline">예치잔액</span>
-            </button>
-            <button
-              onClick={handleExportExcel}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
-            >
-              <Download className="w-3 h-3" />
-              <span className="hidden md:inline">엑셀 다운로드</span>
-            </button>
-            <button
-              onClick={handleRefresh}
-              className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded-lg text-xs font-medium hover:bg-secondary/90 transition-colors flex items-center gap-1.5"
-            >
-              <RefreshCw className="w-3 h-3" />
-              <span className="hidden md:inline">새로고침</span>
-            </button>
-            <button
-              onClick={() => setCleanupModalOpen(true)}
-              className="px-3 py-1.5 bg-warning text-warning-foreground rounded-lg text-xs font-medium hover:bg-warning/90 transition-colors flex items-center gap-1.5"
-            >
-              <AlertTriangle className="w-3 h-3" />
-              <span className="hidden md:inline">정리</span>
-            </button>
-            <button
-              onClick={() => setApiManagerModalOpen(true)}
-              className="px-3 py-1.5 bg-info text-info-foreground rounded-lg text-xs font-medium hover:bg-info/90 transition-colors flex items-center gap-1.5 ml-auto"
-            >
-              <Key className="w-3 h-3" />
-              <span className="hidden md:inline">API 관리</span>
-            </button>
-            <button
-              onClick={() => setAddCompanyModalOpen(true)}
-              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors flex items-center gap-1.5"
-            >
-              <Plus className="w-3 h-3" />
-              <span className="hidden md:inline">업체추가</span>
-            </button>
-          </>
-        }
-      >
+      <FilterBar>
         <FilterBar.Select
           value={filters.account}
           onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
@@ -809,6 +755,57 @@ export default function Applications() {
           onSearch={handleSearch}
         />
         <FilterBar.SearchButton onClick={handleSearch} />
+
+        {/* 액션 버튼들 */}
+        <button
+          onClick={() => setDailyReportModalOpen(true)}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <TrendingUp className="w-3 h-3" />
+          일별실적
+        </button>
+        <button
+          onClick={() => setDepositBalanceModalOpen(true)}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <Wallet className="w-3 h-3" />
+          예치잔액
+        </button>
+        <button
+          onClick={handleExportExcel}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <Download className="w-3 h-3" />
+          엑셀 다운로드
+        </button>
+        <button
+          onClick={handleRefresh}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <RefreshCw className="w-3 h-3" />
+          새로고침
+        </button>
+        <button
+          onClick={() => setCleanupModalOpen(true)}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <AlertTriangle className="w-3 h-3" />
+          정리
+        </button>
+        <button
+          onClick={() => setApiManagerModalOpen(true)}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap"
+        >
+          <Key className="w-3 h-3" />
+          API 관리
+        </button>
+        <button
+          onClick={() => setAddCompanyModalOpen(true)}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap ml-auto"
+        >
+          <Plus className="w-3 h-3" />
+          업체추가
+        </button>
       </FilterBar>
 
       {/* 테이블 */}
