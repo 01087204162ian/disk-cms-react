@@ -609,7 +609,7 @@ export default function EndorseList() {
         key: 'damdanja',
         header: '담당자',
         cell: (row) => row.damdanja || '-',
-        className: 'w-24',
+        className: 'w-21',
       },
       {
         key: 'companyName',
@@ -687,7 +687,7 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-24',
+        className: 'w-27',
       },
       {
         key: 'standardDate',
