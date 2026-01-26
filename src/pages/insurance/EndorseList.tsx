@@ -566,6 +566,18 @@ export default function EndorseList() {
     loadEndorseList(pagination.currentPage, pagination.pageSize)
   }
 
+  // 동명이인 체크: 현재 리스트에서 같은 이름이 2개 이상인지 확인
+  const nameCountMap = useMemo(() => {
+    const countMap: Record<string, number> = {}
+    endorseList.forEach((row) => {
+      const name = row.name || ''
+      if (name && name !== '-') {
+        countMap[name] = (countMap[name] || 0) + 1
+      }
+    })
+    return countMap
+  }, [endorseList])
+
   // 테이블 컬럼 정의
   const columns: Column<EndorseItem>[] = useMemo(
     () => [
@@ -640,7 +652,26 @@ export default function EndorseList() {
         cell: (row) => {
           const name = row.name || '-'
           const age = row.age ? `(${row.age})` : ''
-          return name !== '-' ? `${name} ${age}` : '-'
+          const ageNum = typeof row.age === 'number' ? row.age : typeof row.age === 'string' ? parseInt(row.age, 10) : null
+          const isUnder28 = ageNum !== null && ageNum < 28
+          const isDuplicate = row.duplicate === '중복' // 주민번호 중복 (다른 증권/회사에 가입)
+          const isSameName = name !== '-' && nameCountMap[name] >= 2 // 동명이인 (배서리스트 내 같은 이름)
+          
+          // 색상 결정: 중복(주민번호) > 동명이인 > 28세 미만
+          let textColorClass = ''
+          if (isDuplicate) {
+            textColorClass = 'text-blue-600 font-semibold' // 중복(주민번호): 파란색
+          } else if (isSameName) {
+            textColorClass = 'text-purple-600 font-semibold' // 동명이인: 보라색
+          } else if (isUnder28) {
+            textColorClass = 'text-red-600 font-semibold' // 28세 미만: 빨간색
+          }
+          
+          return name !== '-' ? (
+            <span className={textColorClass}>{name} {age}</span>
+          ) : (
+            <span className={textColorClass}>-</span>
+          )
         },
         className: 'w-24',
       },
@@ -934,7 +965,7 @@ export default function EndorseList() {
         className: 'w-12',
       },
     ],
-    [endorseList, pagination, selectedRowNums, isAllSelected, isIndeterminate, toggleSelectAll]
+    [endorseList, pagination, selectedRowNums, isAllSelected, isIndeterminate, toggleSelectAll, nameCountMap]
   )
 
   // 배서현황 버튼 클릭
