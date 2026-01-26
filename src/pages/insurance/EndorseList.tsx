@@ -651,7 +651,7 @@ export default function EndorseList() {
           const jumin = row.jumin || ''
           return jumin ? jumin.replace(/-/g, '') : '-'
         },
-        className: 'w-44',
+        className: 'w-40',
       },
       {
         key: 'phone',
@@ -687,7 +687,7 @@ export default function EndorseList() {
             </select>
           )
         },
-        className: 'w-20',
+        className: 'w-24',
       },
       {
         key: 'standardDate',
