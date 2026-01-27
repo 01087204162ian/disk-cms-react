@@ -176,7 +176,23 @@ export default function Applications() {
       }
     } catch (error: any) {
       console.error('약국배상책임보험 목록 로드 오류:', error)
-      toast.error(error?.response?.data?.message || error?.message || '목록을 불러오는데 실패했습니다.')
+      console.error('에러 상세 정보:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        config: {
+          url: error?.config?.url,
+          method: error?.config?.method,
+          params: error?.config?.params
+        }
+      })
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          '목록을 불러오는데 실패했습니다.'
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -330,7 +346,19 @@ export default function Applications() {
       }
     } catch (error: any) {
       console.error('상태 변경 오류:', error)
-      toast.error(error?.response?.data?.message || error?.message || '상태 변경에 실패했습니다.')
+      console.error('에러 상세 정보:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.response?.status,
+        statusText: error?.response?.statusText,
+        data: error?.response?.data,
+        requestData: { pharmacy_id: pharmacyId, status: newStatus, old_status: String(oldStatus) }
+      })
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          '상태 변경에 실패했습니다.'
+      toast.error(errorMessage)
     }
   }
 
@@ -347,7 +375,17 @@ export default function Applications() {
       }
     } catch (error: any) {
       console.error('메모 저장 오류:', error)
-      toast.error(error?.response?.data?.message || error?.message || '메모 저장에 실패했습니다.')
+      console.error('에러 상세 정보:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.response?.status,
+        data: error?.response?.data
+      })
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          '메모 저장에 실패했습니다.'
+      toast.error(errorMessage)
     }
   }
 
@@ -368,7 +406,18 @@ export default function Applications() {
       }
     } catch (error: any) {
       console.error('설계번호 저장 오류:', error)
-      toast.error(error?.response?.data?.message || error?.message || '설계번호 저장에 실패했습니다.')
+      console.error('에러 상세 정보:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.response?.status,
+        data: error?.response?.data,
+        requestData: { pharmacyId, designNumber, designType }
+      })
+      const errorMessage = error?.response?.data?.error || 
+                          error?.response?.data?.message || 
+                          error?.message || 
+                          '설계번호 저장에 실패했습니다.'
+      toast.error(errorMessage)
     }
   }
 

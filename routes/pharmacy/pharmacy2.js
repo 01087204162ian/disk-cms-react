@@ -25,21 +25,49 @@ const getDefaultHeaders = () => ({
 // 에러 핸들링 함수
 const handleApiError = (error, res, defaultMessage) => {
   console.error('API 오류:', error);
+  console.error('API 오류 상세:', {
+    message: error.message,
+    code: error.code,
+    response: error.response ? {
+      status: error.response.status,
+      statusText: error.response.statusText,
+      data: error.response.data
+    } : null,
+    request: error.request ? '요청 전송됨' : null
+  });
   
   if (error.response) {
     // PHP API에서 에러 응답이 온 경우
-    res.status(error.response.status).json(error.response.data);
+    const status = error.response.status || 500;
+    const errorData = error.response.data || {};
+    res.status(status).json({
+      success: false,
+      error: errorData.error || errorData.message || defaultMessage || 'API 서버 오류',
+      details: errorData,
+      status: status,
+      statusText: error.response.statusText
+    });
   } else if (error.code === 'ECONNABORTED') {
     // 타임아웃 에러
     res.status(408).json({
       success: false,
-      error: '요청 시간이 초과되었습니다.'
+      error: '요청 시간이 초과되었습니다.',
+      code: 'ECONNABORTED'
+    });
+  } else if (error.request) {
+    // 요청은 보냈지만 응답을 받지 못한 경우
+    res.status(503).json({
+      success: false,
+      error: 'API 서버에 연결할 수 없습니다.',
+      code: error.code || 'NETWORK_ERROR'
     });
   } else {
     // 네트워크 오류 등
     res.status(500).json({
       success: false,
-      error: defaultMessage
+      error: defaultMessage || '서버 내부 오류가 발생했습니다.',
+      details: error.message,
+      code: error.code
     });
   }
 };
