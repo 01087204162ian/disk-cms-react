@@ -7,6 +7,35 @@
 
 ## ✅ 완료된 작업
 
+### 2026-01-26 (약국배상책임보험) - Applications 페이지 에러 핸들링 개선
+
+#### 작업 내용
+- **기능**: 약국배상책임보험 Applications 페이지에서 발생하는 500 에러에 대한 상세 로깅 및 에러 핸들링 개선
+- **파일**: 
+  - `routes/pharmacy/pharmacy2.js` (서버 측 에러 핸들링 개선)
+  - `src/pages/pharmacy/Applications.tsx` (클라이언트 측 에러 핸들링 개선)
+- **주요 구현 사항**:
+  - ✅ 서버 측 에러 핸들링 개선 (`pharmacy2.js`)
+    - `handleApiError` 함수 개선: 에러 상세 정보 로깅 추가
+    - 에러 응답 구조 개선: `status`, `statusText`, `details`, `code` 포함
+    - PHP API 에러 응답 처리 개선: `error` 또는 `message` 필드 우선 사용
+    - 네트워크 오류와 타임아웃 오류 구분 처리
+  - ✅ 클라이언트 측 에러 핸들링 개선 (`Applications.tsx`)
+    - 모든 API 호출에 상세 에러 로깅 추가
+      - `loadApplications`: 목록 로드 에러 상세 로깅
+      - `handleStatusChange`: 상태 변경 에러 상세 로깅
+      - `handleMemoSave`: 메모 저장 에러 상세 로깅
+      - `handleDesignNumberSave`: 설계번호 저장 에러 상세 로깅
+    - 에러 메시지 우선순위 개선: `error` → `message` → 기본 메시지
+    - 요청 파라미터 및 응답 데이터 로깅 추가
+
+#### 개선 효과
+- 500 에러 발생 시 원인 파악이 용이해짐 (상세 로그 제공)
+- 사용자에게 더 명확한 에러 메시지 표시
+- 디버깅 시간 단축 (에러 발생 위치 및 원인 빠른 확인)
+
+---
+
 ### 2026-01-26 (약국배상책임보험) - Applications 페이지 필터/버튼 레이아웃 개선
 
 #### 작업 내용
