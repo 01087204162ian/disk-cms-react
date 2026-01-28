@@ -56,6 +56,7 @@ export default function Applications() {
   const [loading, setLoading] = useState(true)
   const [applications, setApplications] = useState<PharmacyApplication[]>([])
   const [accounts, setAccounts] = useState<Array<{ value: string; label: string }>>([])
+  const [designListExporting, setDesignListExporting] = useState(false)
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -507,6 +508,116 @@ export default function Applications() {
     }
   }
 
+  const handleExportDesignListExcel = async () => {
+    if (designListExporting) return
+
+    if (
+      !confirm(
+        '설계리스트를 엑셀로 다운로드하시겠습니까?\n\n※ 다운로드 후 해당 건들의 출력 상태가 초기화될 수 있습니다.'
+      )
+    ) {
+      return
+    }
+
+    setDesignListExporting(true)
+    try {
+      toast.info('설계리스트 엑셀 다운로드 중...')
+
+      const response = await api.post('/api/pharmacy2/design-list-excel', { trigger: 'value1' })
+      const result = response.data
+
+      if (!result?.success) {
+        throw new Error(result?.message || result?.error || '데이터 조회 실패')
+      }
+
+      const rawData: any[] = Array.isArray(result.data) ? result.data : []
+      if (rawData.length === 0) {
+        toast.error('다운로드할 설계 데이터가 없습니다. (설계중/출력되지 않은 건)')
+        return
+      }
+
+      // ExcelJS를 동적으로 로드 (다운로드 시에만 로드)
+      const ExcelJS = (await import('exceljs')).default
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet('설계리스트')
+
+      // 제목/메타 영역
+      worksheet.addRow(['약국배상책임보험 설계리스트'])
+      worksheet.addRow([`다운로드 일시: ${new Date().toLocaleString('ko-KR')}`])
+      worksheet.addRow([`총 건수: ${rawData.length}건`])
+      worksheet.addRow([])
+
+      // 헤더
+      worksheet.addRow(['구분', '승인일', '약국명', '전문인설계번호', '화재설계번호', '거래처'])
+
+      // 헤더 스타일
+      const headerRowNumber = 5
+      const headerRow = worksheet.getRow(headerRowNumber)
+      headerRow.font = { bold: true }
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F0F0' } }
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' }
+
+      // 컬럼 너비
+      worksheet.getColumn(1).width = 8
+      worksheet.getColumn(2).width = 12
+      worksheet.getColumn(3).width = 25
+      worksheet.getColumn(4).width = 20
+      worksheet.getColumn(5).width = 20
+      worksheet.getColumn(6).width = 20
+
+      // 데이터 (설계번호가 하나라도 있는 건만)
+      let rowIndex = 0
+      rawData.forEach((item) => {
+        const expertDesign = item?.expert_design_number || ''
+        const fireDesign = item?.fire_design_number || ''
+        if (!expertDesign && !fireDesign) return
+
+        rowIndex += 1
+        worksheet.addRow([
+          rowIndex,
+          item?.approval_date ? String(item.approval_date).substring(0, 10) : '',
+          item?.company || '',
+          expertDesign,
+          fireDesign,
+          item?.account_directory || '미지정',
+        ])
+      })
+
+      // 제목 병합 (A1:F1, A2:F2, A3:F3)
+      worksheet.mergeCells('A1:F1')
+      worksheet.mergeCells('A2:F2')
+      worksheet.mergeCells('A3:F3')
+
+      worksheet.getCell('A1').font = { bold: true, size: 14 }
+      worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' }
+      worksheet.getCell('A2').alignment = { horizontal: 'center' }
+      worksheet.getCell('A3').font = { bold: true }
+      worksheet.getCell('A3').alignment = { horizontal: 'center' }
+
+      // 다운로드
+      const today = new Date().toISOString().substring(0, 10).replace(/-/g, '')
+      const fileName = `설계리스트_${today}.xlsx`
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      link.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success(`설계리스트 엑셀 다운로드 완료 (${rowIndex.toLocaleString('ko-KR')}건)`)
+      loadApplications()
+    } catch (error: any) {
+      console.error('설계리스트 엑셀 다운로드 오류:', error)
+      toast.error(error?.response?.data?.error || error?.message || '설계리스트 엑셀 다운로드 중 오류가 발생했습니다.')
+    } finally {
+      setDesignListExporting(false)
+    }
+  }
+
   // 테이블 컬럼 정의
   const columns: Column<PharmacyApplication>[] = useMemo(
     () => [
@@ -819,6 +930,15 @@ export default function Applications() {
         >
           <Wallet className="w-3 h-3" />
           예치잔액
+        </button>
+        <button
+          onClick={handleExportDesignListExcel}
+          disabled={designListExporting}
+          className="h-7 px-2 py-0.5 text-xs border border-primary text-primary bg-background rounded-md hover:bg-primary hover:text-white transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          title="설계중/미출력 건 설계리스트 엑셀"
+        >
+          <Download className="w-3 h-3" />
+          설계리스트 엑셀
         </button>
         <button
           onClick={handleExportExcel}

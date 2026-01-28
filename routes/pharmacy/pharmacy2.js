@@ -1011,7 +1011,4 @@ router.post('/design-list-excel', async (req, res) => {
   }
 });
 
-// 기존 module.exports = router; 바로 위에 추가
-module.exports = router;
-// 기존 module.exports = router; 위에 추가
 module.exports = router;
