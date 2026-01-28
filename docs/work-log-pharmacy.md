@@ -7,6 +7,21 @@
 
 ## ✅ 완료된 작업
 
+### 2026-01-28 (약국배상책임보험) - Applications 페이지 “설계리스트 엑셀” 기능 추가(레거시 기능 매칭)
+
+#### 작업 내용
+- **기능**: 레거시 `applications.html`의 “승인건 중 설계리스트 엑셀” 기능을 React Applications 페이지에 추가
+- **파일**:
+  - `src/pages/pharmacy/Applications.tsx` (설계리스트 엑셀 버튼/다운로드 로직 추가)
+  - `routes/pharmacy/pharmacy2.js` (중복 `module.exports` 정리)
+- **주요 구현 사항**:
+  - ✅ `POST /api/pharmacy2/design-list-excel` 호출로 설계리스트 데이터 조회 (`trigger=value1`)
+  - ✅ ExcelJS로 엑셀 파일 생성 후 다운로드 (시트명: 설계리스트, 파일명: `설계리스트_YYYYMMDD.xlsx`)
+  - ✅ 다운로드 중 중복 클릭 방지(loading state) 및 완료 후 목록 새로고침
+
+#### 결과
+- 레거시 대비 누락되었던 설계리스트 엑셀 다운로드 기능이 React UI에서 동일하게 사용 가능
+
 ### 2026-01-26 (약국배상책임보험) - Applications 페이지 에러 핸들링 개선
 
 #### 작업 내용
