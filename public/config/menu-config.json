@@ -171,10 +171,16 @@
               "order": 1
             },
             {
+              "id": "pharmacy-renewal-list",
+              "title": "갱신리스트",
+              "page": "pharmacy/renewal-list",
+              "order": 2
+            },
+            {
               "id": "pharmacy-documentation",
               "title": "문서",
               "page": "pharmacy/documentation",
-              "order": 2
+              "order": 3
             },
             {
               "id": "pharmacy-claims",

@@ -473,5 +473,107 @@
 
 ---
 
-**최종 업데이트**: 2026년 1월 24일  
+---
+
+## 📋 기획 중인 작업
+
+### 갱신리스트 메뉴 추가 기획안 (2026-02-02)
+
+#### 개요
+- **목적**: 기존 계약(계약완료) 약국의 갱신 관리를 위한 전용 리스트 페이지 제공
+- **위치**: 보험상품 > 약국배상책임보험 > 신청리스트 **아래** > 갱신리스트
+- **페이지 경로**: `/pharmacy/renewal-list`
+- **메뉴 순서**: 신청리스트(order: 1) 다음, order: 2
+
+#### 데이터 기준
+- **대상**: `pharmacyApply` 테이블에서 `ch = '6'` (계약완료) 상태인 데이터
+- **연결 기준**: 사업자번호 (`business_number`)로 신청리스트와 연결
+- **기본 정렬**: 보험기간 종료일 기준 오름차순 (만기 임박 순)
+
+#### 필터 구성
+- **신청리스트와 동일**: 거래처, 검색어, 페이지 크기
+- **추가**: 만기 필터 (전체 / 만기 30일 전 / 만기 15일 전 / 만기 7일 전)
+
+#### 컬럼 구성 (14개)
+1. **약국명** (`company_name`) - 기존 데이터 연동
+2. **사업자번호** (`business_number`) - 계약 식별 키, 신청리스트 연결 기준
+3. **약사명** (`chemist_name`) - 대표 약사명
+4. **연락처** (`phone` / `contact`) - 갱신 안내용 연락처
+5. **기존 보험기간** (`insurance_start_date` ~ `insurance_end_date`) - 만기 확인용
+6. **갱신 보험기간** (`renewal_start_date` ~ `renewal_end_date`) - 기본 1년, 인라인 편집 가능
+7. **갱신 의사** (`renewal_intent`) - Y / N / 갱신전해지, 드롭다운 선택, 색상 처리
+8. **기존 보험료** (`previous_premium`) - 직전 계약 보험료, 비교용
+9. **갱신 보험료** (`renewal_premium`) - 갱신 확정 보험료, 인라인 편집 가능
+10. **변경사항 유무** (`has_changes`) - 있음 / 없음
+11. **변경 내용** (`change_details`) - 면적 / 재고자산 / 담보 등
+12. **업무상태** (`work_status`) - 현재까지의 업무 상태 공유
+13. **갱신 증권번호** (`renewal_certificate_number`) - 발행 후 입력
+14. **담당자 메모** (`memo`) - 통화 이력, 특이사항, 운영 관리용
+
+#### 상태 기반 필터 및 색상 처리
+- **갱신 의사 = Y**: 초록색 배경 또는 아이콘 (처리 대상 강조)
+- **갱신 의사 = N**: 주황색 배경 또는 아이콘 (처리 대상 강조)
+- **갱신 의사 = 갱신전해지 + 업무상태 = 해지**: 회색 처리 (비대상 명확화)
+- **만기 7일 이내**: 빨간색 강조
+- **만기 15일 이내**: 주황색 강조
+- **만기 30일 이내**: 노란색 강조
+
+#### 인라인 편집 기능
+- 갱신 보험기간 (DatePicker 2개)
+- 갱신 의사 (Select 드롭다운)
+- 갱신 보험료 (숫자 입력, 콤마 자동 포맷팅)
+- 변경사항 유무 (체크박스 또는 Select)
+- 변경 내용 (텍스트 입력)
+- 업무상태 (Select 드롭다운)
+- 갱신 증권번호 (텍스트 입력)
+- 담당자 메모 (텍스트 입력, Enter 키 또는 blur 시 저장)
+
+#### API 설계
+- **조회 API**: `GET /api/pharmacy/renewal-list`
+  - 파라미터: `page`, `limit`, `account`, `search`, `expiry_filter`
+- **업데이트 API**: `POST /api/pharmacy/renewal-update`
+  - 파라미터: `id`, `renewal_start_date`, `renewal_end_date`, `renewal_intent`, `renewal_premium`, `has_changes`, `change_details`, `work_status`, `renewal_certificate_number`, `memo`
+
+#### 데이터베이스
+- **주 테이블**: `pharmacyApply` (기존 테이블 활용)
+- **필요 필드 추가** (없을 경우):
+  ```sql
+  ALTER TABLE pharmacyApply 
+  ADD COLUMN renewal_start_date DATE NULL,
+  ADD COLUMN renewal_end_date DATE NULL,
+  ADD COLUMN renewal_intent ENUM('Y', 'N', '갱신전해지') NULL,
+  ADD COLUMN previous_premium INT NULL,
+  ADD COLUMN renewal_premium INT NULL,
+  ADD COLUMN has_changes ENUM('Y', 'N') DEFAULT 'N',
+  ADD COLUMN change_details TEXT NULL,
+  ADD COLUMN work_status VARCHAR(50) NULL,
+  ADD COLUMN renewal_certificate_number VARCHAR(50) NULL,
+  ADD COLUMN chemist_name VARCHAR(100) NULL;
+  ```
+
+#### 신청리스트 ↔ 갱신리스트 연결
+- **연결 기준**: 사업자번호 (`business_number`)
+- 사업자번호 클릭 시 상대 리스트에서 해당 약국 검색
+- 계약 히스토리 추적 및 중복 가입 확인 가능
+
+#### 알림 연계 (향후 구현)
+- **운영팀 알림**: 만기 30일/15일/7일 전 중 택 1, CMS-슬랙 연계
+- **고객 안내**: 만기 30일/15일/7일 전 중 택 1, 문자/알림톡 연계
+
+#### 구현 단계
+- **Phase 1**: 기본 구조 및 조회 기능 (4-6시간)
+- **Phase 2**: 인라인 편집 기능 (4-6시간)
+- **Phase 3**: 색상 처리 및 UI 개선 (2-3시간)
+- **Phase 4**: 연결 기능 및 최적화 (2-3시간)
+- **Phase 5**: 알림 연계 (향후)
+
+#### 확인 사항
+- [ ] `pharmacyApply` 테이블 구조 확인 (필요 필드 존재 여부)
+- [ ] `insurance_start_date`, `insurance_end_date` 필드 존재 여부 확인
+- [ ] `chemist_name` 필드 존재 여부 확인
+- [ ] 기존 `pharmacy-list.php` API 구조 파악
+
+---
+
+**최종 업데이트**: 2026년 2월 2일  
 **프로젝트**: Disk-CMS React 마이그레이션 - 약국배상책임보험

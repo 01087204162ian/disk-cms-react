@@ -1011,4 +1011,45 @@ router.post('/design-list-excel', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/pharmacy2/renewal-list
+ * 갱신리스트 조회 (계약완료 상태만)
+ * - ch = '6' (계약완료) 상태 데이터만 조회
+ * - 보험기간 종료일 기준 만기 필터링 지원
+ * - 보험기간 종료일 기준 오름차순 정렬 (만기 임박 순)
+ */
+router.get('/renewal-list', async (req, res) => {
+  try {
+    const { page = 1, limit = 20, account = '', search = '', expiry_filter = '' } = req.query;
+    
+    // 파라미터 검증
+    const validatedPage = Math.max(1, parseInt(page) || 1);
+    const validatedLimit = Math.min(100, Math.max(1, parseInt(limit) || 20));
+    
+    const params = new URLSearchParams({
+      page: validatedPage.toString(),
+      limit: validatedLimit.toString(),
+    });
+    
+    if (account) params.append('account', account.toString().trim());
+    if (search) params.append('search', search.toString().trim());
+    if (expiry_filter) params.append('expiry_filter', expiry_filter.toString().trim());
+
+    console.log(`[GET /renewal-list] 갱신리스트 조회 요청 - page: ${validatedPage}, limit: ${validatedLimit}, account: "${account}", search: "${search}", expiry_filter: "${expiry_filter}"`);
+
+    const response = await axios.get(`${PHP_API_BASE_URL}/pharmacy-renewal-list.php?${params}`, {
+      timeout: DEFAULT_TIMEOUT,
+      headers: getDefaultHeaders()
+    });
+
+    console.log(`[GET /renewal-list] 성공 - 총 ${response.data?.pagination?.totalCount || 0}개 데이터`);
+    
+    res.json(response.data);
+    
+  } catch (error) {
+    console.error(`[GET /renewal-list] 오류:`, error.message);
+    handleApiError(error, res, '갱신리스트 조회 중 오류가 발생했습니다.');
+  }
+});
+
 module.exports = router;

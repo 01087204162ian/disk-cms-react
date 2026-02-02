@@ -17,6 +17,7 @@ const Holidays = lazy(() => import('./pages/staff/Holidays'))
 const HalfDayApproval = lazy(() => import('./pages/staff/HalfDayApproval'))
 const OrganizationChart = lazy(() => import('./pages/staff/OrganizationChart'))
 const PharmacyApplications = lazy(() => import('./pages/pharmacy/Applications'))
+const PharmacyRenewalList = lazy(() => import('./pages/pharmacy/RenewalList'))
 // 문서 페이지는 마크다운 라이브러리가 커서 별도 청크로 분리
 const PharmacyDocumentation = lazy(() => import('./pages/pharmacy/Documentation'))
 const DriverSearch = lazy(() => import('./pages/insurance/DriverSearch'))
@@ -65,6 +66,7 @@ function App() {
                       <Route path="/staff/organization-chart" element={<OrganizationChart />} />
                       {/* 보험 상품 */}
                       <Route path="/pharmacy/applications" element={<PharmacyApplications />} />
+                      <Route path="/pharmacy/renewal-list" element={<PharmacyRenewalList />} />
                       <Route path="/pharmacy/documentation" element={<PharmacyDocumentation />} />
                       {/* KJ 대리운전 */}
                       <Route path="/insurance/kj-driver-search" element={<DriverSearch />} />
