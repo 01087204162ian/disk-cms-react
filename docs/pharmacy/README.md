@@ -54,6 +54,7 @@
 
 ### 📋 기획 문서 (`plans/`)
 - [갱신 프로세스 기획서](./plans/pharmacy-갱신-프로세스-기획.md) - 계약 갱신 프로세스 설계
+- [실적/갱신리스트 기준 전환 계획](./plans/CRITERIA_TRANSITION_PLAN.md) - 승인/증권 기준 전환 일정 (2025~2027)
 - [증권 테이블 계획](./plans/CERTIFICATE_TABLE_PLAN.md) - 증권 기반 통계 테이블 설계
 - [증권 마이그레이션 계획](./plans/CERTIFICATE_MIGRATION_PLAN.md) - 증권 데이터 마이그레이션 계획
 

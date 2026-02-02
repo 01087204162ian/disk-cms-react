@@ -7,6 +7,25 @@
 
 ## ✅ 완료된 작업
 
+### 2026-02-02 (약국배상책임보험) - 실적/갱신리스트 기준 전환 계획 문서화 및 구현
+
+#### 작업 내용
+- **문서**: `disk-cms-react/docs/pharmacy/plans/CRITERIA_TRANSITION_PLAN.md` 신규 작성
+- **기간별 기준**:
+  - 2025년 ~ 2026년: 승인 기준 (pharmacy_settlementList)
+  - 2027년 2월~: 계약(증권) 기준 (pharmacyApply ch='6', pharmacy_certificate_history)
+- **파일**:
+  - `pharmacy-daily-report.php`: 2027년 2월 이전 조회 시 criteria='approval' 강제
+  - `pharmacy-monthly-report.php`: 2027년 이전 조회 시 criteria='approval' 강제
+  - `pharmacy-renewal-list.php`: 2027-02-01 이전은 승인-해지 기준, 이후는 ch='6' 기준
+- **갱신리스트 승인 기준**: pharmacy_settlementList에서 sort=13(승인) 있으나 sort=16(해지) 없는 applyNum만 조회
+
+#### 결과
+- 2025년 실적은 승인 기준으로 일관되게 산출
+- 갱신리스트가 2027년 2월부터 계약 기준으로 전환
+
+---
+
 ### 2026-02-02 (약국배상책임보험) - 약국 정보 수정 API 동일 값 업데이트 에러 수정
 
 #### 작업 내용
