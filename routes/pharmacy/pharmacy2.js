@@ -1020,7 +1020,7 @@ router.post('/design-list-excel', async (req, res) => {
  */
 router.get('/renewal-list', async (req, res) => {
   try {
-    const { page = 1, limit = 20, account = '', search = '', expiry_filter = '' } = req.query;
+    const { page = 1, limit = 20, account = '', search = '', expiry_filter = '', from_date = '', to_date = '' } = req.query;
     
     // 파라미터 검증
     const validatedPage = Math.max(1, parseInt(page) || 1);
@@ -1034,8 +1034,10 @@ router.get('/renewal-list', async (req, res) => {
     if (account) params.append('account', account.toString().trim());
     if (search) params.append('search', search.toString().trim());
     if (expiry_filter) params.append('expiry_filter', expiry_filter.toString().trim());
+    if (from_date) params.append('from_date', from_date.toString().trim());
+    if (to_date) params.append('to_date', to_date.toString().trim());
 
-    console.log(`[GET /renewal-list] 갱신리스트 조회 요청 - page: ${validatedPage}, limit: ${validatedLimit}, account: "${account}", search: "${search}", expiry_filter: "${expiry_filter}"`);
+    console.log(`[GET /renewal-list] 갱신리스트 조회 요청 - page: ${validatedPage}, limit: ${validatedLimit}, account: "${account}", search: "${search}", expiry_filter: "${expiry_filter}", from_date: "${from_date}", to_date: "${to_date}"`);
 
     const response = await axios.get(`${PHP_API_BASE_URL}/pharmacy-renewal-list.php?${params}`, {
       timeout: DEFAULT_TIMEOUT,
