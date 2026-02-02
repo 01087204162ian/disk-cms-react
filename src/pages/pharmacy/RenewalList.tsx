@@ -307,22 +307,22 @@ export default function RenewalList() {
       <FilterBar>
         <FilterBar.Select
           value={filters.account}
-          onChange={(e) => setFilters((prev) => ({ ...prev, account: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, account: value }))}
           options={[{ value: '', label: '전체 거래처' }, ...accounts]}
         />
         <FilterBar.Select
           value={filters.expiry_filter}
-          onChange={(e) => setFilters((prev) => ({ ...prev, expiry_filter: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, expiry_filter: value }))}
           options={EXPIRY_FILTER_OPTIONS}
         />
         <FilterBar.Input
           value={filters.search}
-          onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+          onChange={(value) => setFilters((prev) => ({ ...prev, search: value }))}
           placeholder="약국명, 사업자번호, 약사명 검색"
         />
         <FilterBar.Select
           value={filters.pageSize}
-          onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+          onChange={(value) => handlePageSizeChange(Number(value))}
           options={[
             { value: '20', label: '20개' },
             { value: '50', label: '50개' },
@@ -330,9 +330,11 @@ export default function RenewalList() {
           ]}
         />
         <FilterBar.SearchButton onClick={() => loadRenewals(1, pagination.pageSize)} />
-        <FilterBar.Stats>
-          총 {pagination.totalCount.toLocaleString('ko-KR')}건
-        </FilterBar.Stats>
+        <FilterBar.Stats
+          stats={[
+            { label: '총', value: pagination.totalCount, color: 'foreground' },
+          ]}
+        />
         <div className="ml-auto flex items-center gap-2">
           <button
             onClick={() => loadRenewals()}
