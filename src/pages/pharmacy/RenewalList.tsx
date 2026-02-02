@@ -35,6 +35,7 @@ interface RenewalItem {
 
 const EXPIRY_FILTER_OPTIONS = [
   { value: '', label: '전체' },
+  { value: '45', label: '만기 45일 전(갱신업무 시작)' },
   { value: '30', label: '만기 30일 전' },
   { value: '15', label: '만기 15일 전' },
   { value: '7', label: '만기 7일 전' },
@@ -49,7 +50,7 @@ export default function RenewalList() {
   // 필터 상태
   const [filters, setFilters] = useState({
     account: '',
-    expiry_filter: '', // 만기 필터
+    expiry_filter: '45', // 만기 필터 (기본값: 갱신업무 시작=45일 전)
     from_date: '',
     to_date: '',
     pageSize: '20',
