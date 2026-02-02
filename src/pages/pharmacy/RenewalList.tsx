@@ -29,6 +29,7 @@ interface RenewalItem {
   renewal_certificate_number?: string
   memo?: string
   days_until_expiry?: number | null
+  account_directory?: string
 }
 
 const EXPIRY_FILTER_OPTIONS = [
@@ -188,6 +189,13 @@ export default function RenewalList() {
         header: '약국명',
         cell: (row) => (
           <div className="font-medium">{row.company_name || '-'}</div>
+        ),
+      },
+      {
+        key: 'account_directory',
+        header: '거래처',
+        cell: (row) => (
+          <div className="text-xs">{row.account_directory || '-'}</div>
         ),
       },
       {
