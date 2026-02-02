@@ -6,6 +6,7 @@ import {
   DataTable,
   type Column,
   useToastHelpers,
+  DatePicker,
 } from '../../components'
 
 interface RenewalItem {
@@ -49,6 +50,8 @@ export default function RenewalList() {
   const [filters, setFilters] = useState({
     account: '',
     expiry_filter: '', // 만기 필터
+    from_date: '',
+    to_date: '',
     pageSize: '20',
     search: '',
   })
@@ -91,6 +94,8 @@ export default function RenewalList() {
       }
       if (filters.account) params.account = filters.account
       if (filters.expiry_filter) params.expiry_filter = filters.expiry_filter
+      if (filters.from_date) params.from_date = filters.from_date
+      if (filters.to_date) params.to_date = filters.to_date
       if (filters.search) params.search = filters.search
 
       console.log('갱신리스트 API 요청 파라미터:', params)
@@ -129,7 +134,7 @@ export default function RenewalList() {
     if (!loading) {
       loadRenewals(1, pagination.pageSize)
     }
-  }, [filters.account, filters.expiry_filter, filters.search])
+  }, [filters.account, filters.expiry_filter, filters.from_date, filters.to_date, filters.search])
 
   // 페이지 변경
   const handlePageChange = (page: number) => {
@@ -322,6 +327,22 @@ export default function RenewalList() {
           value={filters.expiry_filter}
           onChange={(value) => setFilters((prev) => ({ ...prev, expiry_filter: value }))}
           options={EXPIRY_FILTER_OPTIONS}
+        />
+        <DatePicker
+          value={filters.from_date}
+          onChange={(value) => setFilters((prev) => ({ ...prev, from_date: value }))}
+          className="w-[180px]"
+          fullWidth={false}
+          placeholder="시작일"
+          variant="filter"
+        />
+        <DatePicker
+          value={filters.to_date}
+          onChange={(value) => setFilters((prev) => ({ ...prev, to_date: value }))}
+          className="w-[180px]"
+          fullWidth={false}
+          placeholder="종료일"
+          variant="filter"
         />
         <FilterBar.Input
           value={filters.search}
