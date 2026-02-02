@@ -7,6 +7,72 @@
 
 ## ✅ 완료된 작업
 
+### 2026-02-02 (약국배상책임보험) - 갱신리스트 메뉴 추가 및 기본 구조 구현 (Phase 1)
+
+#### 작업 내용
+- **기능**: 약국배상책임보험 갱신리스트 메뉴 추가 및 기본 조회 기능 구현
+- **파일**: 
+  - `disk-cms-react/public/config/menu-config.json` (갱신리스트 메뉴 추가)
+  - `disk-cms-react/src/App.tsx` (갱신리스트 라우트 추가)
+  - `imet/api/pharmacy/pharmacy-renewal-list.php` (갱신리스트 조회 API 신규 생성)
+  - `disk-cms-react/routes/pharmacy/pharmacy2.js` (갱신리스트 프록시 엔드포인트 추가)
+  - `disk-cms-react/src/pages/pharmacy/RenewalList.tsx` (갱신리스트 React 컴포넌트 신규 생성)
+- **주요 구현 사항**:
+  - ✅ 메뉴 위치: "보험상품 > 약국배상책임보험 > 갱신리스트" (신청리스트 다음)
+  - ✅ 데이터 소스: `pharmacyApply` 테이블에서 `ch = '6'` (계약완료) 상태 데이터 조회
+  - ✅ 갱신대상 기준: **종기(`jeonggi`) 기준 만기 45일 전부터** (갱신업무 시작 시점)
+  - ✅ 기본 조회: 만기 0~45일 남은 계약완료 건만 표시 (기본값: `expiry_filter = '45'`)
+  - ✅ 필터 기능:
+    - 거래처 필터 (전체/선택)
+    - 만기 필터 (45일/30일/15일/7일 전, 기본값: 45일)
+    - 검색 필터 (약국명, 사업자번호, 약사명)
+    - 기간 필터 (시작일/종료일, 종기(`jeonggi`) 기준)
+  - ✅ 테이블 컬럼 (14개):
+    1. 약국명 (`company_name`)
+    2. 거래처 (`account_directory`)
+    3. 사업자번호 (`business_number`)
+    4. 약사명 (`chemist_name`)
+    5. 연락처 (`phone` / `contact`)
+    6. 기존 보험기간 (`insurance_start_date` ~ `insurance_end_date`)
+    7. 갱신 후 보험기간 (`renewal_start_date` ~ `renewal_end_date`)
+    8. 갱신 의사 (`renewal_intent`: Y/N/갱신전해지)
+    9. 기존 보험료 (`previous_premium`)
+    10. 갱신 보험료 (`renewal_premium`)
+    11. 변경사항 유무 (`has_changes`)
+    12. 변경 내용 (`change_details`)
+    13. 업무상태 (`work_status`)
+    14. 갱신 증권번호 (`renewal_certificate_number`)
+    15. 담당자 메모 (`memo`)
+  - ✅ 색상 처리:
+    - 갱신 의사별 색상 (Y: 초록, N: 주황, 갱신전해지: 회색)
+    - 만기 임박 색상 (7일 이내: 빨강, 15일 이내: 주황, 30일 이내: 노랑)
+  - ✅ 정렬: 보험종기(`jeonggi`) 오름차순 (만기 임박 순)
+  - ✅ 페이징: 페이지당 20/50/100개 선택 가능
+
+#### 갱신리스트 기준 로직
+- **갱신업무 시작 시점**: 종기(`jeonggi`) 기준 **45일 전부터**
+- **기본 조회 조건**: `DATEDIFF(pa.jeonggi, CURDATE()) BETWEEN 0 AND 45`
+- **기간 필터**: `from_date`/`to_date`는 종기(`jeonggi`) 기준으로 필터링
+- **만기 필터**: 선택한 일수 이내 만기 도래 건만 표시 (예: 45일 선택 시 0~45일 남은 건)
+
+#### 데이터베이스 필드 매핑
+- `sigi` → `insurance_start_date` (보험시기)
+- `jeonggi` → `insurance_end_date` (보험종기)
+- `school2` → `business_number` (사업자번호)
+- `damdangja` → `chemist_name` (약사명)
+- `hphone` → `phone` (연락처)
+- `hphone2` → `contact` (일반전화)
+- `preminum` → `current_premium` (현재 보험료)
+- 갱신 관련 필드 (`renewal_*`)는 현재 테이블에 없으므로 NULL로 처리 (향후 ALTER TABLE로 추가 가능)
+
+#### 결과
+- 갱신리스트 메뉴가 정상적으로 표시되고 조회 가능
+- 종기 기준 45일 전부터 갱신대상 건이 자동으로 표시됨
+- 필터링 및 검색 기능 정상 작동
+- 만기 임박 건이 색상으로 강조되어 표시됨
+
+---
+
 ### 2026-02-02 (약국배상책임보험) - 증권발급(14) → 계약완료(6) 자동 변경 처리
 
 #### 작업 내용
