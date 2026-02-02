@@ -50,7 +50,7 @@ const handleApiError = (error, res, defaultMessage) => {
  */
 router.get('/daily', async (req, res) => {
   try {
-    const { account = '', year = '', month = '' } = req.query;
+    const { account = '', year = '', month = '', criteria = 'approval' } = req.query;
     
     // 년도 검증 (필수)
     if (!year || !year.trim()) {
@@ -107,7 +107,11 @@ router.get('/daily', async (req, res) => {
       params.append('account', validAccount);
     }
 
-    console.log(`[GET /daily] 일별 실적 조회 요청 - 년도: ${validYear}, 월: ${validMonth || '전체(최근30일)'}, 거래처: ${validAccount || '전체'}`);
+    if (criteria && ['approval', 'certificate'].includes(String(criteria).trim())) {
+      params.append('criteria', String(criteria).trim());
+    }
+
+    console.log(`[GET /daily] 일별 실적 조회 요청 - 년도: ${validYear}, 월: ${validMonth || '전체(최근30일)'}, 거래처: ${validAccount || '전체'}, 기준: ${criteria || 'approval'}`);
 
     // PHP API 호출
     const response = await axios.get(
@@ -148,7 +152,7 @@ router.get('/daily', async (req, res) => {
  */
 router.get('/monthly', async (req, res) => {
   try {
-    const { account = '', year = '' } = req.query;
+    const { account = '', year = '', criteria = 'approval' } = req.query;
     
     // 년도 검증
     if (!year || !year.trim()) {
@@ -183,8 +187,11 @@ router.get('/monthly', async (req, res) => {
     if (validAccount) {
       params.append('account', validAccount);
     }
+    if (criteria && ['approval', 'certificate'].includes(String(criteria).trim())) {
+      params.append('criteria', String(criteria).trim());
+    }
 
-    console.log(`[GET /monthly] 월별 실적 조회 요청 - 년도: ${validYear}, 거래처: ${validAccount || '전체'}`);
+    console.log(`[GET /monthly] 월별 실적 조회 요청 - 년도: ${validYear}, 거래처: ${validAccount || '전체'}, 기준: ${criteria || 'approval'}`);
 
     // PHP API 호출
     const response = await axios.get(
