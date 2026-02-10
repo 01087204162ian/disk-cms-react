@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import api from '../../lib/api'
 
 /**
  * DB 개인대리운전 관리 페이지 (dbins.kr 연동 예정)
@@ -8,7 +9,61 @@ import React from 'react'
  * - 현재: 화면 뼈대만 구성, 실제 데이터 연동은 daeri 쪽 API 설계 후 진행
  */
 
+type ApplicationRow = {
+  id: string
+  insurance_type: string
+  name: string
+  phone: string
+  yearly_premium: string | null
+  first_premium: string | null
+  address: string | null
+  address_detail: string | null
+  is_same_person: 0 | 1
+  contractor_name: string | null
+  contractor_phone: string | null
+  bank_name: string | null
+  consent_privacy: 0 | 1
+  ip: string | null
+  user_agent: string | null
+  created_at: string
+}
+
 const DbPersonalDriver: React.FC = () => {
+  const [rows, setRows] = useState<ApplicationRow[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchApplications = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const res = await api.get('/api/admin/applications.php')
+        if (!res.data?.ok) {
+          throw new Error(res.data?.error || 'LOAD_FAILED')
+        }
+        if (!cancelled) {
+          setRows(res.data.data || [])
+        }
+      } catch (err) {
+        if (cancelled) return
+        const msg = err instanceof Error ? err.message : 'LOAD_FAILED'
+        setError(`가입신청 목록을 불러오지 못했습니다. (${msg})`)
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchApplications()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-2">
@@ -20,13 +75,20 @@ const DbPersonalDriver: React.FC = () => {
       </header>
 
       <div className="bg-card rounded-xl border border-border p-6">
-        <h2 className="text-base font-semibold mb-4">가입신청 목록 (스키마 미리보기)</h2>
+        <h2 className="text-base font-semibold mb-4">가입신청 목록</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 그대로 보는 용도로 시작합니다. 아래
-          컬럼들은 DB 스키마 기준이며, 이후 실제 데이터는
-          <code>/api/admin-applications.php</code>
-          에서 가져와 표시할 예정입니다.
+          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 그대로 보여줍니다. 현재는 필터 없이
+          최신 신청 순으로 전체 목록을 확인할 수 있습니다.
         </p>
+
+        {loading && (
+          <p className="text-sm text-muted-foreground mb-2">목록을 불러오는 중입니다...</p>
+        )}
+        {error && (
+          <p className="text-sm text-red-600 mb-2">
+            {error}
+          </p>
+        )}
 
         <div className="overflow-x-auto rounded-lg border border-dashed border-border bg-background/40">
           <table className="min-w-full text-sm">
@@ -50,11 +112,39 @@ const DbPersonalDriver: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="px-3 py-2 text-muted-foreground" colSpan={15}>
-                  실제 데이터 연동 후 이 영역에 가입신청 리스트가 표시됩니다.
-                </td>
-              </tr>
+              {rows.length === 0 ? (
+                <tr>
+                  <td className="px-3 py-2 text-muted-foreground" colSpan={15}>
+                    {loading ? '목록을 불러오는 중입니다...' : '표시할 가입신청 데이터가 없습니다.'}
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row) => (
+                  <tr key={row.id} className="border-t border-border/60">
+                    <td className="px-3 py-2 whitespace-nowrap">{row.created_at}</td>
+                    <td className="px-3 py-2">{row.insurance_type}</td>
+                    <td className="px-3 py-2">{row.name}</td>
+                    <td className="px-3 py-2 whitespace-nowrap">{row.phone}</td>
+                    <td className="px-3 py-2 text-right">
+                      {row.yearly_premium ? Number(row.yearly_premium).toLocaleString('ko-KR') : '-'}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {row.first_premium ? Number(row.first_premium).toLocaleString('ko-KR') : '-'}
+                    </td>
+                    <td className="px-3 py-2">{row.address}</td>
+                    <td className="px-3 py-2">{row.address_detail}</td>
+                    <td className="px-3 py-2 text-center">{row.is_same_person ? '동일' : '상이'}</td>
+                    <td className="px-3 py-2">{row.contractor_name}</td>
+                    <td className="px-3 py-2">{row.contractor_phone}</td>
+                    <td className="px-3 py-2">{row.bank_name}</td>
+                    <td className="px-3 py-2 text-center">{row.consent_privacy ? '동의' : '미동의'}</td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">{row.ip}</td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground max-w-xs truncate">
+                      {row.user_agent}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
