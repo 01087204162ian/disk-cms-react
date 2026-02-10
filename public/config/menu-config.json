@@ -135,6 +135,12 @@
               "title": "개인대리운전",
               "page": "insurance/personal-proxy",
               "order": 3
+            },
+            {
+              "id": "db-personal-driver",
+              "title": "DB개인대리운전",
+              "page": "insurance/db-personal-driver",
+              "order": 4
             }
           ]
         },
