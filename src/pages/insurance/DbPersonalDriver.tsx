@@ -136,117 +136,106 @@ const DbPersonalDriver: React.FC = () => {
   }
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold tracking-tight">DB 개인대리운전</h1>
-        <p className="text-sm text-muted-foreground">
-          dbins.kr 에서 들어온 가입신청/상담신청 데이터를 조회·관리하는 운영 페이지입니다.
-        </p>
-      </header>
+      
 
       <div className="bg-card rounded-xl border border-border p-6">
-        <h2 className="text-base font-semibold mb-4">가입신청 목록</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 조회합니다. 상단 필터를 이용해 기간/파트너/검색어
-          등을 지정할 수 있습니다.
-        </p>
+       
 
-        {/* 필터 영역 */}
-        <div className="mb-4 grid gap-3 md:grid-cols-4">
-          {/* 기간 필터 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">접수일자</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
-                value={filters.fromDate}
-                onChange={(e) => setFilters((prev) => ({ ...prev, fromDate: e.target.value }))}
-              />
-              <span className="text-xs text-muted-foreground">~</span>
-              <input
-                type="date"
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
-                value={filters.toDate}
-                onChange={(e) => setFilters((prev) => ({ ...prev, toDate: e.target.value }))}
-              />
+        {/* 필터 + 버튼 한 행 배치 */}
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="grid flex-1 gap-2 md:grid-cols-4">
+            {/* 기간 필터 */}
+            <div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="date"
+                  className="w-[90px] rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  value={filters.fromDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, fromDate: e.target.value }))}
+                />
+                <span className="text-xs text-muted-foreground">~</span>
+                <input
+                  type="date"
+                  className="w-[90px] rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  value={filters.toDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, toDate: e.target.value }))}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* 파트너 필터 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">파트너</label>
-            <select
-              className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-              value={filters.partner}
-              onChange={(e) => setFilters((prev) => ({ ...prev, partner: e.target.value }))}
-            >
-              <option value="">전체</option>
-              <option value="default">default</option>
-              {/* 필요 시 kakao, naver 등 파트너 코드 추가 */}
-            </select>
-          </div>
-
-          {/* 유형 필터 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">유형</label>
-            <select
-              className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
-              value={filters.type}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, type: e.target.value as FilterState['type'] }))
-              }
-            >
-              <option value="all">전체</option>
-              <option value="application">가입신청</option>
-              <option value="consultation">상담신청</option>
-            </select>
-          </div>
-
-          {/* 검색 필터 */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">검색</label>
-            <div className="flex items-center gap-2">
+            {/* 파트너 필터 */}
+            <div>
               <select
-                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                value={filters.keywordType}
+                className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                value={filters.partner}
+                onChange={(e) => setFilters((prev) => ({ ...prev, partner: e.target.value }))}
+              >
+                <option value="">파트너 전체</option>
+                <option value="default">default</option>
+                {/* 필요 시 kakao, naver 등 파트너 코드 추가 */}
+              </select>
+            </div>
+
+            {/* 유형 필터 */}
+            <div>
+              <select
+                className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+                value={filters.type}
                 onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    keywordType: e.target.value as FilterState['keywordType'],
-                  }))
+                  setFilters((prev) => ({ ...prev, type: e.target.value as FilterState['type'] }))
                 }
               >
-                <option value="name">이름</option>
-                <option value="phone">전화번호</option>
-                <option value="id">신청ID</option>
+                <option value="all">유형 전체</option>
+                <option value="application">가입신청</option>
+                <option value="consultation">상담신청</option>
               </select>
-              <input
-                type="text"
-                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
-                placeholder="검색어 입력"
-                value={filters.keyword}
-                onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
-              />
+            </div>
+
+            {/* 검색 필터 */}
+            <div>
+              <div className="flex items-center gap-1">
+                <select
+                  className="w-[80px] rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  value={filters.keywordType}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      keywordType: e.target.value as FilterState['keywordType'],
+                    }))
+                  }
+                >
+                  <option value="name">이름</option>
+                  <option value="phone">전화</option>
+                  <option value="id">ID</option>
+                </select>
+                <input
+                  type="text"
+                  className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  placeholder="검색어"
+                  value={filters.keyword}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 액션 버튼 */}
-        <div className="mb-4 flex justify-end gap-2">
-          <button
-            type="button"
-            className="rounded-md border border-border bg-background px-3 py-1 text-xs"
-            onClick={handleReset}
-          >
-            초기화
-          </button>
-          <button
-            type="button"
-            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
-            onClick={handleSearch}
-          >
-            검색
-          </button>
+          {/* 액션 버튼 (같은 행 우측 정렬) */}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-md border border-border bg-background px-3 py-1 text-xs"
+              onClick={handleReset}
+            >
+              초기화
+            </button>
+            <button
+              type="button"
+              className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+              onClick={handleSearch}
+            >
+              검색
+            </button>
+          </div>
         </div>
 
         {loading && (
