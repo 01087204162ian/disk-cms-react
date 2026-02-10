@@ -20,11 +20,44 @@ const DbPersonalDriver: React.FC = () => {
       </header>
 
       <div className="bg-card rounded-xl border border-border p-6">
-        <h2 className="text-base font-semibold mb-4">데이터 연동 예정</h2>
-        <p className="text-sm text-muted-foreground">
-          우선 메뉴와 페이지 경로만 연결해 둔 상태입니다. 다음 단계에서 daeri(www) 쪽에 조회용 API를
-          설계·구현한 뒤, 이 페이지에서 호출하여 가입/상담 데이터를 표 형태로 표시할 예정입니다.
+        <h2 className="text-base font-semibold mb-4">가입신청 목록 (스키마 미리보기)</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 그대로 보는 용도로 시작합니다. 아래
+          컬럼들은 DB 스키마 기준이며, 이후 실제 데이터는
+          <code>/api/admin-applications.php</code>
+          에서 가져와 표시할 예정입니다.
         </p>
+
+        <div className="overflow-x-auto rounded-lg border border-dashed border-border bg-background/40">
+          <table className="min-w-full text-sm">
+            <thead className="bg-muted">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">created_at</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">insurance_type</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">name</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">phone</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">yearly_premium</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">first_premium</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">address</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">address_detail</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">is_same_person</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">contractor_name</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">contractor_phone</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">bank_name</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">consent_privacy</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">ip</th>
+                <th className="px-3 py-2 text-left font-medium text-muted-foreground">user_agent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="px-3 py-2 text-muted-foreground" colSpan={15}>
+                  실제 데이터 연동 후 이 영역에 가입신청 리스트가 표시됩니다.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
