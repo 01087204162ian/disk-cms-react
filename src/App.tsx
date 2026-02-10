@@ -26,6 +26,7 @@ const CompanyManagement = lazy(() => import('./pages/insurance/CompanyManagement
 const EndorseList = lazy(() => import('./pages/insurance/EndorseList'))
 const CodeByPolicy = lazy(() => import('./pages/insurance/CodeByPolicy'))
 const KjDriverDocumentation = lazy(() => import('./pages/insurance/Documentation'))
+const DbPersonalDriver = lazy(() => import('./pages/insurance/DbPersonalDriver'))
 
 // 로딩 컴포넌트
 const PageLoader = () => (
@@ -75,6 +76,8 @@ function App() {
                       <Route path="/insurance/kj-driver-endorse-list" element={<EndorseList />} />
                       <Route path="/insurance/kj-driver-code-by-policy" element={<CodeByPolicy />} />
                       <Route path="/insurance/kj-driver-documentation" element={<KjDriverDocumentation />} />
+                      {/* DB 개인대리운전 (dbins.kr 연동 관리) */}
+                      <Route path="/insurance/db-personal-driver" element={<DbPersonalDriver />} />
                       {/* 이전 경로 호환 */}
                       <Route path="/staff/work-schedules" element={<Navigate to="/staff/employee-schedule" replace />} />
                       {/* 추가 라우트는 여기에 추가 */}
