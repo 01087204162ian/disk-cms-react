@@ -16,6 +16,23 @@
 
 ---
 
+## 🧾 오늘 작업 (2026-02-10)
+
+- **DB 개인대리운전 페이지(`DbPersonalDriver`) 데이터 연동 구조 변경**
+  - React 라우트: `/insurance/db-personal-driver` → `DbPersonalDriver` 페이지.
+  - 기존 구조: 프론트에서 직접 `https://dbins.kr/api/admin/applications.php` 호출.
+  - 변경 구조:
+    - 프론트: `GET /api/insurance/db-personal-driver/applications` 호출.
+    - CMS 서버(Node): `routes/insurance/db-personal-driver.js` 프록시 라우트 추가.
+      - 내부에서 `https://dbins.kr/api/admin/applications.php` 호출 후 결과를 그대로 반환.
+    - `server.js` 에 `dbPersonalDriverRoutes` 등록:
+      - `app.use('/api/insurance', dbPersonalDriverRoutes);`
+  - 결과:
+    - 프론트는 항상 `/api/insurance/*` 만 호출하고,
+    - 실제 `dbins.kr` 호출/보안/에러 처리는 CMS 서버에서 담당하는 구조로 정리.
+
+---
+
 ## 📌 계획 메모
 
 - **운영 콘솔**: `disk-cms-react`
