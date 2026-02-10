@@ -40,9 +40,11 @@ const DbPersonalDriver: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const res = await api.get('https://dbins.kr/api/admin/applications.php', {
-          withCredentials: false,
-        })
+
+        // 프록시 경유:
+        // 프론트 → /api/insurance/db-personal-driver/applications → 서버(Node) → dbins.kr API
+        const res = await api.get('/api/insurance/db-personal-driver/applications')
+
         if (!res.data?.ok) {
           throw new Error(res.data?.error || 'LOAD_FAILED')
         }

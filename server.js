@@ -37,6 +37,7 @@ const workersCompConsultationsRoutes = require('./routes/workers-comp/consultati
 // 보험상품 (KJ 대리운전 등)
 const kjDriverSearchRoutes = require('./routes/insurance/kj-driver-search');
 const kjDriverCompanyRoutes = require('./routes/insurance/kj-driver-company');
+const dbPersonalDriverRoutes = require('./routes/insurance/db-personal-driver');
 
 // 지식 공유 (실수 사례 공유 시스템)
 const mistakeCasesRoutes = require('./routes/manual/mistake-cases');
@@ -115,6 +116,7 @@ app.use('/api/pharmacy-reports', pharmacyReportsRoutes); // 🆕 실적
 // 보험상품 (KJ 대리운전 등)
 app.use('/api/insurance', kjDriverSearchRoutes);
 app.use('/api/insurance', kjDriverCompanyRoutes);
+app.use('/api/insurance', dbPersonalDriverRoutes);
 
 // 근재보험 관련 (새로 추가)
 app.use('/api/workers-comp', workersCompApplicationsRoutes);
