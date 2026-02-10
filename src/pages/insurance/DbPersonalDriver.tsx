@@ -40,7 +40,9 @@ const DbPersonalDriver: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const res = await api.get('/api/admin/applications.php')
+        const res = await api.get('https://dbins.kr/api/admin/applications.php', {
+          withCredentials: false,
+        })
         if (!res.data?.ok) {
           throw new Error(res.data?.error || 'LOAD_FAILED')
         }
