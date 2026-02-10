@@ -33,6 +33,28 @@
 
 ---
 
+## 📊 현재 개발 현황 (체크리스트)
+
+- **프론트 (`disk-cms-react`)**
+  - [x] 라우트 추가: `/insurance/db-personal-driver` → `DbPersonalDriver` 페이지
+  - [x] 가입신청 목록 테이블 UI 구성 (applications 비민감 컬럼 표시)
+  - [x] 데이터 연동: `GET /api/insurance/db-personal-driver/applications` 사용
+  - [ ] 상단 필터 영역 (기간/파트너/유형/검색어 등)
+  - [ ] 상세보기/처리상태/메모 모달
+  - [ ] 엑셀 다운로드 등 운영 편의 기능
+
+- **CMS 서버(Node, `disk-cms-react/server.js`)**
+  - [x] 프록시 라우트 추가: `routes/insurance/db-personal-driver.js`
+  - [x] `/api/insurance/db-personal-driver/applications` → `https://dbins.kr/api/admin/applications.php` 연동
+  - [ ] page/limit/from/to/partner/type 등의 쿼리 파라미터 처리
+
+- **실제 백엔드 (`daeri`, dbins.kr)** 
+  - [x] 가입신청 저장 API: `/www/api/applications.php` (Cafe24, MariaDB 연동)
+  - [x] 운영용 applications 조회용 admin API (프록시가 호출하는 대상) 동작 확인
+  - [ ] 상담신청 조회용 admin API 설계/구현 (`consultations` 연동)
+
+---
+
 ## 📌 계획 메모
 
 - **운영 콘솔**: `disk-cms-react`

@@ -28,22 +28,48 @@ type ApplicationRow = {
   created_at: string
 }
 
+type FilterState = {
+  fromDate: string
+  toDate: string
+  partner: string
+  type: 'all' | 'application' | 'consultation'
+  keywordType: 'name' | 'phone' | 'id'
+  keyword: string
+}
+
 const DbPersonalDriver: React.FC = () => {
   const [rows, setRows] = useState<ApplicationRow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<FilterState>({
+    fromDate: '',
+    toDate: '',
+    partner: '',
+    type: 'all',
+    keywordType: 'name',
+    keyword: '',
+  })
 
   useEffect(() => {
     let cancelled = false
 
-    const fetchApplications = async () => {
+    const fetchApplications = async (currentFilters: FilterState) => {
       try {
         setLoading(true)
         setError(null)
 
         // 프록시 경유:
         // 프론트 → /api/insurance/db-personal-driver/applications → 서버(Node) → dbins.kr API
-        const res = await api.get('/api/insurance/db-personal-driver/applications')
+        const res = await api.get('/api/insurance/db-personal-driver/applications', {
+          params: {
+            from: currentFilters.fromDate || undefined,
+            to: currentFilters.toDate || undefined,
+            partner: currentFilters.partner || undefined,
+            type: currentFilters.type !== 'all' ? currentFilters.type : undefined,
+            keywordType: currentFilters.keyword ? currentFilters.keywordType : undefined,
+            keyword: currentFilters.keyword || undefined,
+          },
+        })
 
         if (!res.data?.ok) {
           throw new Error(res.data?.error || 'LOAD_FAILED')
@@ -62,12 +88,52 @@ const DbPersonalDriver: React.FC = () => {
       }
     }
 
-    fetchApplications()
+    // 초기 로드 시 한 번 호출
+    fetchApplications(filters)
 
     return () => {
       cancelled = true
     }
   }, [])
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await api.get('/api/insurance/db-personal-driver/applications', {
+        params: {
+          from: filters.fromDate || undefined,
+          to: filters.toDate || undefined,
+          partner: filters.partner || undefined,
+          type: filters.type !== 'all' ? filters.type : undefined,
+          keywordType: filters.keyword ? filters.keywordType : undefined,
+          keyword: filters.keyword || undefined,
+        },
+      })
+      if (!res.data?.ok) {
+        throw new Error(res.data?.error || 'LOAD_FAILED')
+      }
+      setRows(res.data.data || [])
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'LOAD_FAILED'
+      setError(`가입신청 목록을 불러오지 못했습니다. (${msg})`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleReset = () => {
+    setFilters({
+      fromDate: '',
+      toDate: '',
+      partner: '',
+      type: 'all',
+      keywordType: 'name',
+      keyword: '',
+    })
+    // 초기 상태로 재조회
+    void handleSearch()
+  }
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-2">
@@ -81,9 +147,108 @@ const DbPersonalDriver: React.FC = () => {
       <div className="bg-card rounded-xl border border-border p-6">
         <h2 className="text-base font-semibold mb-4">가입신청 목록</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 그대로 보여줍니다. 현재는 필터 없이
-          최신 신청 순으로 전체 목록을 확인할 수 있습니다.
+          daeri/www 의 <code>applications</code> 테이블(비민감 컬럼)을 조회합니다. 상단 필터를 이용해 기간/파트너/검색어
+          등을 지정할 수 있습니다.
         </p>
+
+        {/* 필터 영역 */}
+        <div className="mb-4 grid gap-3 md:grid-cols-4">
+          {/* 기간 필터 */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">접수일자</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
+                value={filters.fromDate}
+                onChange={(e) => setFilters((prev) => ({ ...prev, fromDate: e.target.value }))}
+              />
+              <span className="text-xs text-muted-foreground">~</span>
+              <input
+                type="date"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
+                value={filters.toDate}
+                onChange={(e) => setFilters((prev) => ({ ...prev, toDate: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          {/* 파트너 필터 */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">파트너</label>
+            <select
+              className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+              value={filters.partner}
+              onChange={(e) => setFilters((prev) => ({ ...prev, partner: e.target.value }))}
+            >
+              <option value="">전체</option>
+              <option value="default">default</option>
+              {/* 필요 시 kakao, naver 등 파트너 코드 추가 */}
+            </select>
+          </div>
+
+          {/* 유형 필터 */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">유형</label>
+            <select
+              className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+              value={filters.type}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, type: e.target.value as FilterState['type'] }))
+              }
+            >
+              <option value="all">전체</option>
+              <option value="application">가입신청</option>
+              <option value="consultation">상담신청</option>
+            </select>
+          </div>
+
+          {/* 검색 필터 */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">검색</label>
+            <div className="flex items-center gap-2">
+              <select
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                value={filters.keywordType}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    keywordType: e.target.value as FilterState['keywordType'],
+                  }))
+                }
+              >
+                <option value="name">이름</option>
+                <option value="phone">전화번호</option>
+                <option value="id">신청ID</option>
+              </select>
+              <input
+                type="text"
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs"
+                placeholder="검색어 입력"
+                value={filters.keyword}
+                onChange={(e) => setFilters((prev) => ({ ...prev, keyword: e.target.value }))}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 액션 버튼 */}
+        <div className="mb-4 flex justify-end gap-2">
+          <button
+            type="button"
+            className="rounded-md border border-border bg-background px-3 py-1 text-xs"
+            onClick={handleReset}
+          >
+            초기화
+          </button>
+          <button
+            type="button"
+            className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
+            onClick={handleSearch}
+          >
+            검색
+          </button>
+        </div>
 
         {loading && (
           <p className="text-sm text-muted-foreground mb-2">목록을 불러오는 중입니다...</p>
