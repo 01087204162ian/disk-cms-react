@@ -17,17 +17,35 @@ const getDefaultHeaders = () => ({
   'Content-Type': 'application/json',
 });
 
-// 가입신청 목록 조회 (현재는 기본 전체 조회만, 이후 필터/페이징 확장 예정)
+// 가입신청 목록 조회 (필터/페이징 파라미터를 그대로 전달)
 router.get('/db-personal-driver/applications', async (req, res) => {
   try {
-    // TODO: from, to, partner, type, page, limit 등 쿼리 파라미터를
-    // dbins.kr 측 admin API 스펙에 맞게 전달하도록 확장
+    // 프론트에서 전달한 쿼리 파라미터를 그대로 admin API에 전달
+    // - page, limit, from, to, partner, type, keywordType, keyword 등
+    const {
+      page,
+      limit,
+      from,
+      to,
+      partner,
+      type,
+      keywordType,
+      keyword,
+    } = req.query;
 
     const apiUrl = `${DBINS_ADMIN_BASE_URL}/applications.php`;
 
     const response = await axios.get(apiUrl, {
-      // 현재는 필터 없이 전체 조회 (dbins.kr 쪽 스펙 확정 후 params 추가)
-      params: {},
+      params: {
+        page,
+        limit,
+        from,
+        to,
+        partner,
+        type,
+        keywordType,
+        keyword,
+      },
       timeout: DEFAULT_TIMEOUT,
       headers: getDefaultHeaders(),
     });
