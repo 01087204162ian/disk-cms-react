@@ -139,8 +139,7 @@ const DbPersonalDriver: React.FC = () => {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight">DB 개인대리운전</h1>
         <p className="text-sm text-muted-foreground">
-          dbins.kr 에서 들어온 가입신청/상담신청 데이터를 조회·관리하는 페이지입니다. 현재는 화면 뼈대만
-          구성된 상태이며, 이후 daeri 백엔드(API) 연동 후 실제 데이터가 표시됩니다.
+          dbins.kr 에서 들어온 가입신청/상담신청 데이터를 조회·관리하는 운영 페이지입니다.
         </p>
       </header>
 
