@@ -132,7 +132,8 @@ export default function DepositUsageModal({
       // 헤더 설정
       worksheet.columns = [
         { header: '번호', key: 'num', width: 8 },
-        { header: '신청번호', key: 'applyNum', width: 15 },
+        { header: '신청번호', key: 'applyNum', width: 12 },
+        { header: '약국명', key: 'company', width: 20 },
         { header: '사용일', key: 'date', width: 12 },
         { header: '승인보험료', key: 'approval', width: 15 },
         { header: '전문인보험료', key: 'pro', width: 15 },
@@ -153,6 +154,7 @@ export default function DepositUsageModal({
         worksheet.addRow({
           num: index + 1,
           applyNum: item.applyNum || '',
+          company: item.company || '',
           date: item.wdate?.substring(0, 10) || '',
           approval: item.approvalPreminum || 0,
           pro: item.proPreminum || 0,
